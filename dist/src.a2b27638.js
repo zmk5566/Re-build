@@ -41073,7 +41073,7 @@ RandomSelect_btn.addEventListener('click', function () {
   SelectedVertex_object.add(the_scene_object);
 });
 function VisualizeMarchVertex(march_vertex, height) {
-  var CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.2, 4, 2), new THREE.MeshBasicMaterial({
+  var CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.1, 4, 2), new THREE.MeshBasicMaterial({
     wireframe: false,
     color: march_vertex.IsActive == true ? 0x00ff00 : 0xff0000
   }));
