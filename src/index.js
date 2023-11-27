@@ -165,7 +165,7 @@ function drawVertexByType(CenterList,MidList,vertex_List,result){
     result.forEach(element => {scene.remove(element);});
     result.length=0;
     for(let i=0;i<CenterList.length;i++){
-        const CenterOfHex = new THREE.Mesh(
+        var CenterOfHex = new THREE.Mesh(
         new THREE.SphereGeometry(0.2, 4, 2),
         new THREE.MeshBasicMaterial({
             wireframe: false,
@@ -176,7 +176,7 @@ function drawVertexByType(CenterList,MidList,vertex_List,result){
         scene.add(CenterOfHex);
     }
     for(let i=0;i<MidList.length;i++){
-        const CenterOfHex = new THREE.Mesh(
+        var CenterOfHex = new THREE.Mesh(
         new THREE.SphereGeometry(0.2, 4, 2),
         new THREE.MeshBasicMaterial({
             wireframe: false,
@@ -187,7 +187,7 @@ function drawVertexByType(CenterList,MidList,vertex_List,result){
         scene.add(CenterOfHex);
     }
     for(let i=0;i<vertex_List.length;i++){
-        const CenterOfHex = new THREE.Mesh(
+        var CenterOfHex = new THREE.Mesh(
         new THREE.SphereGeometry(0.2, 4, 2),
         new THREE.MeshBasicMaterial({
             wireframe: false,
@@ -263,7 +263,7 @@ RandomSelect_btn.addEventListener('click', function(){
 
 
 function VisualizeMarchVertex(march_vertex,height){
-    const CenterOfHex = new THREE.Mesh(
+    var CenterOfHex = new THREE.Mesh(
         new THREE.SphereGeometry(0.2, 4, 2),
         new THREE.MeshBasicMaterial({
             wireframe: false,
