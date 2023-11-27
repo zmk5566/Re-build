@@ -38329,6 +38329,8 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 var scene = new THREE.Scene();
 var _default = exports.default = scene;
+var ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(ambientLight);
 var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
 var orbit = new _OrbitControls.OrbitControls(camera, renderer.domElement);
 camera.position.set(0, 30, 0); //camera位置
@@ -38370,6 +38372,7 @@ for (var i = 0; i < coordList.length; i++) {
 var triangle_list = (0, _Triangle.TriangleList)(coordList); //所有的三角形
 //console.log(triangle_list.length);
 //创建三角形地图grid
+var LineList = [];
 for (var _i = 0; _i < triangle_list.length; _i++) {
   var points = [];
   var material = new THREE.LineBasicMaterial({
@@ -38382,6 +38385,7 @@ for (var _i = 0; _i < triangle_list.length; _i++) {
   points.push(new THREE.Vector3(triangle_list[_i].va[0], triangle_list[_i].va[1], triangle_list[_i].va[2]));
   var geometry = new THREE.BufferGeometry().setFromPoints(points);
   var line = new THREE.Line(geometry, material);
+  LineList.push(line);
   scene.add(line);
 }
 //Step3
@@ -38493,7 +38497,23 @@ function drawVertexByType(CenterList, MidList, vertex_List, result) {
 }
 var Smooth_btn = document.getElementById('Smooth');
 Smooth_btn.addEventListener('click', function () {
-  scene.clear();
+  // scene clear everything except the plane
+  //
+  LineList.forEach(function (element) {
+    scene.remove(element);
+  });
+  tri_list.forEach(function (element) {
+    scene.remove(element);
+  });
+  qua_list.forEach(function (element) {
+    scene.remove(element);
+  });
+  // scene.children.forEach(function(object) {
+  //     if(object!=planeMesh){
+  //         scene.remove(object);
+  //     }
+  // });
+
   (0, _SubQuad.Smooth)(AllVertexList, AllSquadList);
   console.log(AllVertexList.length);
   for (var _i6 = 0; _i6 < AllSquadList.length; _i6++) {
@@ -38638,33 +38658,41 @@ AddLayer_btn.addEventListener('click', function () {
 
 var AddLoadModel = document.getElementById('LoadModel');
 AddLoadModel.addEventListener('click', function () {
-  var inputText_pt1 = document.getElementById("MeshId_pt1").value;
-  var inputText_pt2 = document.getElementById("MeshId_pt2").value;
-  var objLoader = new _OBJLoader.OBJLoader();
-  var Path = './Models/BuidlingType1.obj';
-  objLoader.load(Path, function (test) {
-    // 加载完成后的回调函数
-    scene.add(test);
-    test.scale.set(100, 100, 100); // 缩小模型
-    console.log(test.scale);
-  }, function (xhr) {
-    // 进度回调函数
+  //load obj here 
+  var loader = new _OBJLoader.OBJLoader();
+  var input_pt1 = document.getElementById("MeshId_pt1");
+  var input_pt2 = document.getElementById("MeshId_pt2");
+  var path = '/models/' + input_pt1 + '%2' + input_pt2 + '.obj';
+  loader.load(
+  // resource URL
+  '/models/1111 0011.obj',
+  // called when resource is loaded
+  function (object) {
+    var material = new THREE.MeshPhongMaterial({
+      color: 0xffffff
+    });
+    object.traverse(function (child) {
+      if (child instanceof THREE.Mesh) {
+        child.material = material;
+      }
+    });
+    scene.add(object);
+  },
+  // called when loading is in progresses
+  function (xhr) {
     console.log(xhr.loaded / xhr.total * 100 + '% loaded');
-  }, function (error) {
-    // 错误回调函数
-    console.error('An error happened: ' + error);
+  },
+  // called when loading has errors
+  function (error) {
+    console.log('An error happened');
   });
-  function animate() {
-    requestAnimationFrame(animate);
-    renderer.render(scene, camera);
-  }
-  animate();
 });
 
 //鼠标移动的时候闪烁的小方块
 var highlightMesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({
   side: THREE.DoubleSide,
-  transparent: true
+  transparent: true,
+  visible: false
 }));
 highlightMesh.rotateX(-Math.PI / 2);
 highlightMesh.position.set(0.5, 0, 0.5);
@@ -38793,12 +38821,12 @@ window.addEventListener('mousedown', function () {
 });
 //小方块旋转动画
 function animate(time) {
-  highlightMesh.material.opacity = 1 + Math.sin(time / 120);
-  objects.forEach(function (object) {
-    object.rotation.x = time / 1000;
-    object.rotation.z = time / 1000;
-    object.position.y = 0.5 + 0.5 * Math.abs(Math.sin(time / 1000));
-  });
+  // highlightMesh.material.opacity = 1 + Math.sin(time / 120);
+  // objects.forEach(function(object) {
+  //     object.rotation.x = time / 1000;
+  //     object.rotation.z = time / 1000;
+  //     object.position.y = 0.5 + 0.5 * Math.abs(Math.sin(time / 1000));
+  // });
   renderer.render(scene, camera);
 }
 renderer.setAnimationLoop(animate);
@@ -38848,7 +38876,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "17459" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51209" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

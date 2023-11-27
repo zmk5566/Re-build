@@ -23,6 +23,9 @@ document.body.appendChild(renderer.domElement);
 const scene = new THREE.Scene();
 export default scene;
 
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(ambientLight);
+
 const camera = new THREE.PerspectiveCamera(
     45,
     window.innerWidth / window.innerHeight,
@@ -77,6 +80,7 @@ for(let i=0;i<coordList.length;i++){
 var triangle_list=TriangleList(coordList);//所有的三角形
 //console.log(triangle_list.length);
 //创建三角形地图grid
+var LineList=[];
 for(let i=0;i<triangle_list.length;i++){
     const points=[];
     const material = new THREE.LineBasicMaterial( { color: 0x0000ff } );
@@ -87,6 +91,7 @@ for(let i=0;i<triangle_list.length;i++){
     points.push(new THREE.Vector3(triangle_list[i].va[0],triangle_list[i].va[1],triangle_list[i].va[2]));
     const geometry = new THREE.BufferGeometry().setFromPoints( points );
     const line = new THREE.Line( geometry, material );
+    LineList.push(line);
     scene.add( line );
 }
 //Step3
@@ -204,11 +209,15 @@ function drawVertexByType(CenterList,MidList,vertex_List,result){
 const Smooth_btn = document.getElementById('Smooth');
 Smooth_btn.addEventListener('click', function(){
     // scene clear everything except the plane
-    scene.children.forEach(function(object) {
-        if(object!=planeMesh){
-            scene.remove(object);
-        }
-    });
+    //
+    LineList.forEach(element => {scene.remove(element);});
+    tri_list.forEach(element => {scene.remove(element);});
+    qua_list.forEach(element => {scene.remove(element);});
+    // scene.children.forEach(function(object) {
+    //     if(object!=planeMesh){
+    //         scene.remove(object);
+    //     }
+    // });
 
 
     Smooth(AllVertexList,AllSquadList);
@@ -364,13 +373,20 @@ AddLoadModel.addEventListener('click',function(){
 
     //load obj here 
     const loader = new OBJLoader();
-
+    var input_pt1 = document.getElementById("MeshId_pt1");
+    var input_pt2 = document.getElementById("MeshId_pt2");
+    var path='/models/'+input_pt1+'%2'+input_pt2+'.obj';
     loader.load(
         // resource URL
-        '/models/teapot.obj',
+        '/models/1111 0011.obj',
         // called when resource is loaded
         function ( object ) {
-
+            const material = new THREE.MeshPhongMaterial({ color: 0xffffff });
+            object.traverse(function (child) {
+            if (child instanceof THREE.Mesh) {
+                child.material = material;
+            }
+            });
             scene.add( object );
 
         },
@@ -396,7 +412,8 @@ const highlightMesh = new THREE.Mesh(
     new THREE.PlaneGeometry(1, 1),
     new THREE.MeshBasicMaterial({
         side: THREE.DoubleSide,
-        transparent: true
+        transparent: true,
+        visible:false
     })
 );
 highlightMesh.rotateX(-Math.PI / 2);
@@ -541,12 +558,12 @@ window.addEventListener('mousedown', function() {
 });
 //小方块旋转动画
 function animate(time) {
-    highlightMesh.material.opacity = 1 + Math.sin(time / 120);
-    objects.forEach(function(object) {
-        object.rotation.x = time / 1000;
-        object.rotation.z = time / 1000;
-        object.position.y = 0.5 + 0.5 * Math.abs(Math.sin(time / 1000));
-    });
+    // highlightMesh.material.opacity = 1 + Math.sin(time / 120);
+    // objects.forEach(function(object) {
+    //     object.rotation.x = time / 1000;
+    //     object.rotation.z = time / 1000;
+    //     object.position.y = 0.5 + 0.5 * Math.abs(Math.sin(time / 1000));
+    // });
     renderer.render(scene, camera);
 }
 
