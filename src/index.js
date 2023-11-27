@@ -244,7 +244,8 @@ function the_hitted_logic(idx){
 
 }
 
-
+var model_list=[];
+const loader=new OBJLoader();
 // create a mouse click event listener
 window.addEventListener('mousedown', function(e) {
     console.log("mouse down");
@@ -269,8 +270,8 @@ window.addEventListener('mousedown', function(e) {
             for(let i=1;i<layer-1;i++){
                 if(AllMarchVertexList[i][VertexSelection].IsActive==true&&
                 AllMarchVertexList[i+1][VertexSelection].IsActive==false){
-                    AllMarchVertexList[i][VertexSelection].IsActive=true;
-                    ConstructLayer=i;
+                    AllMarchVertexList[i-1][VertexSelection].IsActive=true;
+                    ConstructLayer=i-1;
                     break;
                 }
 
@@ -401,13 +402,13 @@ function LoadMultipleModels(path,position,model_list,ConstructLayer){
                 child.geometry.applyMatrix4(new THREE.Matrix4().makeRotationY(-Math.PI / 2));
                 // vertices=child.vertices;
                 const vertices = child.geometry.attributes.position.array;
-                console.log("vertices count",vertices.length);
+                // console.log("vertices count",vertices.length);
                 // 输出每个顶点的坐标
                 for (let i = 0; i < vertices.length; i += 3) {
                     const x = vertices[i];
                     const y = vertices[i + 1];
                     const z = vertices[i + 2];
-                    console.log(`Vertex ${i / 3}: x=${x}, y=${y}, z=${z}`);
+                    // console.log(`Vertex ${i / 3}: x=${x}, y=${y}, z=${z}`);
 
                     interpolatedAB.lerpVectors(position[0], position[3], (x+0.5));
                     //console.log(interpolatedAB);
@@ -441,7 +442,7 @@ function LoadMultipleModels(path,position,model_list,ConstructLayer){
                     vertices[i]=finalLerp.x;
                     vertices[i+1]=y+finalLerp.y+0.5+ConstructLayer;
                     vertices[i+2]=finalLerp.z;
-                    console.log(`Vertex ${i / 3}: x=${finalLerp.x}, y=${vertices[i+1]}, z=${vertices[i+2]}`);
+                    // console.log(`Vertex ${i / 3}: x=${finalLerp.x}, y=${vertices[i+1]}, z=${vertices[i+2]}`);
                 }
             }
             });
@@ -461,27 +462,27 @@ function LoadMultipleModels(path,position,model_list,ConstructLayer){
             console.log( 'An error happened' );
         }
     );
-    console.log(interpolatedAB);
+    // console.log(interpolatedAB);
 
 }
 
 
-const button_RotateX = document.getElementById('rotateX');
-button_RotateX.addEventListener('click', function(){
-    model_list.forEach(element => {
-        element.rotateX(Math.PI / 2);
-    });
-});
-const button_RotateY = document.getElementById('rotateY');
-button_RotateY.addEventListener('click', function(){
-    model_list.forEach(element => {
-    element.rotateY(Math.PI / 2);
-});});
-const button_RotateZ = document.getElementById('rotateZ');
-button_RotateZ.addEventListener('click', function(){
-    model_list.forEach(element => {
-    element.rotateZ(Math.PI / 2);
-});});
+// const button_RotateX = document.getElementById('rotateX');
+// button_RotateX.addEventListener('click', function(){
+//     model_list.forEach(element => {
+//         element.rotateX(Math.PI / 2);
+//     });
+// });
+// const button_RotateY = document.getElementById('rotateY');
+// button_RotateY.addEventListener('click', function(){
+//     model_list.forEach(element => {
+//     element.rotateY(Math.PI / 2);
+// });});
+// const button_RotateZ = document.getElementById('rotateZ');
+// button_RotateZ.addEventListener('click', function(){
+//     model_list.forEach(element => {
+//     element.rotateZ(Math.PI / 2);
+// });});
 
 
 
@@ -755,7 +756,7 @@ function GetNearestVertex(x,y,z,currentVertList){
             idx=i;
         }
     }
-    console.log("distance",distance);
+    // console.log("distance",distance);
     if (distance>0.8){
         idx = -1;
     }
