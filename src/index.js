@@ -54,7 +54,6 @@ var ringSample=CubeRing(center,2);
 for(let i=0;i<coordList.length;i++){
     for(let j=0;j<coordList[i].length;j++)
     {
-
     }
 }
 // //single ring
@@ -208,14 +207,19 @@ Smooth_btn.addEventListener('click', function(){
         DrawSubQuad(AllSquadList[i],0xffc0cb,scene,qua_list,true);
     }
 });
-const RandomSelect_btn = document.getElementById('RandomSelect');
-RandomSelect_btn.addEventListener('click', function(){
-    var StartIdx=Math.floor(Math.random() * AllVertexList.length);
+
+
+// create an empty 3d object to hold the vertex and subquad in the future
+const the_scene_object = new THREE.Object3D();
+
+function drawVertexbyIndex(idx,the_scene_object,color=0xffc0cb){
+
+    var StartIdx=idx;
     console.log(AllVertexList.length);
     var testVert=AllVertexList[StartIdx];
     console.log(testVert.subquadid_list);
     for(let i=0;i<testVert.subquadid_list.length;i++){
-        DrawSubQuad(AllSquadList[testVert.subquadid_list[i]],0xffc0cb,scene,qua_list,false);
+        DrawSubQuad(AllSquadList[testVert.subquadid_list[i]],color,the_scene_object,qua_list,false);
         var CenterOfHex = new THREE.Mesh(
         new THREE.SphereGeometry(0.2, 4, 2),
         new THREE.MeshBasicMaterial({
@@ -225,7 +229,7 @@ RandomSelect_btn.addEventListener('click', function(){
         CenterOfHex.position.set(AllVertexList[AllSquadList[testVert.subquadid_list[i]].VerAidx].x,
             AllVertexList[AllSquadList[testVert.subquadid_list[i]].VerAidx].y,
             AllVertexList[AllSquadList[testVert.subquadid_list[i]].VerAidx].z);
-        scene.add(CenterOfHex);
+        the_scene_object.add(CenterOfHex);
 
         CenterOfHex = new THREE.Mesh(
             new THREE.SphereGeometry(0.2, 4, 2),
@@ -236,7 +240,7 @@ RandomSelect_btn.addEventListener('click', function(){
         CenterOfHex.position.set(AllVertexList[AllSquadList[testVert.subquadid_list[i]].VerBidx].x,
             AllVertexList[AllSquadList[testVert.subquadid_list[i]].VerBidx].y,
             AllVertexList[AllSquadList[testVert.subquadid_list[i]].VerBidx].z);
-        scene.add(CenterOfHex);
+        the_scene_object.add(CenterOfHex);
         CenterOfHex = new THREE.Mesh(
             new THREE.SphereGeometry(0.2, 4, 2),
             new THREE.MeshBasicMaterial({
@@ -246,7 +250,7 @@ RandomSelect_btn.addEventListener('click', function(){
         CenterOfHex.position.set(AllVertexList[AllSquadList[testVert.subquadid_list[i]].VerCidx].x,
             AllVertexList[AllSquadList[testVert.subquadid_list[i]].VerCidx].y,
             AllVertexList[AllSquadList[testVert.subquadid_list[i]].VerCidx].z);
-        scene.add(CenterOfHex);
+        the_scene_object.add(CenterOfHex);
         CenterOfHex = new THREE.Mesh(
             new THREE.SphereGeometry(0.2, 4, 2),
             new THREE.MeshBasicMaterial({
@@ -256,8 +260,21 @@ RandomSelect_btn.addEventListener('click', function(){
         CenterOfHex.position.set(AllVertexList[AllSquadList[testVert.subquadid_list[i]].VerDidx].x,
             AllVertexList[AllSquadList[testVert.subquadid_list[i]].VerDidx].y,
             AllVertexList[AllSquadList[testVert.subquadid_list[i]].VerDidx].z);
-        scene.add(CenterOfHex);
+            the_scene_object.add(CenterOfHex);
     }
+
+    return the_scene_object;
+
+
+
+}
+
+const RandomSelect_btn = document.getElementById('RandomSelect');
+RandomSelect_btn.addEventListener('click', function(){
+    var StartIdx=Math.floor(Math.random()*AllVertexList.length);
+    drawVertexbyIndex(StartIdx,the_scene_object);
+    scene.add(the_scene_object);
+
 }
 );
 
@@ -351,29 +368,56 @@ const mousePosition = new THREE.Vector2();
 const raycaster = new THREE.Raycaster();
 let intersects;
 
+// create a 3d object for highlight
+const highlight_object = new THREE.Object3D();
+const cursor_point= new THREE.Object3D();
+scene.add(highlight_object);
+scene.add(cursor_point);
 
 window.addEventListener('mousemove', function(e) {
     // ///改一下
-    // mousePosition.x = (e.clientX / window.innerWidth) * 2 - 1;
-    // mousePosition.y = -(e.clientY / window.innerHeight) * 2 + 1;
-    // raycaster.setFromCamera(mousePosition, camera);//从相机到鼠标位置创建一条射线
-    // intersects = raycaster.intersectObject(planeMesh);//射线跟平面形成焦点
-    // if(intersects.length > 0) {//如果有焦点
-    //     const intersect = intersects[0];
-    //     //找到最近的vertex
-    //     const highlightPos = new THREE.Vector3().copy(intersect.point).floor().addScalar(0.5);
-        
-    //     highlightMesh.position.set(highlightPos.x, 0, highlightPos.z);
-    //     const objectExist = objects.find(function(object) {
-    //         return (object.position.x === highlightMesh.position.x)
-    //         && (object.position.z === highlightMesh.position.z)
-    //     });
+    mousePosition.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mousePosition.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    raycaster.setFromCamera(mousePosition, camera);//从相机到鼠标位置创建一条射线
+    intersects = raycaster.intersectObject(planeMesh);//射线跟平面形成焦点
+    if(intersects.length > 0) {//如果有焦点
+        const intersect = intersects[0];
+        //找到最近的vertex
 
-    //     if(!objectExist)
-    //         highlightMesh.material.color.setHex(0xFF00FF);//悬停时闪烁的光标颜色
-    //     else
-    //         highlightMesh.material.color.setHex(0xFF0000);
-    // }
+        //print the location of the intersect
+        //console.log(intersect.point.x,intersect.point.y,intersect.point.z);
+
+        //draw a sphere at the intersect
+
+
+        // clear the cursor point
+        cursor_point.children.forEach(function(object) {
+            cursor_point.remove(object);
+        });
+
+        const sphere = new THREE.Mesh(
+            new THREE.SphereGeometry(0.1, 4, 2),
+            new THREE.MeshBasicMaterial({
+                wireframe: true,
+                color: 0x00FF00
+            })
+        );
+        sphere.position.copy(intersect.point);
+        cursor_point.add(sphere);
+
+        if (AllVertexList.length>0){
+            // clear the highlight object
+            highlight_object.children.forEach(function(object) {
+                highlight_object.remove(object);
+            });
+
+            var result=GetNearestVertex(intersect.point.x,intersect.point.y,intersect.point.z);
+            // get a orange colo
+            drawVertexbyIndex(result,highlight_object,0xffff00);
+            console.log(GetNearestVertex(intersect.point.x,intersect.point.y,intersect.point.z));
+        }
+
+    }
 });
 
 const sphereMesh = new THREE.Mesh(
@@ -387,8 +431,16 @@ const sphereMesh = new THREE.Mesh(
 const objects = [];
 let clicks = 1
 
+
 //监听鼠标点击
 window.addEventListener('mousedown', function() {
+
+    mousePosition.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mousePosition.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    // raycaster.setFromCamera(mousePosition, camera);//从相机到鼠标位置创建一条射线
+    // intersects = raycaster.intersectObject(planeMesh);//射线跟平面形成焦点
+
+
     // const objectExist = objects.find(function(object) {
     //     return (object.position.x === highlightMesh.position.x)
     //     && (object.position.z === highlightMesh.position.z)
@@ -461,4 +513,20 @@ window.addEventListener('resize', function() {
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
+// input 3d x,y,z return the nearest vertex from AllVertexList
+function GetNearestVertex(x,y,z){
+    var distance=10000;
+    var result;
+    var idx;
+    for(let i=0;i<AllVertexList.length;i++){
+        var temp=Math.pow((x-AllVertexList[i].x),2)+Math.pow((y-AllVertexList[i].z),2)+Math.pow((z-AllVertexList[i].z),2);
+        if(temp<distance){
+            distance=temp;
+            result=AllVertexList[i];
+            idx=i;
+        }
+    }
+    return result,idx;
+}
 
