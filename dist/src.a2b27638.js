@@ -38597,14 +38597,21 @@ AddLayer_btn.addEventListener('click', function () {
   var layer = 3;
   console.log(AllVertexList.length);
   for (var _i8 = 0; _i8 < AllVertexList.length; _i8++) {
+    var AllMarchVertexLayer_j = [];
     for (var _j3 = 0; _j3 < layer; _j3++) {
-      AllMarchVertexList.push(new _Vertex.MarchVertex(AllVertexList[_i8].x, _j3, AllVertexList[_i8].z, AllVertexList[_i8].type, _j3, false));
+      AllMarchVertexLayer_j.push(new _Vertex.MarchVertex(AllVertexList[_i8].x, _j3, AllVertexList[_i8].z, AllVertexList[_i8].type, _j3, false));
+      //AllMarchVertexList.push(new MarchVertex(AllVertexList[i].x,j,AllVertexList[i].z,AllVertexList[i].type,j,false));
+    }
+
+    AllMarchVertexList.push(AllMarchVertexLayer_j);
+  }
+  console.log(AllMarchVertexList.length, AllMarchVertexList[0].length);
+  for (var _i9 = 0; _i9 < AllMarchVertexList.length; _i9++) {
+    for (var _j4 = 0; _j4 < AllMarchVertexList[_i9].length; _j4++) {
+      VisualizeMarchVertex(AllMarchVertexList[_i9][_j4], 1);
     }
   }
-  console.log(AllMarchVertexList.length);
-  for (var _i9 = 0; _i9 < AllMarchVertexList.length; _i9++) {
-    VisualizeMarchVertex(AllMarchVertexList[_i9], 1);
-  }
+
   // 创建物体
   var geometry = new THREE.BoxGeometry(1, 1, 1);
   var material = new THREE.MeshBasicMaterial({
@@ -38645,17 +38652,9 @@ AddLayer_btn.addEventListener('click', function () {
     }
   });
   window.addEventListener('mousedown', function (e) {
-    for (var _i10 = 0; _i10 < AllMarchVertexList.length; _i10++) {
-      var distance = Math.pow(TEST.position.x - AllMarchVertexList[_i10].x, 2) + Math.pow(TEST.position.y - AllMarchVertexList[_i10].y, 2) + Math.pow(TEST.position.z - AllMarchVertexList[_i10].z, 2);
-      console.log(distance);
-      if (distance < 2) {
-        AllMarchVertexList[_i10].IsActive = true;
-        //VisualizeMarchVertex(AllMarchVertexList[i],1);
-      }
-    }
+    //TODO:点击鼠标选择一整个marchingcube，并激活对应的顶点
   });
 });
-
 var AddLoadModel = document.getElementById('LoadModel');
 AddLoadModel.addEventListener('click', function () {
   //load obj here 
@@ -38842,12 +38841,12 @@ function GetNearestVertex(x, y, z, currentVertList) {
   var distance = 10000;
   var result;
   var idx;
-  for (var _i11 = 0; _i11 < currentVertList.length; _i11++) {
-    var temp = Math.pow(x - currentVertList[_i11].x, 2) + Math.pow(y - currentVertList[_i11].y, 2) + Math.pow(z - currentVertList[_i11].z, 2);
+  for (var _i10 = 0; _i10 < currentVertList.length; _i10++) {
+    var temp = Math.pow(x - currentVertList[_i10].x, 2) + Math.pow(y - currentVertList[_i10].y, 2) + Math.pow(z - currentVertList[_i10].z, 2);
     if (temp < distance) {
       distance = temp;
-      result = currentVertList[_i11];
-      idx = _i11;
+      result = currentVertList[_i10];
+      idx = _i10;
     }
   }
   return result, idx; //这个顶点和他的id
