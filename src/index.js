@@ -196,11 +196,12 @@ function findNeighbor(){
 }
 
 
+var model_list=[]
+const loader = new OBJLoader();
 
 function the_hitted_logic(idx){
     drawVertexbyIndex(idx,the_scene_object,0xadd8e6);
     SelectedVertex_object.add(the_scene_object);
-800080
     
     var ConstructLayer=0;
     //AllMarchVertexList[0][VertexSelection].IsActive=true;
@@ -227,19 +228,163 @@ function the_hitted_logic(idx){
         console.log(ConstructLayer);
         console.log(AllMarchCubeList[ConstructLayer].length);
         var CurrentCube=AllMarchCubeList[ConstructLayer][vertid];
-        for(let j=0;j<4;j++){
+        var bit1="";
+        var bit2="";
+        for(let j=0;j<4;j++){//遍历所有受影响的vertex
             if(CurrentCube.MarchVertList_Bottom[j].IsActive==false){
                 CurrentCube.MarchVertList_Bottom[j].IsActive=true;
                 VisualizeMarchVertex(CurrentCube.MarchVertList_Bottom[j],1);
             }
             if(CurrentCube.MarchVertList_Top[j].IsActive==false){
                 CurrentCube.MarchVertList_Top[j].IsActive=true;
-                VisualizeMarchVertex(CurrentCube.MarchVertList_Top[j],1);
+                //VisualizeMarchVertex(CurrentCube.MarchVertList_Top[j],1);
+                var color1;
+                switch(j){
+                    case 0:
+                        color1=0xFFA500;
+                        break;
+                    case 1:
+                        color1=0xFFC0CB;
+                        break;
+                    case 2:
+                        color1=0x0000ff;
+                        break;
+                    case 3:
+                        color1=0x800080;
+                        break;
+                }
+                var CenterOfHex = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.1, 4, 2),
+                    new THREE.MeshBasicMaterial({
+                        wireframe: false,
+                        color: color1
+                    }));
+                    CenterOfHex.position.set(CurrentCube.MarchVertList_Top[j].x,CurrentCube.MarchVertList_Top[j].y,CurrentCube.MarchVertList_Top[j].z);
+                    MarchVertex_object.add(CenterOfHex);
             }
         }
     }
+    var allModelSet=[]
+    for(let i=0;i<AllMarchCubeList.length;i++){
+        for(let j=0;j<AllMarchCubeList[i].length;j++){
+            var ThisCube=AllMarchCubeList[i][j];
+            var bit1=ThisCube.MarchVertList_Top[0].IsActive==false?'0':'1';
+            var bit2=ThisCube.MarchVertList_Top[1].IsActive==false?'0':'1';
+            var bit3=ThisCube.MarchVertList_Top[2].IsActive==false?'0':'1';
+            var bit4=ThisCube.MarchVertList_Top[3].IsActive==false?'0':'1';
+
+            var bit5=ThisCube.MarchVertList_Bottom[0].IsActive==false?'0':'1';
+            var bit6=ThisCube.MarchVertList_Bottom[1].IsActive==false?'0':'1';
+            var bit7=ThisCube.MarchVertList_Bottom[2].IsActive==false?'0':'1';
+            var bit8=ThisCube.MarchVertList_Bottom[3].IsActive==false?'0':'1';
+            //console.log(bit1+bit2+bit3+bit4+' '+bit5+bit6+bit7+bit8+'.obj');
+            var ModelName=bit1+bit2+bit3+bit4+' '+bit5+bit6+bit7+bit8;
+            if(ModelName!='0000 0000'&&ModelName!='1111 1111'){
+                //需要加载模型
+                var CenterPosition= [
+                (ThisCube.MarchVertList_Bottom[0].x+
+                ThisCube.MarchVertList_Bottom[1].x+
+                ThisCube.MarchVertList_Bottom[2].x+
+                ThisCube.MarchVertList_Bottom[3].x)/4,
+                0.5+ThisCube.MarchVertList_Bottom[0].y,
+                (ThisCube.MarchVertList_Bottom[0].z+
+                    ThisCube.MarchVertList_Bottom[1].z+
+                    ThisCube.MarchVertList_Bottom[2].z+
+                    ThisCube.MarchVertList_Bottom[3].z)/4];
+                // var CenterOfHex = new THREE.Mesh(
+                //     new THREE.SphereGeometry(0.1, 4, 2),
+                //     new THREE.MeshBasicMaterial({
+                //         wireframe: false,
+                //         color: 0xff0000
+                //     }));
+                //     CenterOfHex.position.set(CenterPosition[0],CenterPosition[1],CenterPosition[2]);
+                //     MarchVertex_object.add(CenterOfHex);
+                allModelSet.push([j,ModelName,CenterPosition]);
+                
+            }
+        }
+    }
+    console.log(allModelSet);
+    for(let i=0;i<allModelSet.length;i++){
+        var path='/models/'+allModelSet[i][1]+'.obj';
+        var pos=allModelSet[i][2];
+
+        LoadMultipleModels(path,pos,model_list);
+    }
+
+
+
+
+
 
 }
+
+
+// create an object to hold the meshes
+const mesh_object = new THREE.Object3D();
+scene.add(mesh_object);
+
+
+function LoadMultipleModels(path,position,model_list){
+    //console.log(path);
+    //if(path=='/models/0011 0011.obj'){path='/models/1001 1001.obj';}
+    loader.load(
+        path,
+        // called when resource is loaded
+        function ( object ) {
+            var material = new THREE.MeshPhongMaterial({ color: 0xffffff });
+            if(path=='/models/1001 1001.obj'){
+                material = new THREE.MeshPhongMaterial({ color: 0xff00ff });}
+            object.traverse(function (child) {
+            if (child instanceof THREE.Mesh) {
+                child.material = material;
+                //child.geometry.applyMatrix4(new THREE.Matrix4().makeRotationY(-Math.PI / 2));
+            }
+            });
+            mesh_object.add( object );
+            model_list.push(object);
+            // object.scale.x = -1;
+            // object.scale.y = -1;
+            // object.scale.z = -1;
+            object.position.set(position[0],position[1],position[2]);
+        },
+        // called when loading is in progresses
+        function ( xhr ) {
+            console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+        },
+        // called when loading has errors
+        function ( error ) {
+            console.log( 'An error happened' );
+        }
+    );
+}
+
+
+// const button_RotateX = document.getElementById('rotateX');
+// button_RotateX.addEventListener('click', function(){
+//     model_list.forEach(element => {
+//         element.rotateX(Math.PI / 2);
+//     });
+// });
+// const button_RotateY = document.getElementById('rotateY');
+// button_RotateY.addEventListener('click', function(){
+//     model_list.forEach(element => {
+//     element.rotateY(Math.PI / 2);
+// });});
+// const button_RotateZ = document.getElementById('rotateZ');
+// button_RotateZ.addEventListener('click', function(){
+//     model_list.forEach(element => {
+//     element.rotateZ(Math.PI / 2);
+// });});
+
+
+
+
+
+
+
+
+
 
 
 // create a mouse click event listener
@@ -377,42 +522,15 @@ function covert2Dto3D(){
 }
 
 
-const AddLoadModel = document.getElementById('LoadModel');
+const AddLoadModel = document.getElementById('talk_to_gpt');
 AddLoadModel.addEventListener('click',function(){
 
     //load obj here 
     const loader = new OBJLoader();
     var input_pt1 = document.getElementById("MeshId_pt1");
-    var input_pt2 = document.getElementById("MeshId_pt2");
-    var path='/models/'+input_pt1.value+' '+input_pt2.value+'.obj';
-    console.log(path);
-    loader.load(
-        // resource URL
-        path,
-        // called when resource is loaded
-        function ( object ) {
-            const material = new THREE.MeshPhongMaterial({ color: 0xffffff });
-            object.traverse(function (child) {
-            if (child instanceof THREE.Mesh) {
-                child.material = material;
-            }
-            });
-            scene.add( object );
 
-        },
-        // called when loading is in progresses
-        function ( xhr ) {
+    get_new_city(input_pt1.value);
 
-            console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
-
-        },
-        // called when loading has errors
-        function ( error ) {
-
-            console.log( 'An error happened' );
-
-        }
-    );
 
 });
 
@@ -510,6 +628,17 @@ function animate(time) {
         object.rotation.z = time / 1000;
         object.position.y = 0.5 + 0.5 * Math.abs(Math.sin(time / 1000));
     });
+
+    
+    model_list.forEach(function(object) {
+       
+         //object.rotation.x = time / 1000;
+        //object.rotation.y= time / 1000;
+        //object.position.y = 0.5 + 0.5 * Math.abs(Math.sin(time / 1000));
+
+    });
+
+
     renderer.render(scene, camera);
 }
 
@@ -534,12 +663,15 @@ function GetNearestVertex(x,y,z,currentVertList){
             idx=i;
         }
     }
-    console.log("distance",distance);
+    //console.log("distance",distance);
     if (distance>0.8){
         idx = -1;
     }
     return result,idx;//这个顶点和他的id
 }
+
+
+
 
 
 // add gui buttons new folder
@@ -687,6 +819,57 @@ const button_hit_the_object = {
 
 button_folder.add(button_hit_the_object, 'hit_the_object').name('hit_the_object');
 
-//loop through the 2d map and perform a get 
+const talk_to_server = {
+    talk_to_server: function() {
+        restart_gpt();
+    }
+};
+
+button_folder.add(talk_to_server, 'talk_to_server').name('talk_to_server');
+
+// create ajax call to get the data from the server through a get method,with a get parameter "prompt" value "ok"
+function get_new_city(input_prompt){
+
+    const params = {
+        prompt: input_prompt+",please reply restrictedly using json"
+      };
+      // Here, 'param1' is the name of the parameter expected by the API. Replace it and its value as needed.
+      
+      axios.get(url+"city", {params})
+      .then(function (response) {
+        // The request was successful, you can process the response here.
+        console.log(response.data);
+        var the_result = response.data;
 
 
+        // check is the response.data is a string or a json object
+        if (typeof the_result == "string"){
+            console.log("parse the string");
+            the_result = JSON.parse(the_result);
+            the_map.map = the_result.rebuild[0].layout;
+            console.log(the_map.map);
+        }else{
+            the_map.map = the_result.rebuild[0].layout;
+            console.log(the_map.map);
+        }
+
+
+      })
+      .catch(function (error) {
+        // The request failed, handle the error here
+        console.log(error);
+      });
+
+}
+
+function restart_gpt(){
+    axios.get(url+"prompt_history/reset")
+    .then(function (response) {
+      // The request was successful, you can process the response here.
+      console.log(response.data);
+    })
+    .catch(function (error) {
+      // The request failed, handle the error here
+      console.log(error);
+    });
+}

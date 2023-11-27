@@ -10,16 +10,12 @@ OPENAI_API_KEY = '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'
 openai.api_key = OPENAI_API_KEY
 
 # Parameters for OpenAI
-openai_model = "gpt-3.5-turbo"
+openai_model = "gpt-3.5-turbo-16k"
 max_responses = 1
 temperature = 0.7
-max_tokens = 512
+max_tokens = 2048
 city_width = 12
 city_height = 8
-
-
-
-
 
 
 # Defining the FastAPI app and metadata
@@ -30,6 +26,8 @@ CURL can support the stream.
               """,
     version=1.0,
 )
+
+# creates a websocket server
 
 
 
@@ -125,9 +123,13 @@ async def update_value(x: int, y: int, item: Item):
 
 @app.get("/prompt_history/reset")
 def reset_prompt():
-    with open("./data/background.json", "r") as f:
-        app.past_prompts = json.load(f)
+    temp_text = ""
+
+    with open("./data/promt_info.txt", "r") as f:
+        temp_text = f.read()
     # write out the prompt_past.json file
+    temp_promt= {"role": "system", "content": temp_text}
+    app.past_prompts = [temp_promt]
     write_prompt(app.past_prompts)
     return {"status":"sucess","prompt_list":app.past_prompts }
 
