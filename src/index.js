@@ -203,7 +203,14 @@ function drawVertexByType(CenterList,MidList,vertex_List,result){
 
 const Smooth_btn = document.getElementById('Smooth');
 Smooth_btn.addEventListener('click', function(){
-    scene.clear();
+    // scene clear everything except the plane
+    scene.children.forEach(function(object) {
+        if(object!=planeMesh){
+            scene.remove(object);
+        }
+    });
+
+
     Smooth(AllVertexList,AllSquadList);
     console.log(AllVertexList.length);
     for(let i=0;i<AllSquadList.length;i++){
@@ -354,32 +361,33 @@ AddLayer_btn.addEventListener('click', function(){
 
 const AddLoadModel = document.getElementById('LoadModel');
 AddLoadModel.addEventListener('click',function(){
-    var inputText_pt1 = document.getElementById("MeshId_pt1").value;
-    var inputText_pt2 = document.getElementById("MeshId_pt2").value;
-    var objLoader = new OBJLoader();
-    var Path='./Models/BuidlingType1.obj';
-    objLoader.load(
-        Path,
-        function (test) {
-            // 加载完成后的回调函数
-            scene.add(test);
-            test.scale.set(100,100,100); // 缩小模型
-            console.log(test.scale);
+
+    //load obj here 
+    const loader = new OBJLoader();
+
+    loader.load(
+        // resource URL
+        '/models/teapot.obj',
+        // called when resource is loaded
+        function ( object ) {
+
+            scene.add( object );
+
         },
-        function (xhr) {
-            // 进度回调函数
-            console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+        // called when loading is in progresses
+        function ( xhr ) {
+
+            console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+
         },
-        function (error) {
-            // 错误回调函数
-            console.error('An error happened: ' + error);
+        // called when loading has errors
+        function ( error ) {
+
+            console.log( 'An error happened' );
+
         }
     );
-    function animate() {
-        requestAnimationFrame(animate);
-        renderer.render(scene, camera);
-    }
-    animate();
+
 });
 
 
