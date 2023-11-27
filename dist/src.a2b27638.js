@@ -38500,44 +38500,49 @@ Smooth_btn.addEventListener('click', function () {
     (0, _SubQuad.DrawSubQuad)(AllSquadList[_i6], 0xffc0cb, scene, qua_list, true);
   }
 });
-var RandomSelect_btn = document.getElementById('RandomSelect');
-RandomSelect_btn.addEventListener('click', function () {
-  //自己选
-  //raycaster
-  //遍历AllVertexList的坐标
-  //找到最近的点的idx
-  //替换这个StartIdx
-  var StartIdx = Math.floor(Math.random() * AllVertexList.length);
+
+// create an empty 3d object to hold the vertex and subquad in the future
+var the_scene_object = new THREE.Object3D();
+function drawVertexbyIndex(idx, the_scene_object) {
+  var color = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0xffc0cb;
+  var StartIdx = idx;
   console.log(AllVertexList.length);
   var testVert = AllVertexList[StartIdx];
   console.log(testVert.subquadid_list);
   for (var _i7 = 0; _i7 < testVert.subquadid_list.length; _i7++) {
-    (0, _SubQuad.DrawSubQuad)(AllSquadList[testVert.subquadid_list[_i7]], 0xffc0cb, scene, qua_list, false);
+    (0, _SubQuad.DrawSubQuad)(AllSquadList[testVert.subquadid_list[_i7]], color, the_scene_object, qua_list, false);
     var CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.2, 4, 2), new THREE.MeshBasicMaterial({
       wireframe: false,
       color: AllVertexList[AllSquadList[testVert.subquadid_list[_i7]].VerAidx].type == "vertex" ? 0x00ff00 : AllVertexList[AllSquadList[testVert.subquadid_list[_i7]].VerAidx].type == "middle" ? 0xff0000 : 0x0000ff
     }));
     CenterOfHex.position.set(AllVertexList[AllSquadList[testVert.subquadid_list[_i7]].VerAidx].x, AllVertexList[AllSquadList[testVert.subquadid_list[_i7]].VerAidx].y, AllVertexList[AllSquadList[testVert.subquadid_list[_i7]].VerAidx].z);
-    scene.add(CenterOfHex);
+    the_scene_object.add(CenterOfHex);
     CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.2, 4, 2), new THREE.MeshBasicMaterial({
       wireframe: false,
       color: AllVertexList[AllSquadList[testVert.subquadid_list[_i7]].VerAidx].type == "vertex" ? 0x00ff00 : AllVertexList[AllSquadList[testVert.subquadid_list[_i7]].VerAidx].type == "middle" ? 0xff0000 : 0x0000ff
     }));
     CenterOfHex.position.set(AllVertexList[AllSquadList[testVert.subquadid_list[_i7]].VerBidx].x, AllVertexList[AllSquadList[testVert.subquadid_list[_i7]].VerBidx].y, AllVertexList[AllSquadList[testVert.subquadid_list[_i7]].VerBidx].z);
-    scene.add(CenterOfHex);
+    the_scene_object.add(CenterOfHex);
     CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.2, 4, 2), new THREE.MeshBasicMaterial({
       wireframe: false,
       color: AllVertexList[AllSquadList[testVert.subquadid_list[_i7]].VerAidx].type == "middle" ? 0x00ff00 : AllVertexList[AllSquadList[testVert.subquadid_list[_i7]].VerAidx].type == "vertex" ? 0xff0000 : 0x0000ff
     }));
     CenterOfHex.position.set(AllVertexList[AllSquadList[testVert.subquadid_list[_i7]].VerCidx].x, AllVertexList[AllSquadList[testVert.subquadid_list[_i7]].VerCidx].y, AllVertexList[AllSquadList[testVert.subquadid_list[_i7]].VerCidx].z);
-    scene.add(CenterOfHex);
+    the_scene_object.add(CenterOfHex);
     CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.2, 4, 2), new THREE.MeshBasicMaterial({
       wireframe: false,
       color: 0xAABBFF
     }));
     CenterOfHex.position.set(AllVertexList[AllSquadList[testVert.subquadid_list[_i7]].VerDidx].x, AllVertexList[AllSquadList[testVert.subquadid_list[_i7]].VerDidx].y, AllVertexList[AllSquadList[testVert.subquadid_list[_i7]].VerDidx].z);
-    scene.add(CenterOfHex);
+    the_scene_object.add(CenterOfHex);
   }
+  return the_scene_object;
+}
+var RandomSelect_btn = document.getElementById('RandomSelect');
+RandomSelect_btn.addEventListener('click', function () {
+  var StartIdx = Math.floor(Math.random() * AllVertexList.length);
+  drawVertexbyIndex(StartIdx, the_scene_object);
+  scene.add(the_scene_object);
 });
 function VisualizeMarchVertex(march_vertex, height) {
   var CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.2, 4, 2), new THREE.MeshBasicMaterial({
@@ -38650,6 +38655,12 @@ scene.add(highlightMesh);
 var mousePosition = new THREE.Vector2();
 var raycaster = new THREE.Raycaster();
 var intersects;
+
+// create a 3d object for highlight
+var highlight_object = new THREE.Object3D();
+var cursor_point = new THREE.Object3D();
+scene.add(highlight_object);
+scene.add(cursor_point);
 window.addEventListener('mousemove', function (e) {
   // ///改一下
   mousePosition.x = e.clientX / window.innerWidth * 2 - 1;
@@ -38660,13 +38671,32 @@ window.addEventListener('mousemove', function (e) {
     //如果有焦点
     var intersect = intersects[0];
     //找到最近的vertex
-    var highlightPos = new THREE.Vector3().copy(intersect.point).floor().addScalar(0.5);
-    highlightMesh.position.set(highlightPos.x, 0, highlightPos.z);
-    var objectExist = objects.find(function (object) {
-      return object.position.x === highlightMesh.position.x && object.position.z === highlightMesh.position.z;
+
+    //print the location of the intersect
+    //console.log(intersect.point.x,intersect.point.y,intersect.point.z);
+
+    //draw a sphere at the intersect
+
+    // clear the cursor point
+    cursor_point.children.forEach(function (object) {
+      cursor_point.remove(object);
     });
-    if (!objectExist) highlightMesh.material.color.setHex(0xFF00FF); //悬停时闪烁的光标颜色
-    else highlightMesh.material.color.setHex(0xFF0000);
+    var sphere = new THREE.Mesh(new THREE.SphereGeometry(0.1, 4, 2), new THREE.MeshBasicMaterial({
+      wireframe: true,
+      color: 0x00FF00
+    }));
+    sphere.position.copy(intersect.point);
+    cursor_point.add(sphere);
+    if (AllVertexList.length > 0) {
+      // clear the highlight object
+      highlight_object.children.forEach(function (object) {
+        highlight_object.remove(object);
+      });
+      var result = GetNearestVertex(intersect.point.x, intersect.point.y, intersect.point.z);
+      // get a orange colo
+      drawVertexbyIndex(result, highlight_object, 0xffff00);
+      console.log(GetNearestVertex(intersect.point.x, intersect.point.y, intersect.point.z));
+    }
   }
 });
 var sphereMesh = new THREE.Mesh(new THREE.SphereGeometry(0.4, 4, 2), new THREE.MeshBasicMaterial({
@@ -38679,9 +38709,15 @@ var clicks = 1;
 
 //监听鼠标点击
 window.addEventListener('mousedown', function () {
-  var objectExist = objects.find(function (object) {
-    return object.position.x === highlightMesh.position.x && object.position.z === highlightMesh.position.z;
-  }); //检测这个位置是不是空的
+  mousePosition.x = e.clientX / window.innerWidth * 2 - 1;
+  mousePosition.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  // raycaster.setFromCamera(mousePosition, camera);//从相机到鼠标位置创建一条射线
+  // intersects = raycaster.intersectObject(planeMesh);//射线跟平面形成焦点
+
+  // const objectExist = objects.find(function(object) {
+  //     return (object.position.x === highlightMesh.position.x)
+  //     && (object.position.z === highlightMesh.position.z)
+  // });//检测这个位置是不是空的
 
   //创建一个新的plane
   //选中的位置占网格的小方块
@@ -38742,6 +38778,22 @@ window.addEventListener('resize', function () {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
+// input 3d x,y,z return the nearest vertex from AllVertexList
+function GetNearestVertex(x, y, z) {
+  var distance = 10000;
+  var result;
+  var idx;
+  for (var _i11 = 0; _i11 < AllVertexList.length; _i11++) {
+    var temp = Math.pow(x - AllVertexList[_i11].x, 2) + Math.pow(y - AllVertexList[_i11].z, 2) + Math.pow(z - AllVertexList[_i11].z, 2);
+    if (temp < distance) {
+      distance = temp;
+      result = AllVertexList[_i11];
+      idx = _i11;
+    }
+  }
+  return result, idx;
+}
 },{"./styles.css":"src/styles.css","three":"node_modules/three/build/three.module.js","three/examples/jsm/controls/OrbitControls.js":"node_modules/three/examples/jsm/controls/OrbitControls.js","./HexGrid.js":"src/HexGrid.js","./HexCubeCoord.js":"src/HexCubeCoord.js","./Triangle.js":"src/Triangle.js","./Quad.js":"src/Quad.js","./SubQuad.js":"src/SubQuad.js","three/src/math/MathUtils.js":"node_modules/three/src/math/MathUtils.js","./Vertex.js":"src/Vertex.js","three/examples/jsm/loaders/OBJLoader.js":"node_modules/three/examples/jsm/loaders/OBJLoader.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
@@ -38767,7 +38819,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "45463" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "46747" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

@@ -210,16 +210,6 @@ Smooth_btn.addEventListener('click', function(){
         DrawSubQuad(AllSquadList[i],0xffc0cb,scene,qua_list,true);
     }
 });
-<<<<<<< HEAD
-const RandomSelect_btn = document.getElementById('RandomSelect');
-RandomSelect_btn.addEventListener('click', function(){
-    //自己选
-    //raycaster
-    //遍历AllVertexList的坐标
-    //找到最近的点的idx
-    //替换这个StartIdx
-    var StartIdx=Math.floor(Math.random() * AllVertexList.length);
-=======
 
 
 // create an empty 3d object to hold the vertex and subquad in the future
@@ -228,7 +218,6 @@ const the_scene_object = new THREE.Object3D();
 function drawVertexbyIndex(idx,the_scene_object,color=0xffc0cb){
 
     var StartIdx=idx;
->>>>>>> cbfebdbdad25b73f477a5041d0e62f6b0a5ad62d
     console.log(AllVertexList.length);
     var testVert=AllVertexList[StartIdx];
     console.log(testVert.subquadid_list);
@@ -426,20 +415,6 @@ window.addEventListener('mousemove', function(e) {
     if(intersects.length > 0) {//如果有焦点
         const intersect = intersects[0];
         //找到最近的vertex
-<<<<<<< HEAD
-        const highlightPos = new THREE.Vector3().copy(intersect.point).floor().addScalar(0.5);
-        
-        highlightMesh.position.set(highlightPos.x, 0, highlightPos.z);
-        const objectExist = objects.find(function(object) {
-            return (object.position.x === highlightMesh.position.x)
-            && (object.position.z === highlightMesh.position.z)
-        });
-
-        if(!objectExist)
-            highlightMesh.material.color.setHex(0xFF00FF);//悬停时闪烁的光标颜色
-        else
-            highlightMesh.material.color.setHex(0xFF0000);
-=======
 
         //print the location of the intersect
         //console.log(intersect.point.x,intersect.point.y,intersect.point.z);
@@ -474,7 +449,6 @@ window.addEventListener('mousemove', function(e) {
             console.log(GetNearestVertex(intersect.point.x,intersect.point.y,intersect.point.z));
         }
 
->>>>>>> cbfebdbdad25b73f477a5041d0e62f6b0a5ad62d
     }
 });
 
@@ -492,13 +466,6 @@ let clicks = 1
 
 //监听鼠标点击
 window.addEventListener('mousedown', function() {
-<<<<<<< HEAD
-    const objectExist = objects.find(function(object) {
-        return (object.position.x === highlightMesh.position.x)
-        && (object.position.z === highlightMesh.position.z)
-    });//检测这个位置是不是空的
-=======
-
     mousePosition.x = (e.clientX / window.innerWidth) * 2 - 1;
     mousePosition.y = -(e.clientY / window.innerHeight) * 2 + 1;
     // raycaster.setFromCamera(mousePosition, camera);//从相机到鼠标位置创建一条射线
@@ -509,7 +476,6 @@ window.addEventListener('mousedown', function() {
     //     return (object.position.x === highlightMesh.position.x)
     //     && (object.position.z === highlightMesh.position.z)
     // });//检测这个位置是不是空的
->>>>>>> cbfebdbdad25b73f477a5041d0e62f6b0a5ad62d
 
     //创建一个新的plane
     //选中的位置占网格的小方块
@@ -594,4 +560,3 @@ function GetNearestVertex(x,y,z){
     }
     return result,idx;
 }
-
