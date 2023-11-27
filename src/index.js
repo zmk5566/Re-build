@@ -101,10 +101,11 @@ for(let i=0;i<triangle_list.length;i++){
 function clearTheScene(){
     triangle_object.clear();
     FindNeighborResult.clear();
+    smooth_object.clear();
 }
 
 //Step3
-const button_FindNeighbor = document.getElementById('FindNeighbor');
+//const button_FindNeighbor = document.getElementById('FindNeighbor');
 var tri_list=[];
 var qua_list=[];
 var CenterList=[];
@@ -197,6 +198,7 @@ button_FindNeighbor.addEventListener('click', function() {
 
 var model_list=[]
 const loader = new OBJLoader();
+
 // create a mouse click event listener
 window.addEventListener('mousedown', function(e) {
     console.log("mouse down");
@@ -420,6 +422,9 @@ function drawVertexByType(CenterList,MidList,vertex_List,result){
 
 
 // smooth the mesh
+// create a object to hold the smoothsquad visualization
+const smooth_object = new THREE.Object3D();
+scene.add(smooth_object);
 
 function Smooth_it_Out(){
 
@@ -431,15 +436,10 @@ function Smooth_it_Out(){
         Smooth(AllVertexList,AllSquadList);
         console.log(AllVertexList.length);
         for(let i=0;i<AllSquadList.length;i++){
-            DrawSubQuad(AllSquadList[i],0xffc0cb,scene,qua_list,true);
+            DrawSubQuad(AllSquadList[i],0xffc0cb,smooth_object,qua_list,true);
         }
 
 }
-
-const Smooth_btn = document.getElementById('Smooth');
-Smooth_btn.addEventListener('click', function(){
-    Smooth_it_Out()
-});
 
 
 // create an empty 3d object to hold the vertex and subquad in the future
@@ -463,14 +463,6 @@ const SelectedVertex_object = new THREE.Object3D();
 scene.add(SelectedVertex_object);
 
 
-const RandomSelect_btn = document.getElementById('RandomSelect');
-RandomSelect_btn.addEventListener('click', function(){
-    var StartIdx=Math.floor(Math.random()*AllVertexList.length);
-    drawVertexbyIndex(StartIdx,the_scene_object);
-    SelectedVertex_object.add(the_scene_object);
-
-}
-);
 
 
 
@@ -479,44 +471,28 @@ function VisualizeMarchVertex(march_vertex,height){
         new THREE.SphereGeometry(0.1, 4, 2),
         new THREE.MeshBasicMaterial({
             wireframe: false,
-            color: march_vertex.IsActive == true ? 0x00ff00 : 0xff0000
+            color: march_vertex.IsActive == true ? 0xff10f0 : 0xff0000
         }));
         CenterOfHex.position.set(march_vertex.x,march_vertex.layer*height,march_vertex.z);
         MarchVertex_object.add(CenterOfHex);
 }
 var AllMarchVertexList=[];
 var AllMarchCubeList=[];
-const AddLayer_btn = document.getElementById('Construct3D');
-
-
-
-
-
-
-function MarchingCubeUpdate(){
-
-
-
-}
+//const AddLayer_btn = document.getElementById('Construct3D');
 
 // create a object to hold marching vertexes
 const MarchVertex_object = new THREE.Object3D();
 scene.add(MarchVertex_object);
 
-AddLayer_btn.addEventListener('click', function(){
+function covert2Dto3D(){
+
     console.log("convert 2D to 3D");
     state = "marching_cube";
     console.log(AllVertexList.length);
     CreateMarchVertex(AllVertexList,AllMarchVertexList,layer);
     CreateMarchCube(AllSquadList,AllMarchVertexList,AllMarchCubeList,layer-1);
+}
 
-    
-    for(let i=0;i<AllMarchVertexList.length;i++){
-        for(let j=0;j<AllMarchVertexList[i].length;j++){ 
-            //VisualizeMarchVertex(AllMarchVertexList[i][j],1);
-        }
-    }
-});
 
 const AddLoadModel = document.getElementById('LoadModel');
 AddLoadModel.addEventListener('click',function(){
@@ -570,9 +546,7 @@ let intersects;
 
 // create a 3d object for highlight
 const highlight_object = new THREE.Object3D();
-const cursor_point= new THREE.Object3D();
 scene.add(highlight_object);
-scene.add(cursor_point);
 
 var SelectCenter = new THREE.Mesh(
     new THREE.SphereGeometry(0.2, 4, 2),
@@ -588,11 +562,6 @@ function mouseTriggerBase(){
     intersects = raycaster.intersectObject(planeMesh);//射线跟平面形成焦点
     if(intersects.length > 0) {//如果有焦点
         const intersect = intersects[0];
-        //找到最近的vertex
-        // clear the cursor point
-        cursor_point.children.forEach(function(object) {
-            cursor_point.remove(object);
-        });
 
         const sphere = new THREE.Mesh(
             new THREE.SphereGeometry(0.1, 4, 2),
@@ -605,8 +574,7 @@ function mouseTriggerBase(){
         projected.x=intersect.point.x;
         projected.y=0;
         projected.z=intersect.point.z;
-        sphere.position.copy(projected);
-        cursor_point.add(sphere);
+
         var result;
         if (AllVertexList.length>0){
             // clear the highlight object
@@ -691,18 +659,45 @@ function GetNearestVertex(x,y,z,currentVertList){
 }
 
 
+// add gui buttons new folder
+const button_folder = gui.addFolder('Buttons');
 
+// add one button
+const button = {
+    findNeighbor: function() {
+        findNeighbor();
+    }
+};
+
+// add the button to the folder
+button_folder.add(button, 'findNeighbor').name('Find Neighbor');
+
+// add another button smooth
+
+const button_smooth = {
+    smooth: function() {
+        Smooth_it_Out();
+    }
+};
+
+button_folder.add(button_smooth, 'smooth').name('Smooth');
+
+// add 2d to 3d button
+const button_2d_to_3d = {
+    convert: function() {
+        covert2Dto3D();
+    }
+};
+
+
+
+button_folder.add(button_2d_to_3d, 'convert').name('2D to 3D');
+
+button_folder.open();
 
 // add gui check boxes for the display
-display_folder.add(scene, 'visible').name('scene');
-display_folder.add(triangle_object, 'visible').name('triangle_object');
-display_folder.add(FindNeighborResult, 'visible').name('FindNeighborResult');
+display_folder.add(SelectedVertex_object, 'visible').name('SelectedVertex_object');
 display_folder.add(highlight_object, 'visible').name('highlight_object');
-display_folder.add(cursor_point, 'visible').name('cursor_point');
-display_folder.add(planeMesh, 'visible').name('planeMesh');
-display_folder.add(SelectCenter, 'visible').name('SelectCenter');
-display_folder.add(orbit, 'enabled').name('orbit');
-
-
+display_folder.add(MarchVertex_object, 'visible').name('MarchVertex_object');
 
 
