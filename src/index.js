@@ -6,9 +6,9 @@ import {HexGrid} from './HexGrid.js';
 import {HexCubeCoord,HexCoordList,CubeRing} from './HexCubeCoord.js';
 import {Merge,TriangleList,DrawTriangle, Triangle} from './Triangle.js';
 import { DrawQuad } from "./Quad.js";
-import { SubQuad,DrawSubQuad,MapSubQuad4UI,Smooth,Map } from "./SubQuad.js";
+import { SubQuad,DrawSubQuad,MapSubQuad4UI,Smooth,Map,CreateMarchCube } from "./SubQuad.js";
 import { smootherstep } from "three/src/math/MathUtils.js";
-import { Vertex,MarchVertex } from "./Vertex.js";
+import { Vertex,MarchVertex,CreateMarchVertex } from "./Vertex.js";
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 
 
@@ -315,20 +315,18 @@ function VisualizeMarchVertex(march_vertex,height){
         scene.add(CenterOfHex);
 }
 var AllMarchVertexList=[];
+var AllMarchCubeList=[];
 const AddLayer_btn = document.getElementById('Construct3D');
 AddLayer_btn.addEventListener('click', function(){
     console.log("convert 2D to 3D");
-    var layer=3;
+    var layer=3;//layer of vertex
     console.log(AllVertexList.length);
-    for(let i=0;i<AllVertexList.length;i++){
-        var AllMarchVertexLayer_j=[];
-        for(let j=0;j<layer;j++){
-            AllMarchVertexLayer_j.push(new MarchVertex(AllVertexList[i].x,j,AllVertexList[i].z,AllVertexList[i].type,j,false));
-            //AllMarchVertexList.push(new MarchVertex(AllVertexList[i].x,j,AllVertexList[i].z,AllVertexList[i].type,j,false));
-        }
-        AllMarchVertexList.push(AllMarchVertexLayer_j);
-    }
-    console.log(AllMarchVertexList.length,AllMarchVertexList[0].length);
+    CreateMarchVertex(AllVertexList,AllMarchVertexList,layer);
+    CreateMarchCube(AllSquadList,AllMarchVertexList,AllMarchCubeList,layer-1);
+
+    console.log(AllVertexList.length,AllMarchVertexList.length,AllMarchVertexList[0].length);
+    console.log(AllSquadList.length,AllMarchCubeList.length,AllMarchCubeList[0].length);
+    
     for(let i=0;i<AllMarchVertexList.length;i++){
         for(let j=0;j<AllMarchVertexList[i].length;j++){ 
             VisualizeMarchVertex(AllMarchVertexList[i][j],1);
@@ -336,7 +334,7 @@ AddLayer_btn.addEventListener('click', function(){
     }
 
 
-    // 创建物体
+    // 创建物体//GUI
     const geometry = new THREE.BoxGeometry(1, 1, 1);
     const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
     const TEST = new THREE.Mesh(geometry, material);

@@ -15,13 +15,46 @@ export class SubQuad{
         this.VerDidx=-1;
     }
 }
-export class SubQuadCube extends SubQuad{
+export class MarchCube extends SubQuad{
     //有八个顶点的
-    MarchVertList=[]
-    constructor(va,vb,vc,vd,MarchVertList,layer){
+    MarchVertList_Top=[];
+    MarchVertList_Bottom=[];
+    constructor(va,vb,vc,vd,layer){
         super(va,vb,vc,vd);
         this.layer=layer;
-        this.MarchVertList;
+        this.VerAidx;
+        this.VerBidx;
+        this.VerCidx;
+        this.VerDidx;
+        this.MarchVertList_Top;
+        this.MarchVertList_Bottom;
+    }
+}
+export function CreateMarchCube(AllSquadList,AllMarchVertexList,AllMarchCubeList,layer){
+    for(let j=0;j<layer;j++){
+        var AllMarchCubeLayer_j=[];
+        for(let i=0;i<AllSquadList.length;i++){
+            //var new_va=[AllSquadList[i].va[0],i]
+            var NewCube=new MarchCube(AllSquadList[i].va,
+                AllSquadList[i].vb,//layer*height,因为设置的height=1
+                AllSquadList[i].vc,
+                AllSquadList[i].vd,
+                j);
+                NewCube.VerAidx=AllSquadList[i].VerAidx;
+                NewCube.VerBidx=AllSquadList[i].VerBidx;
+                NewCube.VerCidx=AllSquadList[i].VerCidx;
+                NewCube.VerDidx=AllSquadList[i].VerDidx;
+                NewCube.MarchVertList_Bottom.push(AllMarchVertexList[j][NewCube.VerAidx],
+                    AllMarchVertexList[j][NewCube.VerBidx],
+                    AllMarchVertexList[j][NewCube.VerCidx],
+                    AllMarchVertexList[j][NewCube.VerDidx]);
+                NewCube.MarchVertList_Top.push(AllMarchVertexList[j+1][NewCube.VerAidx],
+                    AllMarchVertexList[j+1][NewCube.VerBidx],
+                    AllMarchVertexList[j+1][NewCube.VerCidx],
+                    AllMarchVertexList[j+1][NewCube.VerDidx]);
+            AllMarchCubeLayer_j.push(NewCube);
+        }
+        AllMarchCubeList.push(AllMarchCubeLayer_j);
     }
 }
 

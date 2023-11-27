@@ -35954,6 +35954,7 @@ if (typeof window !== 'undefined') {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.CreateMarchVertex = CreateMarchVertex;
 exports.Vertex = exports.MarchVertex = void 0;
 var _HexCubeCoord = require("./HexCubeCoord");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
@@ -35984,16 +35985,30 @@ var Vertex = exports.Vertex = /*#__PURE__*/_createClass(function Vertex(x, y, z,
 var MarchVertex = exports.MarchVertex = /*#__PURE__*/function (_Vertex) {
   _inherits(MarchVertex, _Vertex);
   var _super = _createSuper(MarchVertex);
-  function MarchVertex(x, y, z, type, layer, IsActive) {
+  function MarchVertex(x, y, z, type, layer, IsActive, subquadid_list) {
     var _this;
     _classCallCheck(this, MarchVertex);
     _this = _super.call(this, x, y, z, type);
+    _defineProperty(_assertThisInitialized(_this), "subquadid_list", []);
     _this.layer = layer;
+    _this.subquadid_list = subquadid_list;
     _this.IsActive = IsActive;
     return _this;
   }
   return _createClass(MarchVertex);
 }(Vertex);
+function CreateMarchVertex(AllVertexList, AllMarchVertexList, layer) {
+  //根据顶点坐标创建3D
+  for (var j = 0; j < layer; j++) {
+    var AllMarchVertexLayer_j = [];
+    for (var i = 0; i < AllVertexList.length; i++) {
+      AllMarchVertexLayer_j.push(new MarchVertex(AllVertexList[i].x, j,
+      //layer*height,因为设置的height=1
+      AllVertexList[i].z, AllVertexList[i].type, j, false, AllVertexList[i].subquadid_list));
+    }
+    AllMarchVertexList.push(AllMarchVertexLayer_j);
+  }
+}
 },{"./HexCubeCoord":"src/HexCubeCoord.js"}],"src/Quad.js":[function(require,module,exports) {
 "use strict";
 
@@ -36084,11 +36099,13 @@ function DrawQuad(quad, col, scene, meshlist) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.CreateMarchCube = CreateMarchCube;
 exports.DrawSubQuad = DrawSubQuad;
 exports.Map = Map;
 exports.MapSubQuad4UI = MapSubQuad4UI;
+exports.MarchCube = void 0;
 exports.Smooth = Smooth;
-exports.SubQuadCube = exports.SubQuad = void 0;
+exports.SubQuad = void 0;
 var THREE = _interopRequireWildcard(require("three"));
 var _Vertex = require("./Vertex");
 var _Triangle = require("./Triangle");
@@ -36120,21 +36137,46 @@ var SubQuad = exports.SubQuad = /*#__PURE__*/_createClass(function SubQuad(va, v
   this.VerCidx = -1;
   this.VerDidx = -1;
 });
-var SubQuadCube = exports.SubQuadCube = /*#__PURE__*/function (_SubQuad) {
-  _inherits(SubQuadCube, _SubQuad);
-  var _super = _createSuper(SubQuadCube);
-  function SubQuadCube(va, vb, vc, vd, MarchVertList, layer) {
+var MarchCube = exports.MarchCube = /*#__PURE__*/function (_SubQuad) {
+  _inherits(MarchCube, _SubQuad);
+  var _super = _createSuper(MarchCube);
+  function MarchCube(va, vb, vc, vd, layer) {
     var _this;
-    _classCallCheck(this, SubQuadCube);
+    _classCallCheck(this, MarchCube);
     _this = _super.call(this, va, vb, vc, vd);
     //有八个顶点的
-    _defineProperty(_assertThisInitialized(_this), "MarchVertList", []);
+    _defineProperty(_assertThisInitialized(_this), "MarchVertList_Top", []);
+    _defineProperty(_assertThisInitialized(_this), "MarchVertList_Bottom", []);
     _this.layer = layer;
-    _this.MarchVertList;
+    _this.VerAidx;
+    _this.VerBidx;
+    _this.VerCidx;
+    _this.VerDidx;
+    _this.MarchVertList_Top;
+    _this.MarchVertList_Bottom;
     return _this;
   }
-  return _createClass(SubQuadCube);
+  return _createClass(MarchCube);
 }(SubQuad);
+function CreateMarchCube(AllSquadList, AllMarchVertexList, AllMarchCubeList, layer) {
+  for (var j = 0; j < layer; j++) {
+    var AllMarchCubeLayer_j = [];
+    for (var i = 0; i < AllSquadList.length; i++) {
+      //var new_va=[AllSquadList[i].va[0],i]
+      var NewCube = new MarchCube(AllSquadList[i].va, AllSquadList[i].vb,
+      //layer*height,因为设置的height=1
+      AllSquadList[i].vc, AllSquadList[i].vd, j);
+      NewCube.VerAidx = AllSquadList[i].VerAidx;
+      NewCube.VerBidx = AllSquadList[i].VerBidx;
+      NewCube.VerCidx = AllSquadList[i].VerCidx;
+      NewCube.VerDidx = AllSquadList[i].VerDidx;
+      NewCube.MarchVertList_Bottom.push(AllMarchVertexList[j][NewCube.VerAidx], AllMarchVertexList[j][NewCube.VerBidx], AllMarchVertexList[j][NewCube.VerCidx], AllMarchVertexList[j][NewCube.VerDidx]);
+      NewCube.MarchVertList_Top.push(AllMarchVertexList[j + 1][NewCube.VerAidx], AllMarchVertexList[j + 1][NewCube.VerBidx], AllMarchVertexList[j + 1][NewCube.VerCidx], AllMarchVertexList[j + 1][NewCube.VerDidx]);
+      AllMarchCubeLayer_j.push(NewCube);
+    }
+    AllMarchCubeList.push(AllMarchCubeLayer_j);
+  }
+}
 function MapSubQuad4UI(TriangleList, QuadList, VertexList, MidList, CenterList) {
   //HexCenterPosList作为所有可选顶点的索引
   //输入得到的所有的三角形，因为他们都互补相邻，所以直接获取他们的顶点就可以
@@ -36651,7 +36693,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54869" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55227" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

@@ -218,6 +218,7 @@ function HexCoordList(radius) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.CreateMarchVertex = CreateMarchVertex;
 exports.Vertex = exports.MarchVertex = void 0;
 var _HexCubeCoord = require("./HexCubeCoord");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
@@ -248,16 +249,30 @@ var Vertex = exports.Vertex = /*#__PURE__*/_createClass(function Vertex(x, y, z,
 var MarchVertex = exports.MarchVertex = /*#__PURE__*/function (_Vertex) {
   _inherits(MarchVertex, _Vertex);
   var _super = _createSuper(MarchVertex);
-  function MarchVertex(x, y, z, type, layer, IsActive) {
+  function MarchVertex(x, y, z, type, layer, IsActive, subquadid_list) {
     var _this;
     _classCallCheck(this, MarchVertex);
     _this = _super.call(this, x, y, z, type);
+    _defineProperty(_assertThisInitialized(_this), "subquadid_list", []);
     _this.layer = layer;
+    _this.subquadid_list = subquadid_list;
     _this.IsActive = IsActive;
     return _this;
   }
   return _createClass(MarchVertex);
 }(Vertex);
+function CreateMarchVertex(AllVertexList, AllMarchVertexList, layer) {
+  //根据顶点坐标创建3D
+  for (var j = 0; j < layer; j++) {
+    var AllMarchVertexLayer_j = [];
+    for (var i = 0; i < AllVertexList.length; i++) {
+      AllMarchVertexLayer_j.push(new MarchVertex(AllVertexList[i].x, j,
+      //layer*height,因为设置的height=1
+      AllVertexList[i].z, AllVertexList[i].type, j, false, AllVertexList[i].subquadid_list));
+    }
+    AllMarchVertexList.push(AllMarchVertexLayer_j);
+  }
+}
 },{"./HexCubeCoord":"src/HexCubeCoord.js"}],"src/HexGrid.js":[function(require,module,exports) {
 "use strict";
 
@@ -306,7 +321,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54869" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55227" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
