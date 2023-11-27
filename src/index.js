@@ -114,6 +114,7 @@ var quad_list=[];
 var isolated_triangle_list=[];
 var AllSquadList=[];
 var AllVertexList=[];
+var VertexSelection=-1;
 
 //create a object to hold the find neighbor result
 const FindNeighborResult = new THREE.Object3D();
@@ -324,49 +325,47 @@ AddLayer_btn.addEventListener('click', function(){
     CreateMarchVertex(AllVertexList,AllMarchVertexList,layer);
     CreateMarchCube(AllSquadList,AllMarchVertexList,AllMarchCubeList,layer-1);
 
-    console.log(AllVertexList.length,AllMarchVertexList.length,AllMarchVertexList[0].length);
-    console.log(AllSquadList.length,AllMarchCubeList.length,AllMarchCubeList[0].length);
+    // console.log(AllVertexList.length,AllMarchVertexList.length,AllMarchVertexList[layer-1].length);
+    // console.log(AllSquadList.length,AllMarchCubeList.length,AllMarchCubeList[layer-2].length);
     
     for(let i=0;i<AllMarchVertexList.length;i++){
         for(let j=0;j<AllMarchVertexList[i].length;j++){ 
-            VisualizeMarchVertex(AllMarchVertexList[i][j],1);
+            //VisualizeMarchVertex(AllMarchVertexList[i][j],1);
         }
     }
-
-
-    // 创建物体//GUI
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    const TEST = new THREE.Mesh(geometry, material);
-    scene.add(TEST);
-    window.addEventListener('keydown', function(e) {
-        const keyCode = e.keyCode;
-        // 根据按键代码移动物体
-        switch (keyCode) {
-            case 65: // 左箭头
-            TEST.position.x -= 0.3;
-            break;
-            case 69: // 上箭头
-            TEST.position.y += 0.3;
-            break;
-            case 68: // 右箭头
-            TEST.position.x += 0.3;
-            break;
-            case 81: // 下箭头
-            TEST.position.y -= 0.3;
-            break;
-            case 87: // Page Up
-            TEST.position.z -= 0.3;
-            break;
-            case 83: // Page Down
-            TEST.position.z += 0.3;
-            break;
-            default:
-            break;
-        }
-    });
     window.addEventListener('mousedown', function(e) {
         //TODO:点击鼠标选择一整个marchingcube，并激活对应的顶点
+        console.log("select vertex id :" ,VertexSelection);
+        console.log("corresspond squad id: ",AllMarchVertexList[0][VertexSelection].subquadid_list);
+        //console.log(AllMarchVertexList[ConstructLayer][VertexSelection].IsActive);
+        var ConstructLayer=0;
+        //AllMarchVertexList[0][VertexSelection].IsActive=true;
+        for(let i=0;i<layer;i++){
+            if(AllMarchVertexList[i][VertexSelection].IsActive==false){
+                ConstructLayer=i;
+                AllMarchVertexList[i][VertexSelection].IsActive=true;
+                break;
+            }
+        }
+
+        var CenterVert=AllMarchVertexList[ConstructLayer][VertexSelection];
+        console.log(ConstructLayer);
+        for(let i=0;i<CenterVert.subquadid_list.length;i++){
+            var vertid=CenterVert.subquadid_list[i];
+            console.log(ConstructLayer);
+            console.log(AllMarchCubeList[ConstructLayer].length);
+            var CurrentCube=AllMarchCubeList[ConstructLayer][vertid];
+            for(let j=0;j<4;j++){
+                if(CurrentCube.MarchVertList_Bottom[j].IsActive==false){
+                    CurrentCube.MarchVertList_Bottom[j].IsActive=true;
+                    VisualizeMarchVertex(CurrentCube.MarchVertList_Bottom[j],1);
+                }
+                if(CurrentCube.MarchVertList_Top[j].IsActive==false){
+                    CurrentCube.MarchVertList_Top[j].IsActive=true;
+                    VisualizeMarchVertex(CurrentCube.MarchVertList_Top[j],1);
+                }
+            }
+        }
     });
 });
 
@@ -466,13 +465,11 @@ window.addEventListener('mousemove', function(e) {
             highlight_object.children.forEach(function(object) {
                 highlight_object.remove(object);
             });
-            var result=GetNearestVertex(projected.x,0,projected.z,AllVertexList);
+            VertexSelection=GetNearestVertex(projected.x,0,projected.z,AllVertexList);
            
-            SelectCenter.position.set(AllVertexList[result].x,AllVertexList[result].y,AllVertexList[result].z);
+            SelectCenter.position.set(AllVertexList[VertexSelection].x,AllVertexList[VertexSelection].y,AllVertexList[VertexSelection].z);
             // get a orange color
-            drawVertexbyIndex(result,highlight_object,0xffff00);
-
-            //console.log(SelectCenter.position,projected);
+            drawVertexbyIndex(VertexSelection,highlight_object,0xffff00);
         }
 
     }
