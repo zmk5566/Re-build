@@ -362,10 +362,9 @@ AddLoadModel.addEventListener('click',function(){
     var inputText_pt1 = document.getElementById("MeshId_pt1").value;
     var inputText_pt2 = document.getElementById("MeshId_pt2").value;
     var objLoader = new OBJLoader();
-    var Path1='E:/unity_proj/OpenBrush/open-brush-main/open-brush-main/Re-build/Models/'+inputText_pt1+' '+inputText_pt2+'.obj';
-    var Path2='../Models/BuidlingType1.obj';
+    var Path='./Models/BuidlingType1.obj';
     objLoader.load(
-        '',
+        Path,
         function (test) {
             // 加载完成后的回调函数
             scene.add(test);
