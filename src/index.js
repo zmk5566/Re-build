@@ -40,7 +40,7 @@ camera.position.set(0, 30, 0);//camera位置
 orbit.update();
 
 //整个map上的grid//其实就是一整块
-const planeMesh = new THREE.Mesh(
+var planeMesh = new THREE.Mesh(
     new THREE.PlaneGeometry(20, 20),
     new THREE.MeshBasicMaterial({
         side: THREE.DoubleSide,
@@ -79,6 +79,9 @@ for(let i=0;i<coordList.length;i++){
 //Step2:Draw Triangle
 var triangle_list=TriangleList(coordList);//所有的三角形
 //console.log(triangle_list.length);
+// create a object to hold the triangle
+const triangle_object = new THREE.Object3D();
+scene.add(triangle_object);
 //创建三角形地图grid
 var LineList=[];
 for(let i=0;i<triangle_list.length;i++){
@@ -92,8 +95,14 @@ for(let i=0;i<triangle_list.length;i++){
     const geometry = new THREE.BufferGeometry().setFromPoints( points );
     const line = new THREE.Line( geometry, material );
     LineList.push(line);
-    scene.add( line );
+    triangle_object.add( line );
 }
+
+function clearTheScene(){
+    triangle_object.clear();
+    FindNeighborResult.clear();
+}
+
 //Step3
 const button_FindNeighbor = document.getElementById('FindNeighbor');
 var tri_list=[];
@@ -105,10 +114,16 @@ var quad_list=[];
 var isolated_triangle_list=[];
 var AllSquadList=[];
 var AllVertexList=[];
+
+//create a object to hold the find neighbor result
+const FindNeighborResult = new THREE.Object3D();
+scene.add(FindNeighborResult);
+
 button_FindNeighbor.addEventListener('click', function() {
     // 在这里编写按钮点击时要执行的 JavaScript 代码
-    tri_list.forEach(element => {scene.remove(element);});
-    qua_list.forEach(element => {scene.remove(element);});
+    clearTheScene();
+    //tri_list.forEach(element => {scene.remove(element);});
+    //qua_list.forEach(element => {scene.remove(element);});
     var triangle_list=TriangleList(coordList);
     console.log("Number of Triangles before merge",triangle_list.length);
     Merge(triangle_list,quad_list,isolated_triangle_list);
@@ -120,9 +135,9 @@ button_FindNeighbor.addEventListener('click', function() {
         //DrawSubQuad(isolated_triangle_list[0].squadlist[0],0xff0000,scene,tri_list);
         for(let j=0;j<isolated_triangle_list.length;j++){
             //DrawTriangle(isolated_triangle_list[j],0xff0000,scene,tri_list);
-            DrawSubQuad(isolated_triangle_list[j].squadlist[0],0x000022,scene,qua_list,false);
-            DrawSubQuad(isolated_triangle_list[j].squadlist[1],0xff22ff,scene,qua_list,false);
-            DrawSubQuad(isolated_triangle_list[j].squadlist[2],0x0022ff,scene,qua_list,false);
+            DrawSubQuad(isolated_triangle_list[j].squadlist[0],0x000022,FindNeighborResult,qua_list,false);
+            DrawSubQuad(isolated_triangle_list[j].squadlist[1],0xff22ff,FindNeighborResult,qua_list,false);
+            DrawSubQuad(isolated_triangle_list[j].squadlist[2],0x0022ff,FindNeighborResult,qua_list,false);
             
             AllSquadList.push(isolated_triangle_list[j].squadlist[0]);
             AllSquadList.push(isolated_triangle_list[j].squadlist[1]);
@@ -135,10 +150,10 @@ button_FindNeighbor.addEventListener('click', function() {
         for(let j=0;j<quad_list.length;j++){
             var color=0x00ff00+j*(0x0000ff)/quad_list.length;
             //DrawQuad(quad_list[j],color,scene,qua_list);}
-            DrawSubQuad(quad_list[j].squadlist[0],0xffc0cb,scene,qua_list,false);
-            DrawSubQuad(quad_list[j].squadlist[1],0x71a5d0,scene,qua_list,false);
-            DrawSubQuad(quad_list[j].squadlist[2],0xe4b7ff,scene,qua_list,false);
-            DrawSubQuad(quad_list[j].squadlist[3],0xff9c70,scene,qua_list,false);
+            DrawSubQuad(quad_list[j].squadlist[0],0xffc0cb,FindNeighborResult,qua_list,false);
+            DrawSubQuad(quad_list[j].squadlist[1],0x71a5d0,FindNeighborResult,qua_list,false);
+            DrawSubQuad(quad_list[j].squadlist[2],0xe4b7ff,FindNeighborResult,qua_list,false);
+            DrawSubQuad(quad_list[j].squadlist[3],0xff9c70,FindNeighborResult,qua_list,false);
 
             //add to squadlist
             AllSquadList.push(quad_list[j].squadlist[0]);
@@ -157,9 +172,9 @@ button_FindNeighbor.addEventListener('click', function() {
                         color: 0xAABBFF
                     }));
                     CenterOfHex.position.set(vertex_List[4].x,vertex_List[4].y,vertex_List[4].z);
-                    scene.add(CenterOfHex)
+                    FindNeighborResult.add(CenterOfHex)
         console.log(vertex_List[4].subquadlist.length);
-        DrawSubQuad(vertex_List[4].subquadlist[i],0xff0000,scene,qua_list);
+        DrawSubQuad(vertex_List[4].subquadlist[i],0xff0000,FindNeighborResult,qua_list);
     }
     //测试定点分类
     var AllVertexMesh=[];
@@ -209,15 +224,7 @@ function drawVertexByType(CenterList,MidList,vertex_List,result){
 const Smooth_btn = document.getElementById('Smooth');
 Smooth_btn.addEventListener('click', function(){
     // scene clear everything except the plane
-    //
-    LineList.forEach(element => {scene.remove(element);});
-    tri_list.forEach(element => {scene.remove(element);});
-    qua_list.forEach(element => {scene.remove(element);});
-    // scene.children.forEach(function(object) {
-    //     if(object!=planeMesh){
-    //         scene.remove(object);
-    //     }
-    // });
+    clearTheScene();
 
     Smooth(AllVertexList,AllSquadList);
     console.log(AllVertexList.length);
@@ -406,20 +413,13 @@ AddLoadModel.addEventListener('click',function(){
 
 
 //鼠标移动的时候闪烁的小方块
-const highlightMesh = new THREE.Mesh(
-    new THREE.PlaneGeometry(1, 1),
-    new THREE.MeshBasicMaterial({
-        side: THREE.DoubleSide,
-        transparent: true,
-        visible:false
-    })
-);
-highlightMesh.rotateX(-Math.PI / 2);
-highlightMesh.position.set(0.5, 0, 0.5);
-scene.add(highlightMesh);
+
+// highlightMesh.rotateX(-Math.PI / 2);
+// highlightMesh.position.set(0.5, 0, 0.5);
+// scene.add(highlightMesh);
 
 const mousePosition = new THREE.Vector2();
-const raycaster = new THREE.Raycaster();
+var raycaster = new THREE.Raycaster();
 let intersects;
 
 // create a 3d object for highlight
@@ -556,12 +556,11 @@ window.addEventListener('mousedown', function() {
 });
 //小方块旋转动画
 function animate(time) {
-    // highlightMesh.material.opacity = 1 + Math.sin(time / 120);
-    // objects.forEach(function(object) {
-    //     object.rotation.x = time / 1000;
-    //     object.rotation.z = time / 1000;
-    //     object.position.y = 0.5 + 0.5 * Math.abs(Math.sin(time / 1000));
-    // });
+    objects.forEach(function(object) {
+        object.rotation.x = time / 1000;
+        object.rotation.z = time / 1000;
+        object.position.y = 0.5 + 0.5 * Math.abs(Math.sin(time / 1000));
+    });
     renderer.render(scene, camera);
 }
 
