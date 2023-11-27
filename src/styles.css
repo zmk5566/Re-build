@@ -7,10 +7,8 @@ body {
 #info {
   color: white;
   position: absolute;
-  top: 10px;
   width: 100%;
   text-align: center;
-  z-index: 100;
   display: block;
 }
 
@@ -66,3 +64,10 @@ body {
   box-shadow: #d6d6e7 0 3px 7px inset;
   transform: translateY(2px);
 }
+
+#to_be_deleted {
+  position: fixed;
+  width: 50%;
+  bottom: 10px;
+  border: 3px solid #8AC007;
+} 
