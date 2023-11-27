@@ -191,10 +191,9 @@ function findNeighbor(){
 }
 
 
-button_FindNeighbor.addEventListener('click', function() {
-    findNeighbor();
-    
-});
+// button_FindNeighbor.addEventListener('click', function() {
+//     findNeighbor();
+// });
 
 var model_list=[]
 const loader = new OBJLoader();
@@ -289,7 +288,7 @@ window.addEventListener('mousedown', function(e) {
                 var ModelName=bit1+bit2+bit3+bit4+' '+bit5+bit6+bit7+bit8;
                 if(ModelName!='0000 0000'&&ModelName!='1111 1111'){
                     //需要加载模型
-                    var CenterPosition= [
+                    var CenterPosition=new THREE.Vector3(
                     (ThisCube.MarchVertList_Bottom[0].x+
                     ThisCube.MarchVertList_Bottom[1].x+
                     ThisCube.MarchVertList_Bottom[2].x+
@@ -298,7 +297,13 @@ window.addEventListener('mousedown', function(e) {
                     (ThisCube.MarchVertList_Bottom[0].z+
                         ThisCube.MarchVertList_Bottom[1].z+
                         ThisCube.MarchVertList_Bottom[2].z+
-                        ThisCube.MarchVertList_Bottom[3].z)/4];
+                        ThisCube.MarchVertList_Bottom[3].z)/4);
+
+                    var VertexA=new THREE.Vector3(ThisCube.MarchVertList_Bottom[0].x,ThisCube.MarchVertList_Bottom[0].y,ThisCube.MarchVertList_Bottom[0].z);
+                    var VertexB=new THREE.Vector3(ThisCube.MarchVertList_Bottom[1].x,ThisCube.MarchVertList_Bottom[1].y,ThisCube.MarchVertList_Bottom[1].z);
+                    var VertexC=new THREE.Vector3(ThisCube.MarchVertList_Bottom[2].x,ThisCube.MarchVertList_Bottom[2].y,ThisCube.MarchVertList_Bottom[2].z);
+                    var VertexD=new THREE.Vector3(ThisCube.MarchVertList_Bottom[3].x,ThisCube.MarchVertList_Bottom[3].y,ThisCube.MarchVertList_Bottom[3].z);
+                    var VetexList=[VertexA,VertexB,VertexC,VertexD,CenterPosition];
                     // var CenterOfHex = new THREE.Mesh(
                     //     new THREE.SphereGeometry(0.1, 4, 2),
                     //     new THREE.MeshBasicMaterial({
@@ -307,17 +312,18 @@ window.addEventListener('mousedown', function(e) {
                     //     }));
                     //     CenterOfHex.position.set(CenterPosition[0],CenterPosition[1],CenterPosition[2]);
                     //     MarchVertex_object.add(CenterOfHex);
-                    allModelSet.push([j,ModelName,CenterPosition]);
+                    allModelSet.push([j,ModelName,VetexList]);
                     
                 }
             }
         }
         console.log(allModelSet);
         for(let i=0;i<allModelSet.length;i++){
-            var path='/models/'+allModelSet[i][1]+'.obj';
+            //var path='/models/'+allModelSet[i][1]+'.obj';
+            var path='/models/'+'cube'+'.obj';
             var pos=allModelSet[i][2];
 
-            LoadMultipleModels(path,pos,model_list);
+            LoadMultipleModels(path,pos,model_list,ConstructLayer);
         }
 
 
@@ -327,9 +333,12 @@ window.addEventListener('mousedown', function(e) {
 
 } );
 
-function LoadMultipleModels(path,position,model_list){
+function LoadMultipleModels(path,position,model_list,ConstructLayer){
     //console.log(path);
     //if(path=='/models/0011 0011.obj'){path='/models/1001 1001.obj';}
+    var  verticesList=[];
+    var interpolatedAB = new THREE.Vector3();
+    var interpolatedCD = new THREE.Vector3();
     loader.load(
         path,
         // called when resource is loaded
@@ -340,15 +349,59 @@ function LoadMultipleModels(path,position,model_list){
             object.traverse(function (child) {
             if (child instanceof THREE.Mesh) {
                 child.material = material;
-                //child.geometry.applyMatrix4(new THREE.Matrix4().makeRotationY(-Math.PI / 2));
+                child.geometry.applyMatrix4(new THREE.Matrix4().makeRotationY(-Math.PI / 2));
+                // vertices=child.vertices;
+                const vertices = child.geometry.attributes.position.array;
+                console.log("vertices count",vertices.length);
+                // 输出每个顶点的坐标
+                for (let i = 0; i < vertices.length; i += 3) {
+                    const x = vertices[i];
+                    const y = vertices[i + 1];
+                    const z = vertices[i + 2];
+                    console.log(`Vertex ${i / 3}: x=${x}, y=${y}, z=${z}`);
+
+                    interpolatedAB.lerpVectors(position[0], position[3], (x+0.5));
+                    //console.log(interpolatedAB);
+                    var CenterOfHex = new THREE.Mesh(
+                        new THREE.SphereGeometry(0.1, 4, 2),
+                        new THREE.MeshBasicMaterial({
+                            wireframe: false,
+                            color: 0xff0000
+                        }));
+                        CenterOfHex.position.set(interpolatedAB.x,interpolatedAB.y,interpolatedAB.z);
+                        MarchVertex_object.add(CenterOfHex);
+                        interpolatedCD.lerpVectors(position[1], position[2], (x+0.5));
+                        var CenterOfHex = new THREE.Mesh(
+                            new THREE.SphereGeometry(0.1, 4, 2),
+                            new THREE.MeshBasicMaterial({
+                                wireframe: false,
+                                color: 0x00ff00
+                            }));
+                            CenterOfHex.position.set(interpolatedCD.x,interpolatedCD.y,interpolatedCD.z);
+                            MarchVertex_object.add(CenterOfHex);
+                        const finalLerp=new THREE.Vector3();
+                        finalLerp.lerpVectors(interpolatedAB,interpolatedCD,(z+0.5));
+                        var CenterOfHex = new THREE.Mesh(
+                            new THREE.SphereGeometry(0.1, 4, 2),
+                            new THREE.MeshBasicMaterial({
+                                wireframe: false,
+                                color: 0x0000ff
+                            }));
+                            CenterOfHex.position.set(finalLerp.x,finalLerp.y,finalLerp.z);
+                            MarchVertex_object.add(CenterOfHex);
+                    vertices[i]=finalLerp.x;
+                    vertices[i+1]=y+finalLerp.y+0.5+ConstructLayer;
+                    vertices[i+2]=finalLerp.z;
+                    console.log(`Vertex ${i / 3}: x=${finalLerp.x}, y=${vertices[i+1]}, z=${vertices[i+2]}`);
+                }
             }
             });
+
             scene.add( object );
-            model_list.push(object);
-            // object.scale.x = -1;
-            // object.scale.y = -1;
-            // object.scale.z = -1;
-            object.position.set(position[0],position[1],position[2]);
+            // const geometry=object.children[0].geometry;
+            // vertices=geometry.vertices;
+            console.log("vertices",verticesList.length);
+            //object.position.set(position[4].x,position[4].y-0.5,position[4].z);
         },
         // called when loading is in progresses
         function ( xhr ) {
@@ -359,6 +412,8 @@ function LoadMultipleModels(path,position,model_list){
             console.log( 'An error happened' );
         }
     );
+    console.log(interpolatedAB);
+
 }
 
 

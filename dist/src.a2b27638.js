@@ -40992,9 +40992,11 @@ function _findNeighbor() {
   AllVertexList = CenterList.concat(MidList).concat(vertex_List);
   (0, _SubQuad.Map)(AllVertexList, AllSquadList);
 }
-button_FindNeighbor.addEventListener('click', function () {
-  _findNeighbor();
-});
+
+// button_FindNeighbor.addEventListener('click', function() {
+//     findNeighbor();
+// });
+
 var model_list = [];
 var loader = new _OBJLoader.OBJLoader();
 
@@ -41081,7 +41083,12 @@ window.addEventListener('mousedown', function (e) {
           var ModelName = bit1 + bit2 + bit3 + bit4 + ' ' + bit5 + bit6 + bit7 + bit8;
           if (ModelName != '0000 0000' && ModelName != '1111 1111') {
             //需要加载模型
-            var CenterPosition = [(ThisCube.MarchVertList_Bottom[0].x + ThisCube.MarchVertList_Bottom[1].x + ThisCube.MarchVertList_Bottom[2].x + ThisCube.MarchVertList_Bottom[3].x) / 4, 0.5 + ThisCube.MarchVertList_Bottom[0].y, (ThisCube.MarchVertList_Bottom[0].z + ThisCube.MarchVertList_Bottom[1].z + ThisCube.MarchVertList_Bottom[2].z + ThisCube.MarchVertList_Bottom[3].z) / 4];
+            var CenterPosition = new THREE.Vector3((ThisCube.MarchVertList_Bottom[0].x + ThisCube.MarchVertList_Bottom[1].x + ThisCube.MarchVertList_Bottom[2].x + ThisCube.MarchVertList_Bottom[3].x) / 4, 0.5 + ThisCube.MarchVertList_Bottom[0].y, (ThisCube.MarchVertList_Bottom[0].z + ThisCube.MarchVertList_Bottom[1].z + ThisCube.MarchVertList_Bottom[2].z + ThisCube.MarchVertList_Bottom[3].z) / 4);
+            var VertexA = new THREE.Vector3(ThisCube.MarchVertList_Bottom[0].x, ThisCube.MarchVertList_Bottom[0].y, ThisCube.MarchVertList_Bottom[0].z);
+            var VertexB = new THREE.Vector3(ThisCube.MarchVertList_Bottom[1].x, ThisCube.MarchVertList_Bottom[1].y, ThisCube.MarchVertList_Bottom[1].z);
+            var VertexC = new THREE.Vector3(ThisCube.MarchVertList_Bottom[2].x, ThisCube.MarchVertList_Bottom[2].y, ThisCube.MarchVertList_Bottom[2].z);
+            var VertexD = new THREE.Vector3(ThisCube.MarchVertList_Bottom[3].x, ThisCube.MarchVertList_Bottom[3].y, ThisCube.MarchVertList_Bottom[3].z);
+            var VetexList = [VertexA, VertexB, VertexC, VertexD, CenterPosition];
             // var CenterOfHex = new THREE.Mesh(
             //     new THREE.SphereGeometry(0.1, 4, 2),
             //     new THREE.MeshBasicMaterial({
@@ -41090,22 +41097,26 @@ window.addEventListener('mousedown', function (e) {
             //     }));
             //     CenterOfHex.position.set(CenterPosition[0],CenterPosition[1],CenterPosition[2]);
             //     MarchVertex_object.add(CenterOfHex);
-            allModelSet.push([_j2, ModelName, CenterPosition]);
+            allModelSet.push([_j2, ModelName, VetexList]);
           }
         }
       }
       console.log(allModelSet);
       for (var _i5 = 0; _i5 < allModelSet.length; _i5++) {
-        var path = '/models/' + allModelSet[_i5][1] + '.obj';
+        //var path='/models/'+allModelSet[i][1]+'.obj';
+        var path = '/models/' + 'cube' + '.obj';
         var pos = allModelSet[_i5][2];
-        LoadMultipleModels(path, pos, model_list);
+        LoadMultipleModels(path, pos, model_list, ConstructLayer);
       }
     }
   }
 });
-function LoadMultipleModels(path, position, model_list) {
+function LoadMultipleModels(path, position, model_list, ConstructLayer) {
   //console.log(path);
   //if(path=='/models/0011 0011.obj'){path='/models/1001 1001.obj';}
+  var verticesList = [];
+  var interpolatedAB = new THREE.Vector3();
+  var interpolatedCD = new THREE.Vector3();
   loader.load(path,
   // called when resource is loaded
   function (object) {
@@ -41120,16 +41131,51 @@ function LoadMultipleModels(path, position, model_list) {
     object.traverse(function (child) {
       if (child instanceof THREE.Mesh) {
         child.material = material;
-        //child.geometry.applyMatrix4(new THREE.Matrix4().makeRotationY(-Math.PI / 2));
+        child.geometry.applyMatrix4(new THREE.Matrix4().makeRotationY(-Math.PI / 2));
+        // vertices=child.vertices;
+        var vertices = child.geometry.attributes.position.array;
+        console.log("vertices count", vertices.length);
+        // 输出每个顶点的坐标
+        for (var _i6 = 0; _i6 < vertices.length; _i6 += 3) {
+          var x = vertices[_i6];
+          var y = vertices[_i6 + 1];
+          var z = vertices[_i6 + 2];
+          console.log("Vertex ".concat(_i6 / 3, ": x=").concat(x, ", y=").concat(y, ", z=").concat(z));
+          interpolatedAB.lerpVectors(position[0], position[3], x + 0.5);
+          //console.log(interpolatedAB);
+          var CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.1, 4, 2), new THREE.MeshBasicMaterial({
+            wireframe: false,
+            color: 0xff0000
+          }));
+          CenterOfHex.position.set(interpolatedAB.x, interpolatedAB.y, interpolatedAB.z);
+          MarchVertex_object.add(CenterOfHex);
+          interpolatedCD.lerpVectors(position[1], position[2], x + 0.5);
+          var CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.1, 4, 2), new THREE.MeshBasicMaterial({
+            wireframe: false,
+            color: 0x00ff00
+          }));
+          CenterOfHex.position.set(interpolatedCD.x, interpolatedCD.y, interpolatedCD.z);
+          MarchVertex_object.add(CenterOfHex);
+          var finalLerp = new THREE.Vector3();
+          finalLerp.lerpVectors(interpolatedAB, interpolatedCD, z + 0.5);
+          var CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.1, 4, 2), new THREE.MeshBasicMaterial({
+            wireframe: false,
+            color: 0x0000ff
+          }));
+          CenterOfHex.position.set(finalLerp.x, finalLerp.y, finalLerp.z);
+          MarchVertex_object.add(CenterOfHex);
+          vertices[_i6] = finalLerp.x;
+          vertices[_i6 + 1] = y + finalLerp.y + 0.5 + ConstructLayer;
+          vertices[_i6 + 2] = finalLerp.z;
+          console.log("Vertex ".concat(_i6 / 3, ": x=").concat(finalLerp.x, ", y=").concat(vertices[_i6 + 1], ", z=").concat(vertices[_i6 + 2]));
+        }
       }
     });
-
     scene.add(object);
-    model_list.push(object);
-    // object.scale.x = -1;
-    // object.scale.y = -1;
-    // object.scale.z = -1;
-    object.position.set(position[0], position[1], position[2]);
+    // const geometry=object.children[0].geometry;
+    // vertices=geometry.vertices;
+    console.log("vertices", verticesList.length);
+    //object.position.set(position[4].x,position[4].y-0.5,position[4].z);
   },
   // called when loading is in progresses
   function (xhr) {
@@ -41139,6 +41185,7 @@ function LoadMultipleModels(path, position, model_list) {
   function (error) {
     console.log('An error happened');
   });
+  console.log(interpolatedAB);
 }
 var button_RotateX = document.getElementById('rotateX');
 button_RotateX.addEventListener('click', function () {
@@ -41163,30 +41210,30 @@ function drawVertexByType(CenterList, MidList, vertex_List, result) {
     scene.remove(element);
   });
   result.length = 0;
-  for (var _i6 = 0; _i6 < CenterList.length; _i6++) {
+  for (var _i7 = 0; _i7 < CenterList.length; _i7++) {
     var CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.2, 4, 2), new THREE.MeshBasicMaterial({
       wireframe: false,
       color: 0xAABBFF
     }));
-    CenterOfHex.position.set(CenterList[_i6].x, CenterList[_i6].y, CenterList[_i6].z);
+    CenterOfHex.position.set(CenterList[_i7].x, CenterList[_i7].y, CenterList[_i7].z);
     result.push(CenterOfHex);
     scene.add(CenterOfHex);
   }
-  for (var _i7 = 0; _i7 < MidList.length; _i7++) {
+  for (var _i8 = 0; _i8 < MidList.length; _i8++) {
     var CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.2, 4, 2), new THREE.MeshBasicMaterial({
       wireframe: false,
       color: 0xAABB00
     }));
-    CenterOfHex.position.set(MidList[_i7].x, MidList[_i7].y, MidList[_i7].z);
+    CenterOfHex.position.set(MidList[_i8].x, MidList[_i8].y, MidList[_i8].z);
     result.push(CenterOfHex);
     scene.add(CenterOfHex);
   }
-  for (var _i8 = 0; _i8 < vertex_List.length; _i8++) {
+  for (var _i9 = 0; _i9 < vertex_List.length; _i9++) {
     var CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.2, 4, 2), new THREE.MeshBasicMaterial({
       wireframe: false,
       color: 0x0000FF
     }));
-    CenterOfHex.position.set(vertex_List[_i8].x, vertex_List[_i8].y, vertex_List[_i8].z);
+    CenterOfHex.position.set(vertex_List[_i9].x, vertex_List[_i9].y, vertex_List[_i9].z);
     result.push(CenterOfHex);
     scene.add(CenterOfHex);
   }
@@ -41203,8 +41250,8 @@ function Smooth_it_Out() {
   clearTheScene();
   (0, _SubQuad.Smooth)(AllVertexList, AllSquadList);
   console.log(AllVertexList.length);
-  for (var _i9 = 0; _i9 < AllSquadList.length; _i9++) {
-    (0, _SubQuad.DrawSubQuad)(AllSquadList[_i9], 0xffc0cb, smooth_object, qua_list, true);
+  for (var _i10 = 0; _i10 < AllSquadList.length; _i10++) {
+    (0, _SubQuad.DrawSubQuad)(AllSquadList[_i10], 0xffc0cb, smooth_object, qua_list, true);
   }
 }
 
@@ -41216,8 +41263,8 @@ function drawVertexbyIndex(idx, the_scene_object) {
   //console.log(AllVertexList.length);
   var testVert = AllVertexList[StartIdx];
   //console.log(testVert.subquadid_list);
-  for (var _i10 = 0; _i10 < testVert.subquadid_list.length; _i10++) {
-    (0, _SubQuad.DrawSubQuad)(AllSquadList[testVert.subquadid_list[_i10]], color, the_scene_object, qua_list, false);
+  for (var _i11 = 0; _i11 < testVert.subquadid_list.length; _i11++) {
+    (0, _SubQuad.DrawSubQuad)(AllSquadList[testVert.subquadid_list[_i11]], color, the_scene_object, qua_list, false);
   }
   return the_scene_object;
 }
@@ -41365,12 +41412,12 @@ function GetNearestVertex(x, y, z, currentVertList) {
   var distance = 10000;
   var result;
   var idx;
-  for (var _i11 = 0; _i11 < currentVertList.length; _i11++) {
-    var temp = Math.pow(x - currentVertList[_i11].x, 2) + Math.pow(y - currentVertList[_i11].y, 2) + Math.pow(z - currentVertList[_i11].z, 2);
+  for (var _i12 = 0; _i12 < currentVertList.length; _i12++) {
+    var temp = Math.pow(x - currentVertList[_i12].x, 2) + Math.pow(y - currentVertList[_i12].y, 2) + Math.pow(z - currentVertList[_i12].z, 2);
     if (temp < distance) {
       distance = temp;
-      result = currentVertList[_i11];
-      idx = _i11;
+      result = currentVertList[_i12];
+      idx = _i12;
     }
   }
   //console.log("distance",distance);
@@ -41440,7 +41487,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "43580" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56384" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
