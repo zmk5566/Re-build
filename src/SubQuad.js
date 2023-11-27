@@ -15,6 +15,13 @@ export class SubQuad{
         this.VerDidx=-1;
     }
 }
+export class SubQuadCube extends SubQuad{
+    constructor(va,vb,vc,vd,VerAidx,VerBidx,VerCidx,VerDidx,layer){
+        super(va,vb,vc,vd);
+        this.layer=layer;
+
+    }
+}
 
 export function MapSubQuad4UI(TriangleList,QuadList,VertexList,MidList,CenterList){
     //HexCenterPosList作为所有可选顶点的索引

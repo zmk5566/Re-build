@@ -40405,70 +40405,45 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.Vertex = exports.MarchVertex = void 0;
-
 var _HexCubeCoord = require("./HexCubeCoord");
-
-function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
-
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
-
 function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor); } }
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-var Vertex = /*#__PURE__*/_createClass(function Vertex(x, y, z, type) {
+function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
+function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
+var Vertex = exports.Vertex = /*#__PURE__*/_createClass(function Vertex(x, y, z, type) {
   _classCallCheck(this, Vertex);
-
   _defineProperty(this, "subquadlist", []);
-
   _defineProperty(this, "subquadid_list", []);
-
   this.x = x;
   this.y = y;
   this.z = z;
   this.type = type;
-  this.subquadlist = [];
+  this.subquadlist = []; //不确定，最好别用
   this.subquadid_list = [];
 });
-
-exports.Vertex = Vertex;
-
-var MarchVertex = /*#__PURE__*/function (_Vertex) {
+var MarchVertex = exports.MarchVertex = /*#__PURE__*/function (_Vertex) {
   _inherits(MarchVertex, _Vertex);
-
   var _super = _createSuper(MarchVertex);
-
   function MarchVertex(x, y, z, type, layer, IsActive) {
     var _this;
-
     _classCallCheck(this, MarchVertex);
-
     _this = _super.call(this, x, y, z, type);
     _this.layer = layer;
     _this.IsActive = IsActive;
     return _this;
   }
-
   return _createClass(MarchVertex);
 }(Vertex);
-
-exports.MarchVertex = MarchVertex;
 },{"./HexCubeCoord":"src/HexCubeCoord.js"}],"src/Quad.js":[function(require,module,exports) {
 "use strict";
 
@@ -40575,29 +40550,28 @@ exports.DrawSubQuad = DrawSubQuad;
 exports.Map = Map;
 exports.MapSubQuad4UI = MapSubQuad4UI;
 exports.Smooth = Smooth;
-exports.SubQuad = void 0;
-
+exports.SubQuadCube = exports.SubQuad = void 0;
 var THREE = _interopRequireWildcard(require("three"));
-
 var _Vertex = require("./Vertex");
-
 var _Triangle = require("./Triangle");
-
 var _Quad = require("./Quad");
-
-function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-
-function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
+function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
+function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && Object.prototype.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor); } }
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-
+function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
+function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var SubQuad = /*#__PURE__*/_createClass(function SubQuad(va, vb, vc, vd) {
+var SubQuad = exports.SubQuad = /*#__PURE__*/_createClass(function SubQuad(va, vb, vc, vd) {
   _classCallCheck(this, SubQuad);
-
   this.va = va;
   this.vb = vb;
   this.vc = vc;
@@ -40607,9 +40581,18 @@ var SubQuad = /*#__PURE__*/_createClass(function SubQuad(va, vb, vc, vd) {
   this.VerCidx = -1;
   this.VerDidx = -1;
 });
-
-exports.SubQuad = SubQuad;
-
+var SubQuadCube = exports.SubQuadCube = /*#__PURE__*/function (_SubQuad) {
+  _inherits(SubQuadCube, _SubQuad);
+  var _super = _createSuper(SubQuadCube);
+  function SubQuadCube(va, vb, vc, vd, VerAidx, VerBidx, VerCidx, VerDidx, layer) {
+    var _this;
+    _classCallCheck(this, SubQuadCube);
+    _this = _super.call(this, va, vb, vc, vd);
+    _this.layer = layer;
+    return _this;
+  }
+  return _createClass(SubQuadCube);
+}(SubQuad);
 function MapSubQuad4UI(TriangleList, QuadList, VertexList, MidList, CenterList) {
   //HexCenterPosList作为所有可选顶点的索引
   //输入得到的所有的三角形，因为他们都互补相邻，所以直接获取他们的顶点就可以
@@ -40618,10 +40601,8 @@ function MapSubQuad4UI(TriangleList, QuadList, VertexList, MidList, CenterList) 
     //创建顶点+检验是否重合
     if (VertexList.length > 0) {
       var TriVetList = [element.va, element.vb, element.vc];
-
       for (var i = 0; i < TriVetList.length; i++) {
         var IsExist = false;
-
         for (var j = 0; j < VertexList.length; j++) {
           if (TriVetList[i][0] == VertexList[j].x && TriVetList[i][1] == VertexList[j].y && TriVetList[i][2] == VertexList[j].z) {
             //vertex already exist
@@ -40630,11 +40611,9 @@ function MapSubQuad4UI(TriangleList, QuadList, VertexList, MidList, CenterList) 
             break;
           }
         }
-
         if (IsExist) {
           continue;
         }
-
         var NewVet = new _Vertex.Vertex(TriVetList[i][0], TriVetList[i][1], TriVetList[i][2], "vertex");
         NewVet.subquadlist.push(element.squadlist[i]);
         VertexList.push(NewVet);
@@ -40649,9 +40628,9 @@ function MapSubQuad4UI(TriangleList, QuadList, VertexList, MidList, CenterList) 
       VertexList.push(VetA);
       VertexList.push(VetB);
       VertexList.push(VetC);
-    } //创建中点
+    }
 
-
+    //创建中点
     var MidAB = new _Vertex.Vertex(element.mid_ab[0], element.mid_ab[1], element.mid_ab[2], "middle");
     MidAB.subquadlist.push(element.squadlist[0]);
     MidAB.subquadlist.push(element.squadlist[1]);
@@ -40663,23 +40642,22 @@ function MapSubQuad4UI(TriangleList, QuadList, VertexList, MidList, CenterList) 
     MidAC.subquadlist.push(element.squadlist[2]);
     MidList.push(MidAB);
     MidList.push(MidBC);
-    MidList.push(MidAC); //创建Center
+    MidList.push(MidAC);
 
+    //创建Center
     var Center = new _Vertex.Vertex(element.center[0], element.center[1], element.center[2], "center");
     Center.subquadlist.push(element.squadlist[0]);
     Center.subquadlist.push(element.squadlist[1]);
     Center.subquadlist.push(element.squadlist[2]);
     CenterList.push(Center);
-  }); //onsole.log(CenterList[0].x);
-
+  });
+  //onsole.log(CenterList[0].x);
   QuadList.forEach(function (element) {
     //创建顶点+判断
     var QuadVetList = [element.va, element.vb, element.vc, element.vd];
     var QuadMidList = [element.mid_ab, element.mid_bc, element.mid_cd, element.mid_ad];
-
     for (var i = 0; i < QuadVetList.length; i++) {
       var IsExist = false;
-
       for (var j = 0; j < VertexList.length; j++) {
         if (QuadVetList[i][0] == VertexList[j].x && QuadVetList[i][1] == VertexList[j].y && QuadVetList[i][2] == VertexList[j].z) {
           //vertex already exist
@@ -40688,42 +40666,33 @@ function MapSubQuad4UI(TriangleList, QuadList, VertexList, MidList, CenterList) 
           break;
         }
       }
-
       if (IsExist) {
         continue;
       }
-
       var NewVet = new _Vertex.Vertex(QuadVetList[i][0], QuadVetList[i][1], QuadVetList[i][2], "vertex");
       NewVet.subquadlist.push(element.squadlist[i]);
       VertexList.push(NewVet);
     }
-
     for (var _i = 0; _i < QuadMidList.length; _i++) {
       var _IsExist = false;
-
       for (var _j = 0; _j < MidList.length; _j++) {
         if (QuadMidList[_i][0] == MidList[_j].x && QuadMidList[_i][1] == MidList[_j].y && QuadMidList[_i][2] == MidList[_j].z) {
           //vertex already exist
           MidList[_j].subquadlist.push(element.squadlist[_i]);
-
           MidList[_j].subquadlist.push(element.squadlist[(_i + 1) % QuadMidList.length]);
-
           _IsExist = true;
           break;
         }
       }
-
       if (_IsExist) {
         continue;
       }
-
       var NewVet = new _Vertex.Vertex(QuadMidList[_i][0], QuadMidList[_i][1], QuadMidList[_i][2], "middle");
       NewVet.subquadlist.push(element.squadlist[_i]);
       NewVet.subquadlist.push(element.squadlist[(_i + 1) % QuadMidList.length]);
       MidList.push(NewVet);
-    } //创建Center
-
-
+    }
+    //创建Center
     var Center = new _Vertex.Vertex(element.center[0], element.center[1], element.center[2], "center");
     Center.subquadlist.push(element.squadlist[0]);
     Center.subquadlist.push(element.squadlist[1]);
@@ -40732,66 +40701,61 @@ function MapSubQuad4UI(TriangleList, QuadList, VertexList, MidList, CenterList) 
     CenterList.push(Center);
   });
 }
-
 function DrawSubQuad(quad, col, scene, meshlist) {
   var IsLine = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
   //console.log("drawsquad");
-  var vertices = [quad.vd[0], quad.vd[1], quad.vd[2], quad.vc[0], quad.vc[1], quad.vc[2], // 第一个顶点的坐标
-  quad.vb[0], quad.vb[1], quad.vb[2], // 第二个顶点的坐标
+  var vertices = [quad.vd[0], quad.vd[1], quad.vd[2], quad.vc[0], quad.vc[1], quad.vc[2],
+  // 第一个顶点的坐标
+  quad.vb[0], quad.vb[1], quad.vb[2],
+  // 第二个顶点的坐标
   quad.va[0], quad.va[1], quad.va[2] // 第三个顶点的坐标
-  ]; //console.log(vertices);
+  ];
+  //console.log(vertices);
 
-  var SharedEdge = new THREE.Vector3(quad.vd[0] - quad.vb[0], quad.vd[1] - quad.vb[1], quad.vd[2] - quad.vb[2]); // console.log(SharedEdge);
-
+  var SharedEdge = new THREE.Vector3(quad.vd[0] - quad.vb[0], quad.vd[1] - quad.vb[1], quad.vd[2] - quad.vb[2]);
+  // console.log(SharedEdge);
   var CheckEdge1 = new THREE.Vector3(quad.vd[0] - quad.va[0], quad.vd[1] - quad.va[1], quad.vd[2] - quad.va[2]);
   var CheckNormal1 = new THREE.Vector3();
   CheckNormal1.crossVectors(CheckEdge1, SharedEdge).normalize();
   var CheckEdge2 = new THREE.Vector3(quad.vd[0] - quad.vc[0], quad.vd[1] - quad.vc[1], quad.vd[2] - quad.vc[2]);
   var CheckNormal2 = new THREE.Vector3();
-  CheckNormal2.crossVectors(CheckEdge2, SharedEdge).normalize(); //console.log(CheckNormal2);
-
+  CheckNormal2.crossVectors(CheckEdge2, SharedEdge).normalize();
+  //console.log(CheckNormal2);
   var targetNormal = new THREE.Vector3(0, 1, 0); //期望的法线方向
+
   //console.log(CheckNormal1.dot(targetNormal),CheckNormal2.dot(targetNormal));
-
   var indices_pt1 = [0, 3, 1];
-
   if (CheckNormal1.dot(targetNormal) < 0) {
     indices_pt1 = [0, 1, 3];
   }
-
   var indices_pt2 = [1, 2, 3];
-
   if (CheckNormal2.dot(targetNormal) < 0) {
     indices_pt2 = [3, 2, 1];
   }
-
-  var indices = indices_pt1.concat(indices_pt2); // 创建缓冲区几何体
-
+  var indices = indices_pt1.concat(indices_pt2);
+  // 创建缓冲区几何体
   var geometry = new THREE.BufferGeometry();
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-  geometry.setIndex(indices); // 创建材质和网格
-
+  geometry.setIndex(indices);
+  // 创建材质和网格
   var material = new THREE.MeshBasicMaterial({
     color: col
   });
   var mesh = new THREE.Mesh(geometry, material);
-
   if (IsLine) {
     mesh = new THREE.LineSegments(new THREE.EdgesGeometry(geometry), material);
   }
-
-  meshlist.push(mesh); // 将网格添加到场景中
-
+  meshlist.push(mesh);
+  // 将网格添加到场景中
   scene.add(mesh);
 }
-
 function Smooth(VertexList, SQuadList) {
   //Map(VertexList,SQuadList);
   SQuadList.forEach(function (element, index) {
     for (var i = 0; i < 15; i++) {
       SmoothSquad(index, VertexList, SQuadList);
-    } //更新对应的顶点坐标
-
+    }
+    //更新对应的顶点坐标
   });
 }
 
@@ -40801,28 +40765,22 @@ function Map(VertexList, SQuadList) {
     for (var i = 0; i < VertexList.length; i++) {
       if (element.va[0] == VertexList[i].x && element.va[1] == VertexList[i].y && element.va[2] == VertexList[i].z) {
         element.VerAidx = i;
-
         if (VertexList[i].subquadid_list.includes(index) == false) {
           VertexList[i].subquadid_list.push(index);
         }
       }
-
       if (element.vb[0] == VertexList[i].x && element.vb[1] == VertexList[i].y && element.vb[2] == VertexList[i].z) {
         element.VerBidx = i;
-
         if (VertexList[i].subquadid_list.includes(index) == false) {
           VertexList[i].subquadid_list.push(index);
         }
       }
-
       if (element.vc[0] == VertexList[i].x && element.vc[1] == VertexList[i].y && element.vc[2] == VertexList[i].z) {
         element.VerCidx = i;
-
         if (VertexList[i].subquadid_list.includes(index) == false) {
           VertexList[i].subquadid_list.push(index);
         }
       }
-
       if (element.vd[0] == VertexList[i].x && element.vd[1] == VertexList[i].y && element.vd[2] == VertexList[i].z) {
         if (VertexList[i].subquadid_list.includes(index) == false) {
           element.VerDidx = i;
@@ -40832,9 +40790,9 @@ function Map(VertexList, SQuadList) {
     }
   });
 }
-
 function SmoothSquad(index, VertexList, SQuadList) {
-  var Squad = SQuadList[index]; //需要重新编号，找到那个分类为顶点的点
+  var Squad = SQuadList[index];
+  //需要重新编号，找到那个分类为顶点的点
 
   var squad_center = [(Squad.va[0] + Squad.vb[0] + Squad.vc[0] + Squad.vd[0]) / 4, (Squad.va[1] + Squad.vb[1] + Squad.vc[1] + Squad.vd[1]) / 4, (Squad.va[2] + Squad.vb[2] + Squad.vc[2] + Squad.vd[2]) / 4]; //这个不需要判断
 
@@ -40850,17 +40808,14 @@ function SmoothSquad(index, VertexList, SQuadList) {
   var WhereIsVertex = -1;
   var idxs = [Squad.VerAidx, Squad.VerBidx, Squad.VerCidx, Squad.VerDidx];
   var ReOrderList = [];
-
   for (var i = 0; i < 4; i++) {
     var id = idxs[i];
-
     if (VertexList[id].type == "vertex") {
       WhereIsVertex = i;
       ReOrderList.push(i, (1 + i) % 4, (2 + i) % 4, (3 + i) % 4); //[2,3,0,1][vertex,mid1,center,mid2]
       //console.log(ReOrderList);
     } //WhereIsVertex=0:A是顶点，WhereIsVertex=1：B是顶点
     //
-
   }
 
   var rotatedVector1 = VectorList[ReOrderList[1]].applyQuaternion(rotationQuaternionMid1).add(new THREE.Vector3(squad_center[0], squad_center[1], squad_center[2]));
@@ -40870,16 +40825,18 @@ function SmoothSquad(index, VertexList, SQuadList) {
   var NewVertexVector = new THREE.Vector3(UpdateVertex.x - squad_center[0], UpdateVertex.y - squad_center[1], UpdateVertex.z - squad_center[2]);
   var UpdateMid1 = NewVertexVector.applyQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), -90 * (Math.PI / 180))).add(new THREE.Vector3(squad_center[0], squad_center[1], squad_center[2]));
   var UpdateCenter = NewVertexVector.applyQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), -180 * (Math.PI / 180))).add(new THREE.Vector3(squad_center[0], squad_center[1], squad_center[2]));
-  var UpdateMid2 = NewVertexVector.applyQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 1), -270 * (Math.PI / 180))).add(new THREE.Vector3(squad_center[0], squad_center[1], squad_center[2])); // //update this squad
-  //判断
+  var UpdateMid2 = NewVertexVector.applyQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 1), -270 * (Math.PI / 180))).add(new THREE.Vector3(squad_center[0], squad_center[1], squad_center[2]));
 
+  // //update this squad
+  //判断
   var factor = 0.02;
   var UpdateList = [UpdateVertex, UpdateMid1, UpdateCenter, UpdateMid2];
   SQuadList[index].va = [factor * (UpdateList[ReOrderList.indexOf(0)].x - Squad.va[0]) + Squad.va[0], factor * (UpdateList[ReOrderList.indexOf(0)].y - Squad.va[1]) + Squad.va[1], factor * (UpdateList[ReOrderList.indexOf(0)].z - Squad.va[2]) + Squad.va[2]];
   SQuadList[index].vb = [factor * (UpdateList[ReOrderList.indexOf(1)].x - Squad.vb[0]) + Squad.vb[0], factor * (UpdateList[ReOrderList.indexOf(1)].y - Squad.vb[1]) + Squad.vb[1], factor * (UpdateList[ReOrderList.indexOf(1)].z - Squad.vb[2]) + Squad.vb[2]];
   SQuadList[index].vc = [factor * (UpdateList[ReOrderList.indexOf(2)].x - Squad.vc[0]) + Squad.vc[0], factor * (UpdateList[ReOrderList.indexOf(2)].y - Squad.vc[1]) + Squad.vc[1], factor * (UpdateList[ReOrderList.indexOf(2)].z - Squad.vc[2]) + Squad.vc[2]];
-  SQuadList[index].vd = [factor * (UpdateList[ReOrderList.indexOf(3)].x - Squad.vd[0]) + Squad.vd[0], factor * (UpdateList[ReOrderList.indexOf(3)].y - Squad.vd[1]) + Squad.vd[1], factor * (UpdateList[ReOrderList.indexOf(3)].z - Squad.vd[2]) + Squad.vd[2]]; //update vertex+update influenced squad
+  SQuadList[index].vd = [factor * (UpdateList[ReOrderList.indexOf(3)].x - Squad.vd[0]) + Squad.vd[0], factor * (UpdateList[ReOrderList.indexOf(3)].y - Squad.vd[1]) + Squad.vd[1], factor * (UpdateList[ReOrderList.indexOf(3)].z - Squad.vd[2]) + Squad.vd[2]];
 
+  //update vertex+update influenced squad
   VertexList[SQuadList[index].VerAidx].x = SQuadList[index].va[0];
   VertexList[SQuadList[index].VerAidx].y = SQuadList[index].va[1];
   VertexList[SQuadList[index].VerAidx].z = SQuadList[index].va[2];
@@ -40892,7 +40849,6 @@ function SmoothSquad(index, VertexList, SQuadList) {
   VertexList[SQuadList[index].VerDidx].x = SQuadList[index].vd[0];
   VertexList[SQuadList[index].VerDidx].y = SQuadList[index].vd[1];
   VertexList[SQuadList[index].VerDidx].z = SQuadList[index].vd[2];
-
   for (var _i2 = 0; _i2 < VertexList[Squad.VerAidx].subquadid_list.length; _i2++) {
     //遍历这个顶点影响到的所有的subsquad
     var squadIdx = VertexList[Squad.VerAidx].subquadid_list[_i2];
@@ -40902,7 +40858,6 @@ function SmoothSquad(index, VertexList, SQuadList) {
     SQuadList[squadIdx].vc = [VertexList[influencedSquad.VerCidx].x, VertexList[influencedSquad.VerCidx].y, VertexList[influencedSquad.VerCidx].z];
     SQuadList[squadIdx].vd = [VertexList[influencedSquad.VerDidx].x, VertexList[influencedSquad.VerDidx].y, VertexList[influencedSquad.VerDidx].z];
   }
-
   for (var _i3 = 0; _i3 < VertexList[Squad.VerBidx].subquadid_list.length; _i3++) {
     //遍历这个顶点影响到的所有的subsquad
     var squadIdx = VertexList[Squad.VerBidx].subquadid_list[_i3];
@@ -40912,7 +40867,6 @@ function SmoothSquad(index, VertexList, SQuadList) {
     SQuadList[squadIdx].vc = [VertexList[influencedSquad.VerCidx].x, VertexList[influencedSquad.VerCidx].y, VertexList[influencedSquad.VerCidx].z];
     SQuadList[squadIdx].vd = [VertexList[influencedSquad.VerDidx].x, VertexList[influencedSquad.VerDidx].y, VertexList[influencedSquad.VerDidx].z];
   }
-
   for (var _i4 = 0; _i4 < VertexList[Squad.VerCidx].subquadid_list.length; _i4++) {
     //遍历这个顶点影响到的所有的subsquad
     var squadIdx = VertexList[Squad.VerCidx].subquadid_list[_i4];
@@ -40922,7 +40876,6 @@ function SmoothSquad(index, VertexList, SQuadList) {
     SQuadList[squadIdx].vc = [VertexList[influencedSquad.VerCidx].x, VertexList[influencedSquad.VerCidx].y, VertexList[influencedSquad.VerCidx].z];
     SQuadList[squadIdx].vd = [VertexList[influencedSquad.VerDidx].x, VertexList[influencedSquad.VerDidx].y, VertexList[influencedSquad.VerDidx].z];
   }
-
   for (var _i5 = 0; _i5 < VertexList[Squad.VerDidx].subquadid_list.length; _i5++) {
     //遍历这个顶点影响到的所有的subsquad
     var squadIdx = VertexList[Squad.VerDidx].subquadid_list[_i5];
@@ -41185,7 +41138,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "33088" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "39392" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

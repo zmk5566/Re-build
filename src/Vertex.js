@@ -7,7 +7,7 @@ export class Vertex{
         this.y=y;
         this.z=z;
         this.type=type;
-        this.subquadlist=[];
+        this.subquadlist=[];//不确定，最好别用
         this.subquadid_list=[];
       }
 }

@@ -285,7 +285,7 @@ AddLayer_btn.addEventListener('click', function(){
     }
     console.log(AllMarchVertexList.length);
     for(let i=0;i<AllMarchVertexList.length;i++){
-        //VisualizeMarchVertex(AllMarchVertexList[i],1);
+        VisualizeMarchVertex(AllMarchVertexList[i],1);
     }
     // 创建物体
     const geometry = new THREE.BoxGeometry(1, 1, 1);
@@ -326,7 +326,7 @@ AddLayer_btn.addEventListener('click', function(){
             console.log(distance)
             if(distance<2){
                 AllMarchVertexList[i].IsActive=true;
-                VisualizeMarchVertex(AllMarchVertexList[i],1);
+                //VisualizeMarchVertex(AllMarchVertexList[i],1);
             }
         }
     });
@@ -354,26 +354,26 @@ let intersects;
 
 window.addEventListener('mousemove', function(e) {
     // ///改一下
-    // mousePosition.x = (e.clientX / window.innerWidth) * 2 - 1;
-    // mousePosition.y = -(e.clientY / window.innerHeight) * 2 + 1;
-    // raycaster.setFromCamera(mousePosition, camera);//从相机到鼠标位置创建一条射线
-    // intersects = raycaster.intersectObject(planeMesh);//射线跟平面形成焦点
-    // if(intersects.length > 0) {//如果有焦点
-    //     const intersect = intersects[0];
-    //     //找到最近的vertex
-    //     const highlightPos = new THREE.Vector3().copy(intersect.point).floor().addScalar(0.5);
+    mousePosition.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mousePosition.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    raycaster.setFromCamera(mousePosition, camera);//从相机到鼠标位置创建一条射线
+    intersects = raycaster.intersectObject(planeMesh);//射线跟平面形成焦点
+    if(intersects.length > 0) {//如果有焦点
+        const intersect = intersects[0];
+        //找到最近的vertex
+        const highlightPos = new THREE.Vector3().copy(intersect.point).floor().addScalar(0.5);
         
-    //     highlightMesh.position.set(highlightPos.x, 0, highlightPos.z);
-    //     const objectExist = objects.find(function(object) {
-    //         return (object.position.x === highlightMesh.position.x)
-    //         && (object.position.z === highlightMesh.position.z)
-    //     });
+        highlightMesh.position.set(highlightPos.x, 0, highlightPos.z);
+        const objectExist = objects.find(function(object) {
+            return (object.position.x === highlightMesh.position.x)
+            && (object.position.z === highlightMesh.position.z)
+        });
 
-    //     if(!objectExist)
-    //         highlightMesh.material.color.setHex(0xFF00FF);//悬停时闪烁的光标颜色
-    //     else
-    //         highlightMesh.material.color.setHex(0xFF0000);
-    // }
+        if(!objectExist)
+            highlightMesh.material.color.setHex(0xFF00FF);//悬停时闪烁的光标颜色
+        else
+            highlightMesh.material.color.setHex(0xFF0000);
+    }
 });
 
 const sphereMesh = new THREE.Mesh(
@@ -389,59 +389,59 @@ let clicks = 1
 
 //监听鼠标点击
 window.addEventListener('mousedown', function() {
-    // const objectExist = objects.find(function(object) {
-    //     return (object.position.x === highlightMesh.position.x)
-    //     && (object.position.z === highlightMesh.position.z)
-    // });//检测这个位置是不是空的
+    const objectExist = objects.find(function(object) {
+        return (object.position.x === highlightMesh.position.x)
+        && (object.position.z === highlightMesh.position.z)
+    });//检测这个位置是不是空的
 
-    // //创建一个新的plane
-    // //选中的位置占网格的小方块
-    // const newMesh = new THREE.Mesh(
-    //     new THREE.PlaneGeometry(1, 1),
-    //     new THREE.MeshBasicMaterial({
-    //         side: THREE.DoubleSide,
-    //         transparent: true
-    //     })
-    // );
-    // newMesh.rotateX(-Math.PI / 2);
-    // newMesh.position.copy(highlightMesh.position);
-    // //根据点击的顺序给新生成的mesh生成不同颜色的plane
-    // if(clicks == 1) {
-    //     newMesh.material.color.setHex(0x00FF00)
-    //     clicks += 1
-    // } 
-    // else if(clicks == 2) {
-    //     newMesh.material.color.setHex(0xFF0000)
-    //     clicks += 1
-    // }
-    // else if(clicks == 3) {
-    //     newMesh.material.color.setHex(0x0000FF)
-    //     clicks += 1
-    // }
-    // scene.add(newMesh);
+    //创建一个新的plane
+    //选中的位置占网格的小方块
+    const newMesh = new THREE.Mesh(
+        new THREE.PlaneGeometry(1, 1),
+        new THREE.MeshBasicMaterial({
+            side: THREE.DoubleSide,
+            transparent: true
+        })
+    );
+    newMesh.rotateX(-Math.PI / 2);
+    newMesh.position.copy(highlightMesh.position);
+    //根据点击的顺序给新生成的mesh生成不同颜色的plane
+    if(clicks == 1) {
+        newMesh.material.color.setHex(0x00FF00)
+        clicks += 1
+    } 
+    else if(clicks == 2) {
+        newMesh.material.color.setHex(0xFF0000)
+        clicks += 1
+    }
+    else if(clicks == 3) {
+        newMesh.material.color.setHex(0x0000FF)
+        clicks += 1
+    }
+    scene.add(newMesh);
 
-    // let x = newMesh.position.x;
-    // let y = newMesh.position.y;
-    // let z = newMesh.position.z;
-    // //输出数据
-    // console.log('Current location: ' + x + ', ' + y + ', ' + z)
+    let x = newMesh.position.x;
+    let y = newMesh.position.y;
+    let z = newMesh.position.z;
+    //输出数据
+    console.log('Current location: ' + x + ', ' + y + ', ' + z)
 
-    // //在选中的方格上放生成悬浮的object
-    // if(!objectExist) {
-    //     if(intersects.length > 0) {
-    //         const sphereClone = sphereMesh.clone();
-    //         sphereClone.position.copy(highlightMesh.position);
-    //         scene.add(sphereClone);
-    //         objects.push(sphereClone);
-    //         highlightMesh.material.color.setHex(0xFF0000);
-    //         console.log("Item pushed @ " + sphereClone.position.x +", "+ sphereClone.position.y +", "+ sphereClone.position.z);
-    //         console.log(objects)
-    //         highlightMesh.material.color.setHex(0xFFFFFF);
-    //     }
-    // } else {
-    //     console.log("Item is here")
-    // }
-    // console.log(scene.children.length);
+    //在选中的方格上放生成悬浮的object
+    if(!objectExist) {
+        if(intersects.length > 0) {
+            const sphereClone = sphereMesh.clone();
+            sphereClone.position.copy(highlightMesh.position);
+            scene.add(sphereClone);
+            objects.push(sphereClone);
+            highlightMesh.material.color.setHex(0xFF0000);
+            console.log("Item pushed @ " + sphereClone.position.x +", "+ sphereClone.position.y +", "+ sphereClone.position.z);
+            console.log(objects)
+            highlightMesh.material.color.setHex(0xFFFFFF);
+        }
+    } else {
+        console.log("Item is here")
+    }
+    console.log(scene.children.length);
 });
 //小方块旋转动画
 function animate(time) {
