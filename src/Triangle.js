@@ -82,7 +82,7 @@ export function FindNeighbor(SelectTriangle,AllTriangles){
         //他其实是要储存这个neighbor的id的
         const set1=[JSON.stringify(mTriangle.va),JSON.stringify(mTriangle.vb),JSON.stringify(mTriangle.vc)];
         const set2=[JSON.stringify(AllTriangles[i].va),JSON.stringify(AllTriangles[i].vb),JSON.stringify(AllTriangles[i].vc)];
-        const count=0;
+        var count=0;
         for(let j=0;j<set1.length;j++){
             if(set2.includes(set1[j])){
                 count=count+1;
