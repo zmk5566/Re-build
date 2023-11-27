@@ -38656,7 +38656,7 @@ AddLoadModel.addEventListener('click', function () {
   objLoader.load(Path, function (test) {
     // 加载完成后的回调函数
     scene.add(test);
-    test.scale.set(100, 100, 100); // 缩小模型
+    //test.scale.set(100,100,100); // 缩小模型
     console.log(test.scale);
   }, function (xhr) {
     // 进度回调函数
