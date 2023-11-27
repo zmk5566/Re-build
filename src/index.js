@@ -321,14 +321,21 @@ AddLayer_btn.addEventListener('click', function(){
     var layer=3;
     console.log(AllVertexList.length);
     for(let i=0;i<AllVertexList.length;i++){
+        var AllMarchVertexLayer_j=[];
         for(let j=0;j<layer;j++){
-            AllMarchVertexList.push(new MarchVertex(AllVertexList[i].x,j,AllVertexList[i].z,AllVertexList[i].type,j,false));
+            AllMarchVertexLayer_j.push(new MarchVertex(AllVertexList[i].x,j,AllVertexList[i].z,AllVertexList[i].type,j,false));
+            //AllMarchVertexList.push(new MarchVertex(AllVertexList[i].x,j,AllVertexList[i].z,AllVertexList[i].type,j,false));
+        }
+        AllMarchVertexList.push(AllMarchVertexLayer_j);
+    }
+    console.log(AllMarchVertexList.length,AllMarchVertexList[0].length);
+    for(let i=0;i<AllMarchVertexList.length;i++){
+        for(let j=0;j<AllMarchVertexList[i].length;j++){ 
+            VisualizeMarchVertex(AllMarchVertexList[i][j],1);
         }
     }
-    console.log(AllMarchVertexList.length);
-    for(let i=0;i<AllMarchVertexList.length;i++){
-        VisualizeMarchVertex(AllMarchVertexList[i],1);
-    }
+
+
     // 创建物体
     const geometry = new THREE.BoxGeometry(1, 1, 1);
     const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
@@ -361,16 +368,7 @@ AddLayer_btn.addEventListener('click', function(){
         }
     });
     window.addEventListener('mousedown', function(e) {
-        for(let i=0;i<AllMarchVertexList.length;i++){
-            var distance=Math.pow((TEST.position.x-AllMarchVertexList[i].x),2)+
-            Math.pow((TEST.position.y-AllMarchVertexList[i].y),2)+
-            Math.pow((TEST.position.z-AllMarchVertexList[i].z),2);
-            console.log(distance)
-            if(distance<2){
-                AllMarchVertexList[i].IsActive=true;
-                //VisualizeMarchVertex(AllMarchVertexList[i],1);
-            }
-        }
+        //TODO:点击鼠标选择一整个marchingcube，并激活对应的顶点
     });
 });
 
