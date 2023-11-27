@@ -23,6 +23,9 @@ document.body.appendChild(renderer.domElement);
 const scene = new THREE.Scene();
 export default scene;
 
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(ambientLight);
+
 const camera = new THREE.PerspectiveCamera(
     45,
     window.innerWidth / window.innerHeight,
@@ -80,6 +83,7 @@ var triangle_list=TriangleList(coordList);//所有的三角形
 const triangle_object = new THREE.Object3D();
 scene.add(triangle_object);
 //创建三角形地图grid
+var LineList=[];
 for(let i=0;i<triangle_list.length;i++){
     const points=[];
     const material = new THREE.LineBasicMaterial( { color: 0x0000ff } );
@@ -90,6 +94,7 @@ for(let i=0;i<triangle_list.length;i++){
     points.push(new THREE.Vector3(triangle_list[i].va[0],triangle_list[i].va[1],triangle_list[i].va[2]));
     const geometry = new THREE.BufferGeometry().setFromPoints( points );
     const line = new THREE.Line( geometry, material );
+    LineList.push(line);
     triangle_object.add( line );
 }
 
@@ -374,13 +379,21 @@ AddLoadModel.addEventListener('click',function(){
 
     //load obj here 
     const loader = new OBJLoader();
-
+    var input_pt1 = document.getElementById("MeshId_pt1");
+    var input_pt2 = document.getElementById("MeshId_pt2");
+    var path='/models/'+input_pt1.value+' '+input_pt2.value+'.obj';
+    console.log(path);
     loader.load(
         // resource URL
-        '/models/teapot.obj',
+        path,
         // called when resource is loaded
         function ( object ) {
-
+            const material = new THREE.MeshPhongMaterial({ color: 0xffffff });
+            object.traverse(function (child) {
+            if (child instanceof THREE.Mesh) {
+                child.material = material;
+            }
+            });
             scene.add( object );
 
         },
