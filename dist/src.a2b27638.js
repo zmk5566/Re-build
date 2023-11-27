@@ -38329,6 +38329,8 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 var scene = new THREE.Scene();
 var _default = exports.default = scene;
+var ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(ambientLight);
 var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
 var orbit = new _OrbitControls.OrbitControls(camera, renderer.domElement);
 camera.position.set(0, 30, 0); //camera位置
@@ -38369,7 +38371,11 @@ for (var i = 0; i < coordList.length; i++) {
 //Step2:Draw Triangle
 var triangle_list = (0, _Triangle.TriangleList)(coordList); //所有的三角形
 //console.log(triangle_list.length);
+// create a object to hold the triangle
+var triangle_object = new THREE.Object3D();
+scene.add(triangle_object);
 //创建三角形地图grid
+var LineList = [];
 for (var _i = 0; _i < triangle_list.length; _i++) {
   var points = [];
   var material = new THREE.LineBasicMaterial({
@@ -38382,8 +38388,14 @@ for (var _i = 0; _i < triangle_list.length; _i++) {
   points.push(new THREE.Vector3(triangle_list[_i].va[0], triangle_list[_i].va[1], triangle_list[_i].va[2]));
   var geometry = new THREE.BufferGeometry().setFromPoints(points);
   var line = new THREE.Line(geometry, material);
-  scene.add(line);
+  LineList.push(line);
+  triangle_object.add(line);
 }
+function clearTheScene() {
+  triangle_object.clear();
+  FindNeighborResult.clear();
+}
+
 //Step3
 var button_FindNeighbor = document.getElementById('FindNeighbor');
 var tri_list = [];
@@ -38395,14 +38407,15 @@ var quad_list = [];
 var isolated_triangle_list = [];
 var AllSquadList = [];
 var AllVertexList = [];
+
+//create a object to hold the find neighbor result
+var FindNeighborResult = new THREE.Object3D();
+scene.add(FindNeighborResult);
 button_FindNeighbor.addEventListener('click', function () {
   // 在这里编写按钮点击时要执行的 JavaScript 代码
-  tri_list.forEach(function (element) {
-    scene.remove(element);
-  });
-  qua_list.forEach(function (element) {
-    scene.remove(element);
-  });
+  clearTheScene();
+  //tri_list.forEach(element => {scene.remove(element);});
+  //qua_list.forEach(element => {scene.remove(element);});
   var triangle_list = (0, _Triangle.TriangleList)(coordList);
   console.log("Number of Triangles before merge", triangle_list.length);
   (0, _Triangle.Merge)(triangle_list, quad_list, isolated_triangle_list);
@@ -38414,9 +38427,9 @@ button_FindNeighbor.addEventListener('click', function () {
     //DrawSubQuad(isolated_triangle_list[0].squadlist[0],0xff0000,scene,tri_list);
     for (var _j = 0; _j < isolated_triangle_list.length; _j++) {
       //DrawTriangle(isolated_triangle_list[j],0xff0000,scene,tri_list);
-      (0, _SubQuad.DrawSubQuad)(isolated_triangle_list[_j].squadlist[0], 0x000022, scene, qua_list, false);
-      (0, _SubQuad.DrawSubQuad)(isolated_triangle_list[_j].squadlist[1], 0xff22ff, scene, qua_list, false);
-      (0, _SubQuad.DrawSubQuad)(isolated_triangle_list[_j].squadlist[2], 0x0022ff, scene, qua_list, false);
+      (0, _SubQuad.DrawSubQuad)(isolated_triangle_list[_j].squadlist[0], 0x000022, FindNeighborResult, qua_list, false);
+      (0, _SubQuad.DrawSubQuad)(isolated_triangle_list[_j].squadlist[1], 0xff22ff, FindNeighborResult, qua_list, false);
+      (0, _SubQuad.DrawSubQuad)(isolated_triangle_list[_j].squadlist[2], 0x0022ff, FindNeighborResult, qua_list, false);
       AllSquadList.push(isolated_triangle_list[_j].squadlist[0]);
       AllSquadList.push(isolated_triangle_list[_j].squadlist[1]);
       AllSquadList.push(isolated_triangle_list[_j].squadlist[2]);
@@ -38428,10 +38441,10 @@ button_FindNeighbor.addEventListener('click', function () {
     for (var _j2 = 0; _j2 < quad_list.length; _j2++) {
       var color = 0x00ff00 + _j2 * 0x0000ff / quad_list.length;
       //DrawQuad(quad_list[j],color,scene,qua_list);}
-      (0, _SubQuad.DrawSubQuad)(quad_list[_j2].squadlist[0], 0xffc0cb, scene, qua_list, false);
-      (0, _SubQuad.DrawSubQuad)(quad_list[_j2].squadlist[1], 0x71a5d0, scene, qua_list, false);
-      (0, _SubQuad.DrawSubQuad)(quad_list[_j2].squadlist[2], 0xe4b7ff, scene, qua_list, false);
-      (0, _SubQuad.DrawSubQuad)(quad_list[_j2].squadlist[3], 0xff9c70, scene, qua_list, false);
+      (0, _SubQuad.DrawSubQuad)(quad_list[_j2].squadlist[0], 0xffc0cb, FindNeighborResult, qua_list, false);
+      (0, _SubQuad.DrawSubQuad)(quad_list[_j2].squadlist[1], 0x71a5d0, FindNeighborResult, qua_list, false);
+      (0, _SubQuad.DrawSubQuad)(quad_list[_j2].squadlist[2], 0xe4b7ff, FindNeighborResult, qua_list, false);
+      (0, _SubQuad.DrawSubQuad)(quad_list[_j2].squadlist[3], 0xff9c70, FindNeighborResult, qua_list, false);
 
       //add to squadlist
       AllSquadList.push(quad_list[_j2].squadlist[0]);
@@ -38448,9 +38461,9 @@ button_FindNeighbor.addEventListener('click', function () {
       color: 0xAABBFF
     }));
     CenterOfHex.position.set(vertex_List[4].x, vertex_List[4].y, vertex_List[4].z);
-    scene.add(CenterOfHex);
+    FindNeighborResult.add(CenterOfHex);
     console.log(vertex_List[4].subquadlist.length);
-    (0, _SubQuad.DrawSubQuad)(vertex_List[4].subquadlist[_i2], 0xff0000, scene, qua_list);
+    (0, _SubQuad.DrawSubQuad)(vertex_List[4].subquadlist[_i2], 0xff0000, FindNeighborResult, qua_list);
   }
   //测试定点分类
   var AllVertexMesh = [];
@@ -38493,7 +38506,8 @@ function drawVertexByType(CenterList, MidList, vertex_List, result) {
 }
 var Smooth_btn = document.getElementById('Smooth');
 Smooth_btn.addEventListener('click', function () {
-  scene.clear();
+  // scene clear everything except the plane
+  clearTheScene();
   (0, _SubQuad.Smooth)(AllVertexList, AllSquadList);
   console.log(AllVertexList.length);
   for (var _i6 = 0; _i6 < AllSquadList.length; _i6++) {
@@ -38637,37 +38651,43 @@ AddLayer_btn.addEventListener('click', function () {
 });
 var AddLoadModel = document.getElementById('LoadModel');
 AddLoadModel.addEventListener('click', function () {
-  var inputText_pt1 = document.getElementById("MeshId_pt1").value;
-  var inputText_pt2 = document.getElementById("MeshId_pt2").value;
-  var objLoader = new _OBJLoader.OBJLoader();
-  var Path = './Models/BuidlingType1.obj';
-  objLoader.load(Path, function (test) {
-    // 加载完成后的回调函数
-    scene.add(test);
-    test.scale.set(100, 100, 100); // 缩小模型
-    console.log(test.scale);
-  }, function (xhr) {
-    // 进度回调函数
+  //load obj here 
+  var loader = new _OBJLoader.OBJLoader();
+  var input_pt1 = document.getElementById("MeshId_pt1");
+  var input_pt2 = document.getElementById("MeshId_pt2");
+  var path = '/models/' + input_pt1.value + ' ' + input_pt2.value + '.obj';
+  console.log(path);
+  loader.load(
+  // resource URL
+  path,
+  // called when resource is loaded
+  function (object) {
+    var material = new THREE.MeshPhongMaterial({
+      color: 0xffffff
+    });
+    object.traverse(function (child) {
+      if (child instanceof THREE.Mesh) {
+        child.material = material;
+      }
+    });
+    scene.add(object);
+  },
+  // called when loading is in progresses
+  function (xhr) {
     console.log(xhr.loaded / xhr.total * 100 + '% loaded');
-  }, function (error) {
-    // 错误回调函数
-    console.error('An error happened: ' + error);
+  },
+  // called when loading has errors
+  function (error) {
+    console.log('An error happened');
   });
-  function animate() {
-    requestAnimationFrame(animate);
-    renderer.render(scene, camera);
-  }
-  animate();
 });
 
 //鼠标移动的时候闪烁的小方块
-var highlightMesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({
-  side: THREE.DoubleSide,
-  transparent: true
-}));
-highlightMesh.rotateX(-Math.PI / 2);
-highlightMesh.position.set(0.5, 0, 0.5);
-scene.add(highlightMesh);
+
+// highlightMesh.rotateX(-Math.PI / 2);
+// highlightMesh.position.set(0.5, 0, 0.5);
+// scene.add(highlightMesh);
+
 var mousePosition = new THREE.Vector2();
 var raycaster = new THREE.Raycaster();
 var intersects;
@@ -38792,7 +38812,6 @@ window.addEventListener('mousedown', function () {
 });
 //小方块旋转动画
 function animate(time) {
-  highlightMesh.material.opacity = 1 + Math.sin(time / 120);
   objects.forEach(function (object) {
     object.rotation.x = time / 1000;
     object.rotation.z = time / 1000;
@@ -38847,7 +38866,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "17459" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54869" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
