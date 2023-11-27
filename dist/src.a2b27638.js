@@ -41094,10 +41094,6 @@ AddLayer_btn.addEventListener('click', function () {
   console.log(AllVertexList.length);
   (0, _Vertex.CreateMarchVertex)(AllVertexList, AllMarchVertexList, layer);
   (0, _SubQuad.CreateMarchCube)(AllSquadList, AllMarchVertexList, AllMarchCubeList, layer - 1);
-
-  // console.log(AllVertexList.length,AllMarchVertexList.length,AllMarchVertexList[layer-1].length);
-  // console.log(AllSquadList.length,AllMarchCubeList.length,AllMarchCubeList[layer-2].length);
-
   for (var _i7 = 0; _i7 < AllMarchVertexList.length; _i7++) {
     for (var j = 0; j < AllMarchVertexList[_i7].length; j++) {
       //VisualizeMarchVertex(AllMarchVertexList[i][j],1);
@@ -41108,13 +41104,21 @@ AddLayer_btn.addEventListener('click', function () {
     console.log("select vertex id :", VertexSelection);
     console.log("corresspond squad id: ", AllMarchVertexList[0][VertexSelection].subquadid_list);
     //console.log(AllMarchVertexList[ConstructLayer][VertexSelection].IsActive);
+
+    //判断现在的点有几层楼高
+
     var ConstructLayer = 0;
     //AllMarchVertexList[0][VertexSelection].IsActive=true;
-    for (var _i8 = 0; _i8 < layer; _i8++) {
-      if (AllMarchVertexList[_i8][VertexSelection].IsActive == false) {
-        ConstructLayer = _i8;
-        AllMarchVertexList[_i8][VertexSelection].IsActive = true;
-        break;
+    if (AllMarchVertexList[0][VertexSelection].IsActive == false) {
+      //说明这地方还没建东西
+      ConstructLayer = 0;
+    } else {
+      for (var _i8 = 1; _i8 < layer - 1; _i8++) {
+        if (AllMarchVertexList[_i8][VertexSelection].IsActive == true && AllMarchVertexList[_i8 + 1][VertexSelection].IsActive == false) {
+          AllMarchVertexList[_i8][VertexSelection].IsActive = true;
+          ConstructLayer = _i8;
+          break;
+        }
       }
     }
     var CenterVert = AllMarchVertexList[ConstructLayer][VertexSelection];

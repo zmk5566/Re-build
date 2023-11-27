@@ -333,8 +333,6 @@ AddLayer_btn.addEventListener('click', function(){
     CreateMarchVertex(AllVertexList,AllMarchVertexList,layer);
     CreateMarchCube(AllSquadList,AllMarchVertexList,AllMarchCubeList,layer-1);
 
-    // console.log(AllVertexList.length,AllMarchVertexList.length,AllMarchVertexList[layer-1].length);
-    // console.log(AllSquadList.length,AllMarchCubeList.length,AllMarchCubeList[layer-2].length);
     
     for(let i=0;i<AllMarchVertexList.length;i++){
         for(let j=0;j<AllMarchVertexList[i].length;j++){ 
@@ -346,13 +344,24 @@ AddLayer_btn.addEventListener('click', function(){
         console.log("select vertex id :" ,VertexSelection);
         console.log("corresspond squad id: ",AllMarchVertexList[0][VertexSelection].subquadid_list);
         //console.log(AllMarchVertexList[ConstructLayer][VertexSelection].IsActive);
+
+        //判断现在的点有几层楼高
+
         var ConstructLayer=0;
         //AllMarchVertexList[0][VertexSelection].IsActive=true;
-        for(let i=0;i<layer;i++){
-            if(AllMarchVertexList[i][VertexSelection].IsActive==false){
-                ConstructLayer=i;
-                AllMarchVertexList[i][VertexSelection].IsActive=true;
-                break;
+        if(AllMarchVertexList[0][VertexSelection].IsActive==false){
+            //说明这地方还没建东西
+            ConstructLayer=0;
+        }
+        else{
+            for(let i=1;i<layer-1;i++){
+                if(AllMarchVertexList[i][VertexSelection].IsActive==true&&
+                AllMarchVertexList[i+1][VertexSelection].IsActive==false){
+                    AllMarchVertexList[i][VertexSelection].IsActive=true;
+                    ConstructLayer=i;
+                    break;
+                }
+
             }
         }
 
