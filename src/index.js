@@ -77,6 +77,7 @@ for(let i=0;i<coordList.length;i++){
 var triangle_list=TriangleList(coordList);//所有的三角形
 //console.log(triangle_list.length);
 //创建三角形地图grid
+var StraightTriangleGrid=[]
 for(let i=0;i<triangle_list.length;i++){
     const points=[];
     const material = new THREE.LineBasicMaterial( { color: 0x0000ff } );
@@ -87,6 +88,7 @@ for(let i=0;i<triangle_list.length;i++){
     points.push(new THREE.Vector3(triangle_list[i].va[0],triangle_list[i].va[1],triangle_list[i].va[2]));
     const geometry = new THREE.BufferGeometry().setFromPoints( points );
     const line = new THREE.Line( geometry, material );
+    StraightTriangleGrid.push(line);
     scene.add( line );
 }
 //Step3
@@ -203,7 +205,10 @@ function drawVertexByType(CenterList,MidList,vertex_List,result){
 
 const Smooth_btn = document.getElementById('Smooth');
 Smooth_btn.addEventListener('click', function(){
-    scene.clear();
+    //scene.clear();
+    StraightTriangleGrid.forEach(element => {scene.remove(element);});
+    tri_list.forEach(element => {scene.remove(element);});
+    qua_list.forEach(element => {scene.remove(element);});
     Smooth(AllVertexList,AllSquadList);
     console.log(AllVertexList.length);
     for(let i=0;i<AllSquadList.length;i++){
@@ -385,16 +390,16 @@ AddLoadModel.addEventListener('click',function(){
 
 
 //鼠标移动的时候闪烁的小方块
-const highlightMesh = new THREE.Mesh(
-    new THREE.PlaneGeometry(1, 1),
-    new THREE.MeshBasicMaterial({
-        side: THREE.DoubleSide,
-        transparent: true
-    })
-);
-highlightMesh.rotateX(-Math.PI / 2);
-highlightMesh.position.set(0.5, 0, 0.5);
-scene.add(highlightMesh);
+// const highlightMesh = new THREE.Mesh(
+//     new THREE.PlaneGeometry(1, 1),
+//     new THREE.MeshBasicMaterial({
+//         side: THREE.DoubleSide,
+//         transparent: true
+//     })
+// );
+// highlightMesh.rotateX(-Math.PI / 2);
+// highlightMesh.position.set(0.5, 0, 0.5);
+// scene.add(highlightMesh);
 
 const mousePosition = new THREE.Vector2();
 const raycaster = new THREE.Raycaster();
@@ -534,12 +539,12 @@ window.addEventListener('mousedown', function() {
 });
 //小方块旋转动画
 function animate(time) {
-    highlightMesh.material.opacity = 1 + Math.sin(time / 120);
-    objects.forEach(function(object) {
-        object.rotation.x = time / 1000;
-        object.rotation.z = time / 1000;
-        object.position.y = 0.5 + 0.5 * Math.abs(Math.sin(time / 1000));
-    });
+    // highlightMesh.material.opacity = 1 + Math.sin(time / 120);
+    // objects.forEach(function(object) {
+    //     object.rotation.x = time / 1000;
+    //     object.rotation.z = time / 1000;
+    //     object.position.y = 0.5 + 0.5 * Math.abs(Math.sin(time / 1000));
+    // });
     renderer.render(scene, camera);
 }
 

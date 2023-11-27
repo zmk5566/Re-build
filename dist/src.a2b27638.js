@@ -38370,6 +38370,7 @@ for (var i = 0; i < coordList.length; i++) {
 var triangle_list = (0, _Triangle.TriangleList)(coordList); //所有的三角形
 //console.log(triangle_list.length);
 //创建三角形地图grid
+var StraightTriangleGrid = [];
 for (var _i = 0; _i < triangle_list.length; _i++) {
   var points = [];
   var material = new THREE.LineBasicMaterial({
@@ -38382,6 +38383,7 @@ for (var _i = 0; _i < triangle_list.length; _i++) {
   points.push(new THREE.Vector3(triangle_list[_i].va[0], triangle_list[_i].va[1], triangle_list[_i].va[2]));
   var geometry = new THREE.BufferGeometry().setFromPoints(points);
   var line = new THREE.Line(geometry, material);
+  StraightTriangleGrid.push(line);
   scene.add(line);
 }
 //Step3
@@ -38493,7 +38495,16 @@ function drawVertexByType(CenterList, MidList, vertex_List, result) {
 }
 var Smooth_btn = document.getElementById('Smooth');
 Smooth_btn.addEventListener('click', function () {
-  scene.clear();
+  //scene.clear();
+  StraightTriangleGrid.forEach(function (element) {
+    scene.remove(element);
+  });
+  tri_list.forEach(function (element) {
+    scene.remove(element);
+  });
+  qua_list.forEach(function (element) {
+    scene.remove(element);
+  });
   (0, _SubQuad.Smooth)(AllVertexList, AllSquadList);
   console.log(AllVertexList.length);
   for (var _i6 = 0; _i6 < AllSquadList.length; _i6++) {
@@ -38663,13 +38674,17 @@ AddLoadModel.addEventListener('click', function () {
 });
 
 //鼠标移动的时候闪烁的小方块
-var highlightMesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({
-  side: THREE.DoubleSide,
-  transparent: true
-}));
-highlightMesh.rotateX(-Math.PI / 2);
-highlightMesh.position.set(0.5, 0, 0.5);
-scene.add(highlightMesh);
+// const highlightMesh = new THREE.Mesh(
+//     new THREE.PlaneGeometry(1, 1),
+//     new THREE.MeshBasicMaterial({
+//         side: THREE.DoubleSide,
+//         transparent: true
+//     })
+// );
+// highlightMesh.rotateX(-Math.PI / 2);
+// highlightMesh.position.set(0.5, 0, 0.5);
+// scene.add(highlightMesh);
+
 var mousePosition = new THREE.Vector2();
 var raycaster = new THREE.Raycaster();
 var intersects;
@@ -38794,12 +38809,12 @@ window.addEventListener('mousedown', function () {
 });
 //小方块旋转动画
 function animate(time) {
-  highlightMesh.material.opacity = 1 + Math.sin(time / 120);
-  objects.forEach(function (object) {
-    object.rotation.x = time / 1000;
-    object.rotation.z = time / 1000;
-    object.position.y = 0.5 + 0.5 * Math.abs(Math.sin(time / 1000));
-  });
+  // highlightMesh.material.opacity = 1 + Math.sin(time / 120);
+  // objects.forEach(function(object) {
+  //     object.rotation.x = time / 1000;
+  //     object.rotation.z = time / 1000;
+  //     object.position.y = 0.5 + 0.5 * Math.abs(Math.sin(time / 1000));
+  // });
   renderer.render(scene, camera);
 }
 renderer.setAnimationLoop(animate);
