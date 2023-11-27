@@ -59,7 +59,7 @@ for(let i=0;i<coordList.length;i++){
 }
 // //single ring
 // for(let i=0;i<ringSample.length;i++){
-//     const CenterOfHex = new THREE.Mesh(
+//     var CenterOfHex = new THREE.Mesh(
 //     new THREE.SphereGeometry(0.4, 4, 2),
 //     new THREE.MeshBasicMaterial({
 //         wireframe: false,
@@ -143,7 +143,7 @@ button_FindNeighbor.addEventListener('click', function() {
     //按照顶点分类网格
     MapSubQuad4UI(isolated_triangle_list,quad_list,vertex_List,MidList,CenterList);
     for(let i=0;i<vertex_List[4].subquadlist.length;i++){
-        const CenterOfHex = new THREE.Mesh(
+        var CenterOfHex = new THREE.Mesh(
                     new THREE.SphereGeometry(0.2, 4, 2),
                     new THREE.MeshBasicMaterial({
                         wireframe: false,
@@ -216,7 +216,7 @@ RandomSelect_btn.addEventListener('click', function(){
     console.log(testVert.subquadid_list);
     for(let i=0;i<testVert.subquadid_list.length;i++){
         DrawSubQuad(AllSquadList[testVert.subquadid_list[i]],0xffc0cb,scene,qua_list,false);
-        const CenterOfHex = new THREE.Mesh(
+        var CenterOfHex = new THREE.Mesh(
         new THREE.SphereGeometry(0.2, 4, 2),
         new THREE.MeshBasicMaterial({
             wireframe: false,
