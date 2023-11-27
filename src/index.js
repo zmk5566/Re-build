@@ -27,6 +27,7 @@ const states = ["idle", "finding_neibour","smoothing","selection","marching_cube
 
 var state = "idle";
 
+var layer=3;//layer of vertex
 
 
 const renderer = new THREE.WebGLRenderer();
@@ -202,9 +203,55 @@ window.addEventListener('mousedown', function(e) {
     mousePosition.x = (e.clientX / window.innerWidth) * 2 - 1;
     mousePosition.y = -(e.clientY / window.innerHeight) * 2 + 1;
 
+    if (state == "marching_cube"){
     var idx = mouseTriggerBase();
-    drawVertexbyIndex(idx,the_scene_object,0xffc0cb);
-    SelectedVertex_object.add(the_scene_object);
+    console.log("select vertex id :" ,idx);
+    if (idx != -1){
+        drawVertexbyIndex(idx,the_scene_object,0xadd8e6);
+        SelectedVertex_object.add(the_scene_object);
+800080
+        
+        var ConstructLayer=0;
+        //AllMarchVertexList[0][VertexSelection].IsActive=true;
+        if(AllMarchVertexList[0][VertexSelection].IsActive==false){
+            //说明这地方还没建东西
+            ConstructLayer=0;
+        }
+        else{
+            for(let i=1;i<layer-1;i++){
+                if(AllMarchVertexList[i][VertexSelection].IsActive==true&&
+                AllMarchVertexList[i+1][VertexSelection].IsActive==false){
+                    AllMarchVertexList[i][VertexSelection].IsActive=true;
+                    ConstructLayer=i;
+                    break;
+                }
+
+            }
+        }
+
+        var CenterVert=AllMarchVertexList[ConstructLayer][VertexSelection];
+        console.log(ConstructLayer);
+        for(let i=0;i<CenterVert.subquadid_list.length;i++){
+            var vertid=CenterVert.subquadid_list[i];
+            console.log(ConstructLayer);
+            console.log(AllMarchCubeList[ConstructLayer].length);
+            var CurrentCube=AllMarchCubeList[ConstructLayer][vertid];
+            for(let j=0;j<4;j++){
+                if(CurrentCube.MarchVertList_Bottom[j].IsActive==false){
+                    CurrentCube.MarchVertList_Bottom[j].IsActive=true;
+                    VisualizeMarchVertex(CurrentCube.MarchVertList_Bottom[j],1);
+                }
+                if(CurrentCube.MarchVertList_Top[j].IsActive==false){
+                    CurrentCube.MarchVertList_Top[j].IsActive=true;
+                    VisualizeMarchVertex(CurrentCube.MarchVertList_Top[j],1);
+                }
+            }
+        }
+
+
+
+    }
+    }
 
 
 } );
@@ -335,7 +382,7 @@ scene.add(MarchVertex_object);
 
 AddLayer_btn.addEventListener('click', function(){
     console.log("convert 2D to 3D");
-    var layer=3;//layer of vertex
+    state = "marching_cube";
     console.log(AllVertexList.length);
     CreateMarchVertex(AllVertexList,AllMarchVertexList,layer);
     CreateMarchCube(AllSquadList,AllMarchVertexList,AllMarchCubeList,layer-1);
@@ -346,51 +393,6 @@ AddLayer_btn.addEventListener('click', function(){
             //VisualizeMarchVertex(AllMarchVertexList[i][j],1);
         }
     }
-    window.addEventListener('mousedown', function(e) {
-        //TODO:点击鼠标选择一整个marchingcube，并激活对应的顶点
-        console.log("select vertex id :" ,VertexSelection);
-        console.log("corresspond squad id: ",AllMarchVertexList[0][VertexSelection].subquadid_list);
-        //console.log(AllMarchVertexList[ConstructLayer][VertexSelection].IsActive);
-
-        //判断现在的点有几层楼高
-
-        var ConstructLayer=0;
-        //AllMarchVertexList[0][VertexSelection].IsActive=true;
-        if(AllMarchVertexList[0][VertexSelection].IsActive==false){
-            //说明这地方还没建东西
-            ConstructLayer=0;
-        }
-        else{
-            for(let i=1;i<layer-1;i++){
-                if(AllMarchVertexList[i][VertexSelection].IsActive==true&&
-                AllMarchVertexList[i+1][VertexSelection].IsActive==false){
-                    AllMarchVertexList[i][VertexSelection].IsActive=true;
-                    ConstructLayer=i;
-                    break;
-                }
-
-            }
-        }
-
-        var CenterVert=AllMarchVertexList[ConstructLayer][VertexSelection];
-        console.log(ConstructLayer);
-        for(let i=0;i<CenterVert.subquadid_list.length;i++){
-            var vertid=CenterVert.subquadid_list[i];
-            console.log(ConstructLayer);
-            console.log(AllMarchCubeList[ConstructLayer].length);
-            var CurrentCube=AllMarchCubeList[ConstructLayer][vertid];
-            for(let j=0;j<4;j++){
-                if(CurrentCube.MarchVertList_Bottom[j].IsActive==false){
-                    CurrentCube.MarchVertList_Bottom[j].IsActive=true;
-                    VisualizeMarchVertex(CurrentCube.MarchVertList_Bottom[j],1);
-                }
-                if(CurrentCube.MarchVertList_Top[j].IsActive==false){
-                    CurrentCube.MarchVertList_Top[j].IsActive=true;
-                    VisualizeMarchVertex(CurrentCube.MarchVertList_Top[j],1);
-                }
-            }
-        }
-    });
 });
 
 const AddLoadModel = document.getElementById('LoadModel');
@@ -482,22 +484,26 @@ function mouseTriggerBase(){
         projected.z=intersect.point.z;
         sphere.position.copy(projected);
         cursor_point.add(sphere);
-        var result
+        var result;
         if (AllVertexList.length>0){
             // clear the highlight object
             highlight_object.children.forEach(function(object) {
                 highlight_object.remove(object);
             });
             VertexSelection=GetNearestVertex(projected.x,0,projected.z,AllVertexList);
+
+            if (VertexSelection != -1){
            
             SelectCenter.position.set(AllVertexList[VertexSelection].x,AllVertexList[VertexSelection].y,AllVertexList[VertexSelection].z);
+            
             // get a orange color
             drawVertexbyIndex(VertexSelection,highlight_object,0xffff00);
+            }
         }
 
     }
 
-    return result;
+    return VertexSelection;
 }
 
 window.addEventListener('mousemove', function(e) {
@@ -553,6 +559,10 @@ function GetNearestVertex(x,y,z,currentVertList){
             result=currentVertList[i];
             idx=i;
         }
+    }
+    //console.log("distance",distance);
+    if (distance>0.5){
+        idx = -1;
     }
     return result,idx;//这个顶点和他的id
 }
