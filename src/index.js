@@ -195,7 +195,8 @@ button_FindNeighbor.addEventListener('click', function() {
     
 });
 
-
+var model_list=[]
+const loader = new OBJLoader();
 // create a mouse click event listener
 window.addEventListener('mousedown', function(e) {
     console.log("mouse down");
@@ -209,8 +210,6 @@ window.addEventListener('mousedown', function(e) {
     if (idx != -1){
         drawVertexbyIndex(idx,the_scene_object,0xadd8e6);
         SelectedVertex_object.add(the_scene_object);
-800080
-        
         var ConstructLayer=0;
         //AllMarchVertexList[0][VertexSelection].IsActive=true;
         if(AllMarchVertexList[0][VertexSelection].IsActive==false){
@@ -228,7 +227,6 @@ window.addEventListener('mousedown', function(e) {
 
             }
         }
-
         var CenterVert=AllMarchVertexList[ConstructLayer][VertexSelection];
         console.log(ConstructLayer);
         for(let i=0;i<CenterVert.subquadid_list.length;i++){
@@ -236,18 +234,89 @@ window.addEventListener('mousedown', function(e) {
             console.log(ConstructLayer);
             console.log(AllMarchCubeList[ConstructLayer].length);
             var CurrentCube=AllMarchCubeList[ConstructLayer][vertid];
-            for(let j=0;j<4;j++){
+            var bit1="";
+            var bit2="";
+            for(let j=0;j<4;j++){//遍历所有受影响的vertex
                 if(CurrentCube.MarchVertList_Bottom[j].IsActive==false){
                     CurrentCube.MarchVertList_Bottom[j].IsActive=true;
                     VisualizeMarchVertex(CurrentCube.MarchVertList_Bottom[j],1);
                 }
                 if(CurrentCube.MarchVertList_Top[j].IsActive==false){
                     CurrentCube.MarchVertList_Top[j].IsActive=true;
-                    VisualizeMarchVertex(CurrentCube.MarchVertList_Top[j],1);
+                    //VisualizeMarchVertex(CurrentCube.MarchVertList_Top[j],1);
+                    var color1;
+                    switch(j){
+                        case 0:
+                            color1=0xFFA500;
+                            break;
+                        case 1:
+                            color1=0xFFC0CB;
+                            break;
+                        case 2:
+                            color1=0x0000ff;
+                            break;
+                        case 3:
+                            color1=0x800080;
+                            break;
+                    }
+                    var CenterOfHex = new THREE.Mesh(
+                        new THREE.SphereGeometry(0.1, 4, 2),
+                        new THREE.MeshBasicMaterial({
+                            wireframe: false,
+                            color: color1
+                        }));
+                        CenterOfHex.position.set(CurrentCube.MarchVertList_Top[j].x,CurrentCube.MarchVertList_Top[j].y,CurrentCube.MarchVertList_Top[j].z);
+                        MarchVertex_object.add(CenterOfHex);
                 }
             }
         }
+        var allModelSet=[]
+        for(let i=0;i<AllMarchCubeList.length;i++){
+            for(let j=0;j<AllMarchCubeList[i].length;j++){
+                var ThisCube=AllMarchCubeList[i][j];
+                var bit1=ThisCube.MarchVertList_Top[0].IsActive==false?'0':'1';
+                var bit2=ThisCube.MarchVertList_Top[1].IsActive==false?'0':'1';
+                var bit3=ThisCube.MarchVertList_Top[2].IsActive==false?'0':'1';
+                var bit4=ThisCube.MarchVertList_Top[3].IsActive==false?'0':'1';
 
+                var bit5=ThisCube.MarchVertList_Bottom[0].IsActive==false?'0':'1';
+                var bit6=ThisCube.MarchVertList_Bottom[1].IsActive==false?'0':'1';
+                var bit7=ThisCube.MarchVertList_Bottom[2].IsActive==false?'0':'1';
+                var bit8=ThisCube.MarchVertList_Bottom[3].IsActive==false?'0':'1';
+                //console.log(bit1+bit2+bit3+bit4+' '+bit5+bit6+bit7+bit8+'.obj');
+                var ModelName=bit1+bit2+bit3+bit4+' '+bit5+bit6+bit7+bit8;
+                if(ModelName!='0000 0000'&&ModelName!='1111 1111'){
+                    //需要加载模型
+                    var CenterPosition= [
+                    (ThisCube.MarchVertList_Bottom[0].x+
+                    ThisCube.MarchVertList_Bottom[1].x+
+                    ThisCube.MarchVertList_Bottom[2].x+
+                    ThisCube.MarchVertList_Bottom[3].x)/4,
+                    0.5+ThisCube.MarchVertList_Bottom[0].y,
+                    (ThisCube.MarchVertList_Bottom[0].z+
+                        ThisCube.MarchVertList_Bottom[1].z+
+                        ThisCube.MarchVertList_Bottom[2].z+
+                        ThisCube.MarchVertList_Bottom[3].z)/4];
+                    // var CenterOfHex = new THREE.Mesh(
+                    //     new THREE.SphereGeometry(0.1, 4, 2),
+                    //     new THREE.MeshBasicMaterial({
+                    //         wireframe: false,
+                    //         color: 0xff0000
+                    //     }));
+                    //     CenterOfHex.position.set(CenterPosition[0],CenterPosition[1],CenterPosition[2]);
+                    //     MarchVertex_object.add(CenterOfHex);
+                    allModelSet.push([j,ModelName,CenterPosition]);
+                    
+                }
+            }
+        }
+        console.log(allModelSet);
+        for(let i=0;i<allModelSet.length;i++){
+            var path='/models/'+allModelSet[i][1]+'.obj';
+            var pos=allModelSet[i][2];
+
+            LoadMultipleModels(path,pos,model_list);
+        }
 
 
     }
@@ -255,6 +324,60 @@ window.addEventListener('mousedown', function(e) {
 
 
 } );
+
+function LoadMultipleModels(path,position,model_list){
+    //console.log(path);
+    //if(path=='/models/0011 0011.obj'){path='/models/1001 1001.obj';}
+    loader.load(
+        path,
+        // called when resource is loaded
+        function ( object ) {
+            var material = new THREE.MeshPhongMaterial({ color: 0xffffff });
+            if(path=='/models/1001 1001.obj'){
+                material = new THREE.MeshPhongMaterial({ color: 0xff00ff });}
+            object.traverse(function (child) {
+            if (child instanceof THREE.Mesh) {
+                child.material = material;
+                //child.geometry.applyMatrix4(new THREE.Matrix4().makeRotationY(-Math.PI / 2));
+            }
+            });
+            scene.add( object );
+            model_list.push(object);
+            // object.scale.x = -1;
+            // object.scale.y = -1;
+            // object.scale.z = -1;
+            object.position.set(position[0],position[1],position[2]);
+        },
+        // called when loading is in progresses
+        function ( xhr ) {
+            console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+        },
+        // called when loading has errors
+        function ( error ) {
+            console.log( 'An error happened' );
+        }
+    );
+}
+
+
+const button_RotateX = document.getElementById('rotateX');
+button_RotateX.addEventListener('click', function(){
+    model_list.forEach(element => {
+        element.rotateX(Math.PI / 2);
+    });
+});
+const button_RotateY = document.getElementById('rotateY');
+button_RotateY.addEventListener('click', function(){
+    model_list.forEach(element => {
+    element.rotateY(Math.PI / 2);
+});});
+const button_RotateZ = document.getElementById('rotateZ');
+button_RotateZ.addEventListener('click', function(){
+    model_list.forEach(element => {
+    element.rotateZ(Math.PI / 2);
+});});
+
+
 
 function drawVertexByType(CenterList,MidList,vertex_List,result){
 
