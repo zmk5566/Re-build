@@ -198,6 +198,13 @@ button_FindNeighbor.addEventListener('click', function() {
 window.addEventListener('mousedown', function(e) {
     console.log("mouse down");
 
+    mousePosition.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mousePosition.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+    var idx = mouseTriggerBase();
+    drawVertexbyIndex(idx,the_scene_object,0xffc0cb);
+    SelectedVertex_object.add(the_scene_object);
+
 
 } );
 
@@ -417,13 +424,6 @@ scene.add(SelectCenter);
 
 
 function mouseTriggerBase(){
-    
-}
-
-window.addEventListener('mousemove', function(e) {
-    // ///改一下
-    mousePosition.x = (e.clientX / window.innerWidth) * 2 - 1;
-    mousePosition.y = -(e.clientY / window.innerHeight) * 2 + 1;
     raycaster.setFromCamera(mousePosition, camera);//从相机到鼠标位置创建一条射线
     intersects = raycaster.intersectObject(planeMesh);//射线跟平面形成焦点
     if(intersects.length > 0) {//如果有焦点
@@ -447,7 +447,7 @@ window.addEventListener('mousemove', function(e) {
         projected.z=intersect.point.z;
         sphere.position.copy(projected);
         cursor_point.add(sphere);
-
+        var result
         if (AllVertexList.length>0){
             // clear the highlight object
             highlight_object.children.forEach(function(object) {
@@ -463,6 +463,19 @@ window.addEventListener('mousemove', function(e) {
         }
 
     }
+
+    return result;
+}
+
+window.addEventListener('mousemove', function(e) {
+    // ///改一下
+
+    mousePosition.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mousePosition.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    mouseTriggerBase();
+
+    
+  
 });
 
 const sphereMesh = new THREE.Mesh(
