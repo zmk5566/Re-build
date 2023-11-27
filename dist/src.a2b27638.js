@@ -38641,9 +38641,8 @@ AddLoadModel.addEventListener('click', function () {
   var inputText_pt1 = document.getElementById("MeshId_pt1").value;
   var inputText_pt2 = document.getElementById("MeshId_pt2").value;
   var objLoader = new _OBJLoader.OBJLoader();
-  var Path1 = 'E:/unity_proj/OpenBrush/open-brush-main/open-brush-main/Re-build/Models/' + inputText_pt1 + ' ' + inputText_pt2 + '.obj';
-  var Path2 = '../Models/BuidlingType1.obj';
-  objLoader.load('', function (test) {
+  var Path = './Models/BuidlingType1.obj';
+  objLoader.load(Path, function (test) {
     // 加载完成后的回调函数
     scene.add(test);
     test.scale.set(100, 100, 100); // 缩小模型
@@ -38849,7 +38848,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "46747" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "17459" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
