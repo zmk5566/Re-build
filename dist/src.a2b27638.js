@@ -38662,10 +38662,11 @@ AddLoadModel.addEventListener('click', function () {
   var loader = new _OBJLoader.OBJLoader();
   var input_pt1 = document.getElementById("MeshId_pt1");
   var input_pt2 = document.getElementById("MeshId_pt2");
-  var path = '/models/' + input_pt1 + '%2' + input_pt2 + '.obj';
+  var path = '/models/' + input_pt1.value + ' ' + input_pt2.value + '.obj';
+  console.log(path);
   loader.load(
   // resource URL
-  '/models/1111 0011.obj',
+  path,
   // called when resource is loaded
   function (object) {
     var material = new THREE.MeshPhongMaterial({
