@@ -13,6 +13,11 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 
 //import the gui
 import * as dat from 'dat.gui';
+
+// import library ready for ajax call, axio
+import axios from 'axios';
+
+
 const gui = new dat.GUI();
 
 //create a folder for the Display
@@ -195,8 +200,50 @@ function findNeighbor(){
 //     findNeighbor();
 // });
 
-var model_list=[]
-const loader = new OBJLoader();
+function the_hitted_logic(idx){
+    drawVertexbyIndex(idx,the_scene_object,0xadd8e6);
+    SelectedVertex_object.add(the_scene_object);
+800080
+    
+    var ConstructLayer=0;
+    //AllMarchVertexList[0][VertexSelection].IsActive=true;
+    if(AllMarchVertexList[0][VertexSelection].IsActive==false){
+        //说明这地方还没建东西
+        ConstructLayer=0;
+    }
+    else{
+        for(let i=1;i<layer-1;i++){
+            if(AllMarchVertexList[i][VertexSelection].IsActive==true&&
+            AllMarchVertexList[i+1][VertexSelection].IsActive==false){
+                AllMarchVertexList[i][VertexSelection].IsActive=true;
+                ConstructLayer=i;
+                break;
+            }
+
+        }
+    }
+
+    var CenterVert=AllMarchVertexList[ConstructLayer][VertexSelection];
+    console.log(ConstructLayer);
+    for(let i=0;i<CenterVert.subquadid_list.length;i++){
+        var vertid=CenterVert.subquadid_list[i];
+        console.log(ConstructLayer);
+        console.log(AllMarchCubeList[ConstructLayer].length);
+        var CurrentCube=AllMarchCubeList[ConstructLayer][vertid];
+        for(let j=0;j<4;j++){
+            if(CurrentCube.MarchVertList_Bottom[j].IsActive==false){
+                CurrentCube.MarchVertList_Bottom[j].IsActive=true;
+                VisualizeMarchVertex(CurrentCube.MarchVertList_Bottom[j],1);
+            }
+            if(CurrentCube.MarchVertList_Top[j].IsActive==false){
+                CurrentCube.MarchVertList_Top[j].IsActive=true;
+                VisualizeMarchVertex(CurrentCube.MarchVertList_Top[j],1);
+            }
+        }
+    }
+
+}
+
 
 // create a mouse click event listener
 window.addEventListener('mousedown', function(e) {
@@ -207,6 +254,7 @@ window.addEventListener('mousedown', function(e) {
 
     if (state == "marching_cube"){
     var idx = mouseTriggerBase();
+
     console.log("select vertex id :" ,idx);
     if (idx != -1){
         drawVertexbyIndex(idx,the_scene_object,0xadd8e6);
@@ -326,6 +374,7 @@ window.addEventListener('mousedown', function(e) {
             LoadMultipleModels(path,pos,model_list,ConstructLayer);
         }
 
+        the_hitted_logic(idx);
 
     }
     }
@@ -706,8 +755,8 @@ function GetNearestVertex(x,y,z,currentVertList){
             idx=i;
         }
     }
-    //console.log("distance",distance);
-    if (distance>0.5){
+    console.log("distance",distance);
+    if (distance>0.8){
         idx = -1;
     }
     return result,idx;//这个顶点和他的id
@@ -752,7 +801,113 @@ button_folder.open();
 
 // add gui check boxes for the display
 display_folder.add(SelectedVertex_object, 'visible').name('SelectedVertex_object');
-display_folder.add(highlight_object, 'visible').name('highlight_object');
 display_folder.add(MarchVertex_object, 'visible').name('MarchVertex_object');
+
+
+    const url = 'https://api.drugcity.a8a8.top/';
+
+
+var map_data = [];
+// create a new object to hold the map grid
+const map_object = new THREE.Object3D();
+scene.add(map_object);
+var the_map;
+
+display_folder.add(map_object, 'visible').name('map_object');
+var grid_unit_size = 1;
+
+map_object.visible = false;
+
+function get_map(){
+
+// create ajax call to get the data from the server
+ axios.get(url+"map").then(function(response) {
+
+    // get the data from the response
+    const data = response.data;
+    map_data = data;
+    the_map = map_data;
+
+    var map_2d =map_data.map;
+
+    // loop through the 2d array and create a 2d grid map
+    for (let i = 0; i < map_2d.length; i++) {
+        for (let j = 0; j < map_2d[i].length; j++) {
+            const cube = new THREE.Mesh(
+                new THREE.BoxGeometry(grid_unit_size, grid_unit_size, grid_unit_size),
+                new THREE.MeshBasicMaterial({
+                    wireframe: true,
+                    color: map_2d[i][j] == 1 ? 0x0000ff : 0xff0000
+                })
+            );
+            cube.position.set((i-map_data.city_width*0.5+0.5)*grid_unit_size, 0, (j-map_data.city_height*0.5+0.5)*grid_unit_size);
+            map_object.add(cube);
+        }
+    }
+
+
+    console.log(data);
+
+});
+
+}
+
+
+
+
+const button_call_api = {
+    call_api: function() {
+        get_map();
+    }
+};
+
+button_folder.add(button_call_api, 'call_api').name('call_api');
+button_folder.open();
+
+
+function hit_the_object(x,z){
+    if (AllVertexList.length>0){
+        // clear the highlight object
+        highlight_object.children.forEach(function(object) {
+            highlight_object.remove(object);
+        });
+        VertexSelection=GetNearestVertex(x,0,z,AllVertexList);
+
+        if (VertexSelection != -1){
+            the_hitted_logic(VertexSelection);
+        }
+    }
+}
+ 
+
+function hit_the_object_in_center(){
+
+    //loop through the 2d map and perform a hit_the_object
+    var map_2d =the_map.map;
+
+    var grid_unit_size = 1;
+    // loop through the 2d array and create a 2d grid map
+
+
+
+    for (let i = 0; i < map_2d.length; i++) {
+        for (let j = 0; j < map_2d[i].length; j++) {
+            hit_the_object((i-map_data.city_width*0.5+0.5)*grid_unit_size,(j-map_data.city_height*0.5+0.5)*grid_unit_size);
+        }
+    }
+
+
+    
+}
+
+const button_hit_the_object = {
+    hit_the_object: function() {
+        hit_the_object_in_center();
+    }
+};
+
+button_folder.add(button_hit_the_object, 'hit_the_object').name('hit_the_object');
+
+//loop through the 2d map and perform a get 
 
 

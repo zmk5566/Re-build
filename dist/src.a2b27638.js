@@ -40912,11 +40912,10 @@ for (var i = 0; i < triangle_list.length; i++) {
 function clearTheScene() {
   triangle_object.clear();
   FindNeighborResult.clear();
-  smooth_object.clear();
 }
 
 //Step3
-//const button_FindNeighbor = document.getElementById('FindNeighbor');
+var button_FindNeighbor = document.getElementById('FindNeighbor');
 var tri_list = [];
 var qua_list = [];
 var CenterList = [];
@@ -40931,7 +40930,7 @@ var VertexSelection = -1;
 //create a object to hold the find neighbor result
 var FindNeighborResult = new THREE.Object3D();
 scene.add(FindNeighborResult);
-function _findNeighbor() {
+function findNeighbor() {
   state = "finding_neibour";
   // 在这里编写按钮点击时要执行的 JavaScript 代码
   clearTheScene();
@@ -40992,6 +40991,7 @@ function _findNeighbor() {
   AllVertexList = CenterList.concat(MidList).concat(vertex_List);
   (0, _SubQuad.Map)(AllVertexList, AllSquadList);
 }
+<<<<<<< HEAD
 
 // button_FindNeighbor.addEventListener('click', function() {
 //     findNeighbor();
@@ -40999,6 +40999,11 @@ function _findNeighbor() {
 
 var model_list = [];
 var loader = new _OBJLoader.OBJLoader();
+=======
+button_FindNeighbor.addEventListener('click', function () {
+  findNeighbor();
+});
+>>>>>>> 8988bba33fd893a0bd01362bd084c9f1d3481af5
 
 // create a mouse click event listener
 window.addEventListener('mousedown', function (e) {
@@ -41011,6 +41016,7 @@ window.addEventListener('mousedown', function (e) {
     if (idx != -1) {
       drawVertexbyIndex(idx, the_scene_object, 0xadd8e6);
       SelectedVertex_object.add(the_scene_object);
+      800080;
       var ConstructLayer = 0;
       //AllMarchVertexList[0][VertexSelection].IsActive=true;
       if (AllMarchVertexList[0][VertexSelection].IsActive == false) {
@@ -41032,41 +41038,18 @@ window.addEventListener('mousedown', function (e) {
         console.log(ConstructLayer);
         console.log(AllMarchCubeList[ConstructLayer].length);
         var CurrentCube = AllMarchCubeList[ConstructLayer][vertid];
-        var bit1 = "";
-        var bit2 = "";
         for (var j = 0; j < 4; j++) {
-          //遍历所有受影响的vertex
           if (CurrentCube.MarchVertList_Bottom[j].IsActive == false) {
             CurrentCube.MarchVertList_Bottom[j].IsActive = true;
             VisualizeMarchVertex(CurrentCube.MarchVertList_Bottom[j], 1);
           }
           if (CurrentCube.MarchVertList_Top[j].IsActive == false) {
             CurrentCube.MarchVertList_Top[j].IsActive = true;
-            //VisualizeMarchVertex(CurrentCube.MarchVertList_Top[j],1);
-            var color1;
-            switch (j) {
-              case 0:
-                color1 = 0xFFA500;
-                break;
-              case 1:
-                color1 = 0xFFC0CB;
-                break;
-              case 2:
-                color1 = 0x0000ff;
-                break;
-              case 3:
-                color1 = 0x800080;
-                break;
-            }
-            var CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.1, 4, 2), new THREE.MeshBasicMaterial({
-              wireframe: false,
-              color: color1
-            }));
-            CenterOfHex.position.set(CurrentCube.MarchVertList_Top[j].x, CurrentCube.MarchVertList_Top[j].y, CurrentCube.MarchVertList_Top[j].z);
-            MarchVertex_object.add(CenterOfHex);
+            VisualizeMarchVertex(CurrentCube.MarchVertList_Top[j], 1);
           }
         }
       }
+<<<<<<< HEAD
       var allModelSet = [];
       for (var _i4 = 0; _i4 < AllMarchCubeList.length; _i4++) {
         for (var _j2 = 0; _j2 < AllMarchCubeList[_i4].length; _j2++) {
@@ -41205,44 +41188,71 @@ button_RotateZ.addEventListener('click', function () {
     element.rotateZ(Math.PI / 2);
   });
 });
+=======
+    }
+  }
+});
+>>>>>>> 8988bba33fd893a0bd01362bd084c9f1d3481af5
 function drawVertexByType(CenterList, MidList, vertex_List, result) {
   result.forEach(function (element) {
     scene.remove(element);
   });
   result.length = 0;
+<<<<<<< HEAD
   for (var _i7 = 0; _i7 < CenterList.length; _i7++) {
+=======
+  for (var _i4 = 0; _i4 < CenterList.length; _i4++) {
+>>>>>>> 8988bba33fd893a0bd01362bd084c9f1d3481af5
     var CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.2, 4, 2), new THREE.MeshBasicMaterial({
       wireframe: false,
       color: 0xAABBFF
     }));
+<<<<<<< HEAD
     CenterOfHex.position.set(CenterList[_i7].x, CenterList[_i7].y, CenterList[_i7].z);
     result.push(CenterOfHex);
     scene.add(CenterOfHex);
   }
   for (var _i8 = 0; _i8 < MidList.length; _i8++) {
+=======
+    CenterOfHex.position.set(CenterList[_i4].x, CenterList[_i4].y, CenterList[_i4].z);
+    result.push(CenterOfHex);
+    scene.add(CenterOfHex);
+  }
+  for (var _i5 = 0; _i5 < MidList.length; _i5++) {
+>>>>>>> 8988bba33fd893a0bd01362bd084c9f1d3481af5
     var CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.2, 4, 2), new THREE.MeshBasicMaterial({
       wireframe: false,
       color: 0xAABB00
     }));
+<<<<<<< HEAD
     CenterOfHex.position.set(MidList[_i8].x, MidList[_i8].y, MidList[_i8].z);
     result.push(CenterOfHex);
     scene.add(CenterOfHex);
   }
   for (var _i9 = 0; _i9 < vertex_List.length; _i9++) {
+=======
+    CenterOfHex.position.set(MidList[_i5].x, MidList[_i5].y, MidList[_i5].z);
+    result.push(CenterOfHex);
+    scene.add(CenterOfHex);
+  }
+  for (var _i6 = 0; _i6 < vertex_List.length; _i6++) {
+>>>>>>> 8988bba33fd893a0bd01362bd084c9f1d3481af5
     var CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.2, 4, 2), new THREE.MeshBasicMaterial({
       wireframe: false,
       color: 0x0000FF
     }));
+<<<<<<< HEAD
     CenterOfHex.position.set(vertex_List[_i9].x, vertex_List[_i9].y, vertex_List[_i9].z);
+=======
+    CenterOfHex.position.set(vertex_List[_i6].x, vertex_List[_i6].y, vertex_List[_i6].z);
+>>>>>>> 8988bba33fd893a0bd01362bd084c9f1d3481af5
     result.push(CenterOfHex);
     scene.add(CenterOfHex);
   }
 }
 
 // smooth the mesh
-// create a object to hold the smoothsquad visualization
-var smooth_object = new THREE.Object3D();
-scene.add(smooth_object);
+
 function Smooth_it_Out() {
   state = "smoothing";
 
@@ -41250,10 +41260,19 @@ function Smooth_it_Out() {
   clearTheScene();
   (0, _SubQuad.Smooth)(AllVertexList, AllSquadList);
   console.log(AllVertexList.length);
+<<<<<<< HEAD
   for (var _i10 = 0; _i10 < AllSquadList.length; _i10++) {
     (0, _SubQuad.DrawSubQuad)(AllSquadList[_i10], 0xffc0cb, smooth_object, qua_list, true);
+=======
+  for (var _i7 = 0; _i7 < AllSquadList.length; _i7++) {
+    (0, _SubQuad.DrawSubQuad)(AllSquadList[_i7], 0xffc0cb, scene, qua_list, true);
+>>>>>>> 8988bba33fd893a0bd01362bd084c9f1d3481af5
   }
 }
+var Smooth_btn = document.getElementById('Smooth');
+Smooth_btn.addEventListener('click', function () {
+  Smooth_it_Out();
+});
 
 // create an empty 3d object to hold the vertex and subquad in the future
 var the_scene_object = new THREE.Object3D();
@@ -41263,8 +41282,13 @@ function drawVertexbyIndex(idx, the_scene_object) {
   //console.log(AllVertexList.length);
   var testVert = AllVertexList[StartIdx];
   //console.log(testVert.subquadid_list);
+<<<<<<< HEAD
   for (var _i11 = 0; _i11 < testVert.subquadid_list.length; _i11++) {
     (0, _SubQuad.DrawSubQuad)(AllSquadList[testVert.subquadid_list[_i11]], color, the_scene_object, qua_list, false);
+=======
+  for (var _i8 = 0; _i8 < testVert.subquadid_list.length; _i8++) {
+    (0, _SubQuad.DrawSubQuad)(AllSquadList[testVert.subquadid_list[_i8]], color, the_scene_object, qua_list, false);
+>>>>>>> 8988bba33fd893a0bd01362bd084c9f1d3481af5
   }
   return the_scene_object;
 }
@@ -41272,28 +41296,40 @@ function drawVertexbyIndex(idx, the_scene_object) {
 // create a layer to hold the selected vertex
 var SelectedVertex_object = new THREE.Object3D();
 scene.add(SelectedVertex_object);
+var RandomSelect_btn = document.getElementById('RandomSelect');
+RandomSelect_btn.addEventListener('click', function () {
+  var StartIdx = Math.floor(Math.random() * AllVertexList.length);
+  drawVertexbyIndex(StartIdx, the_scene_object);
+  SelectedVertex_object.add(the_scene_object);
+});
 function VisualizeMarchVertex(march_vertex, height) {
   var CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.1, 4, 2), new THREE.MeshBasicMaterial({
     wireframe: false,
-    color: march_vertex.IsActive == true ? 0xff10f0 : 0xff0000
+    color: march_vertex.IsActive == true ? 0x00ff00 : 0xff0000
   }));
   CenterOfHex.position.set(march_vertex.x, march_vertex.layer * height, march_vertex.z);
   MarchVertex_object.add(CenterOfHex);
 }
 var AllMarchVertexList = [];
 var AllMarchCubeList = [];
-//const AddLayer_btn = document.getElementById('Construct3D');
+var AddLayer_btn = document.getElementById('Construct3D');
+function MarchingCubeUpdate() {}
 
 // create a object to hold marching vertexes
 var MarchVertex_object = new THREE.Object3D();
 scene.add(MarchVertex_object);
-function covert2Dto3D() {
+AddLayer_btn.addEventListener('click', function () {
   console.log("convert 2D to 3D");
   state = "marching_cube";
   console.log(AllVertexList.length);
   (0, _Vertex.CreateMarchVertex)(AllVertexList, AllMarchVertexList, layer);
   (0, _SubQuad.CreateMarchCube)(AllSquadList, AllMarchVertexList, AllMarchCubeList, layer - 1);
-}
+  for (var _i9 = 0; _i9 < AllMarchVertexList.length; _i9++) {
+    for (var j = 0; j < AllMarchVertexList[_i9].length; j++) {
+      //VisualizeMarchVertex(AllMarchVertexList[i][j],1);
+    }
+  }
+});
 var AddLoadModel = document.getElementById('LoadModel');
 AddLoadModel.addEventListener('click', function () {
   //load obj here 
@@ -41339,7 +41375,9 @@ var intersects;
 
 // create a 3d object for highlight
 var highlight_object = new THREE.Object3D();
+var cursor_point = new THREE.Object3D();
 scene.add(highlight_object);
+scene.add(cursor_point);
 var SelectCenter = new THREE.Mesh(new THREE.SphereGeometry(0.2, 4, 2), new THREE.MeshBasicMaterial({
   wireframe: false,
   color: 0x0000ff
@@ -41351,6 +41389,11 @@ function mouseTriggerBase() {
   if (intersects.length > 0) {
     //如果有焦点
     var intersect = intersects[0];
+    //找到最近的vertex
+    // clear the cursor point
+    cursor_point.children.forEach(function (object) {
+      cursor_point.remove(object);
+    });
     var sphere = new THREE.Mesh(new THREE.SphereGeometry(0.1, 4, 2), new THREE.MeshBasicMaterial({
       wireframe: true,
       color: 0x00FF00
@@ -41359,6 +41402,8 @@ function mouseTriggerBase() {
     projected.x = intersect.point.x;
     projected.y = 0;
     projected.z = intersect.point.z;
+    sphere.position.copy(projected);
+    cursor_point.add(sphere);
     var result;
     if (AllVertexList.length > 0) {
       // clear the highlight object
@@ -41412,12 +41457,21 @@ function GetNearestVertex(x, y, z, currentVertList) {
   var distance = 10000;
   var result;
   var idx;
+<<<<<<< HEAD
   for (var _i12 = 0; _i12 < currentVertList.length; _i12++) {
     var temp = Math.pow(x - currentVertList[_i12].x, 2) + Math.pow(y - currentVertList[_i12].y, 2) + Math.pow(z - currentVertList[_i12].z, 2);
     if (temp < distance) {
       distance = temp;
       result = currentVertList[_i12];
       idx = _i12;
+=======
+  for (var _i10 = 0; _i10 < currentVertList.length; _i10++) {
+    var temp = Math.pow(x - currentVertList[_i10].x, 2) + Math.pow(y - currentVertList[_i10].y, 2) + Math.pow(z - currentVertList[_i10].z, 2);
+    if (temp < distance) {
+      distance = temp;
+      result = currentVertList[_i10];
+      idx = _i10;
+>>>>>>> 8988bba33fd893a0bd01362bd084c9f1d3481af5
     }
   }
   //console.log("distance",distance);
@@ -41427,41 +41481,15 @@ function GetNearestVertex(x, y, z, currentVertList) {
   return result, idx; //这个顶点和他的id
 }
 
-// add gui buttons new folder
-var button_folder = gui.addFolder('Buttons');
-
-// add one button
-var button = {
-  findNeighbor: function findNeighbor() {
-    _findNeighbor();
-  }
-};
-
-// add the button to the folder
-button_folder.add(button, 'findNeighbor').name('Find Neighbor');
-
-// add another button smooth
-
-var button_smooth = {
-  smooth: function smooth() {
-    Smooth_it_Out();
-  }
-};
-button_folder.add(button_smooth, 'smooth').name('Smooth');
-
-// add 2d to 3d button
-var button_2d_to_3d = {
-  convert: function convert() {
-    covert2Dto3D();
-  }
-};
-button_folder.add(button_2d_to_3d, 'convert').name('2D to 3D');
-button_folder.open();
-
 // add gui check boxes for the display
-display_folder.add(SelectedVertex_object, 'visible').name('SelectedVertex_object');
+display_folder.add(scene, 'visible').name('scene');
+display_folder.add(triangle_object, 'visible').name('triangle_object');
+display_folder.add(FindNeighborResult, 'visible').name('FindNeighborResult');
 display_folder.add(highlight_object, 'visible').name('highlight_object');
-display_folder.add(MarchVertex_object, 'visible').name('MarchVertex_object');
+display_folder.add(cursor_point, 'visible').name('cursor_point');
+display_folder.add(planeMesh, 'visible').name('planeMesh');
+display_folder.add(SelectCenter, 'visible').name('SelectCenter');
+display_folder.add(orbit, 'enabled').name('orbit');
 },{"./styles.css":"src/styles.css","three":"node_modules/three/build/three.module.js","three/examples/jsm/controls/OrbitControls.js":"node_modules/three/examples/jsm/controls/OrbitControls.js","./HexGrid.js":"src/HexGrid.js","./HexCubeCoord.js":"src/HexCubeCoord.js","./Triangle.js":"src/Triangle.js","./Quad.js":"src/Quad.js","./SubQuad.js":"src/SubQuad.js","three/src/math/MathUtils.js":"node_modules/three/src/math/MathUtils.js","./Vertex.js":"src/Vertex.js","three/examples/jsm/loaders/OBJLoader.js":"node_modules/three/examples/jsm/loaders/OBJLoader.js","dat.gui":"node_modules/dat.gui/build/dat.gui.module.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
@@ -41487,7 +41515,11 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+<<<<<<< HEAD
   var ws = new WebSocket(protocol + '://' + hostname + ':' + "56384" + '/');
+=======
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "35156" + '/');
+>>>>>>> 8988bba33fd893a0bd01362bd084c9f1d3481af5
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
