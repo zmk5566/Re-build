@@ -196,6 +196,13 @@ function findNeighbor(){
 }
 
 
+button_FindNeighbor.addEventListener('click', function() {
+    findNeighbor();
+    
+});
+
+var model_list=[]
+const loader = new OBJLoader();
 
 function the_hitted_logic(idx){
     drawVertexbyIndex(idx,the_scene_object,0xadd8e6);
