@@ -16,10 +16,12 @@ export class SubQuad{
     }
 }
 export class SubQuadCube extends SubQuad{
-    constructor(va,vb,vc,vd,VerAidx,VerBidx,VerCidx,VerDidx,layer){
+    //有八个顶点的
+    MarchVertList=[]
+    constructor(va,vb,vc,vd,MarchVertList,layer){
         super(va,vb,vc,vd);
         this.layer=layer;
-
+        this.MarchVertList;
     }
 }
 

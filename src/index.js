@@ -9,6 +9,9 @@ import { DrawQuad } from "./Quad.js";
 import { SubQuad,DrawSubQuad,MapSubQuad4UI,Smooth,Map } from "./SubQuad.js";
 import { smootherstep } from "three/src/math/MathUtils.js";
 import { Vertex,MarchVertex } from "./Vertex.js";
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+
+
 
 
 const renderer = new THREE.WebGLRenderer();
@@ -210,6 +213,11 @@ Smooth_btn.addEventListener('click', function(){
 });
 const RandomSelect_btn = document.getElementById('RandomSelect');
 RandomSelect_btn.addEventListener('click', function(){
+    //自己选
+    //raycaster
+    //遍历AllVertexList的坐标
+    //找到最近的点的idx
+    //替换这个StartIdx
     var StartIdx=Math.floor(Math.random() * AllVertexList.length);
     console.log(AllVertexList.length);
     var testVert=AllVertexList[StartIdx];
@@ -332,7 +340,36 @@ AddLayer_btn.addEventListener('click', function(){
     });
 });
 
-
+const AddLoadModel = document.getElementById('LoadModel');
+AddLoadModel.addEventListener('click',function(){
+    var inputText_pt1 = document.getElementById("MeshId_pt1").value;
+    var inputText_pt2 = document.getElementById("MeshId_pt2").value;
+    var objLoader = new OBJLoader();
+    var Path1='E:/unity_proj/OpenBrush/open-brush-main/open-brush-main/Re-build/Models/'+inputText_pt1+' '+inputText_pt2+'.obj';
+    var Path2='../Models/BuidlingType1.obj';
+    objLoader.load(
+        '',
+        function (test) {
+            // 加载完成后的回调函数
+            scene.add(test);
+            test.scale.set(100,100,100); // 缩小模型
+            console.log(test.scale);
+        },
+        function (xhr) {
+            // 进度回调函数
+            console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+        },
+        function (error) {
+            // 错误回调函数
+            console.error('An error happened: ' + error);
+        }
+    );
+    function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+    }
+    animate();
+});
 
 
 //鼠标移动的时候闪烁的小方块
