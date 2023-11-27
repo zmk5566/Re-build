@@ -36148,10 +36148,10 @@ var MarchCube = exports.MarchCube = /*#__PURE__*/function (_SubQuad) {
     _defineProperty(_assertThisInitialized(_this), "MarchVertList_Top", []);
     _defineProperty(_assertThisInitialized(_this), "MarchVertList_Bottom", []);
     _this.layer = layer;
-    _this.VerAidx;
-    _this.VerBidx;
-    _this.VerCidx;
-    _this.VerDidx;
+    _this.botVerAidx;
+    _this.botVerBidx;
+    _this.botVerCidx;
+    _this.botVerDidx;
     _this.MarchVertList_Top;
     _this.MarchVertList_Bottom;
     return _this;
@@ -36166,12 +36166,12 @@ function CreateMarchCube(AllSquadList, AllMarchVertexList, AllMarchCubeList, lay
       var NewCube = new MarchCube(AllSquadList[i].va, AllSquadList[i].vb,
       //layer*height,因为设置的height=1
       AllSquadList[i].vc, AllSquadList[i].vd, j);
-      NewCube.VerAidx = AllSquadList[i].VerAidx;
-      NewCube.VerBidx = AllSquadList[i].VerBidx;
-      NewCube.VerCidx = AllSquadList[i].VerCidx;
-      NewCube.VerDidx = AllSquadList[i].VerDidx;
-      NewCube.MarchVertList_Bottom.push(AllMarchVertexList[j][NewCube.VerAidx], AllMarchVertexList[j][NewCube.VerBidx], AllMarchVertexList[j][NewCube.VerCidx], AllMarchVertexList[j][NewCube.VerDidx]);
-      NewCube.MarchVertList_Top.push(AllMarchVertexList[j + 1][NewCube.VerAidx], AllMarchVertexList[j + 1][NewCube.VerBidx], AllMarchVertexList[j + 1][NewCube.VerCidx], AllMarchVertexList[j + 1][NewCube.VerDidx]);
+      NewCube.botVerAidx = AllSquadList[i].VerAidx;
+      NewCube.botVerBidx = AllSquadList[i].VerBidx;
+      NewCube.botVerCidx = AllSquadList[i].VerCidx;
+      NewCube.botVerDidx = AllSquadList[i].VerDidx;
+      NewCube.MarchVertList_Bottom.push(AllMarchVertexList[j][NewCube.botVerAidx], AllMarchVertexList[j][NewCube.botVerBidx], AllMarchVertexList[j][NewCube.botVerCidx], AllMarchVertexList[j][NewCube.botVerDidx]);
+      NewCube.MarchVertList_Top.push(AllMarchVertexList[j + 1][NewCube.botVerAidx], AllMarchVertexList[j + 1][NewCube.botVerBidx], AllMarchVertexList[j + 1][NewCube.botVerCidx], AllMarchVertexList[j + 1][NewCube.botVerDidx]);
       AllMarchCubeLayer_j.push(NewCube);
     }
     AllMarchCubeList.push(AllMarchCubeLayer_j);
@@ -36693,7 +36693,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55227" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "32347" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

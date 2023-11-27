@@ -22,10 +22,10 @@ export class MarchCube extends SubQuad{
     constructor(va,vb,vc,vd,layer){
         super(va,vb,vc,vd);
         this.layer=layer;
-        this.VerAidx;
-        this.VerBidx;
-        this.VerCidx;
-        this.VerDidx;
+        this.botVerAidx;
+        this.botVerBidx;
+        this.botVerCidx;
+        this.botVerDidx;
         this.MarchVertList_Top;
         this.MarchVertList_Bottom;
     }
@@ -40,18 +40,18 @@ export function CreateMarchCube(AllSquadList,AllMarchVertexList,AllMarchCubeList
                 AllSquadList[i].vc,
                 AllSquadList[i].vd,
                 j);
-                NewCube.VerAidx=AllSquadList[i].VerAidx;
-                NewCube.VerBidx=AllSquadList[i].VerBidx;
-                NewCube.VerCidx=AllSquadList[i].VerCidx;
-                NewCube.VerDidx=AllSquadList[i].VerDidx;
-                NewCube.MarchVertList_Bottom.push(AllMarchVertexList[j][NewCube.VerAidx],
-                    AllMarchVertexList[j][NewCube.VerBidx],
-                    AllMarchVertexList[j][NewCube.VerCidx],
-                    AllMarchVertexList[j][NewCube.VerDidx]);
-                NewCube.MarchVertList_Top.push(AllMarchVertexList[j+1][NewCube.VerAidx],
-                    AllMarchVertexList[j+1][NewCube.VerBidx],
-                    AllMarchVertexList[j+1][NewCube.VerCidx],
-                    AllMarchVertexList[j+1][NewCube.VerDidx]);
+                NewCube.botVerAidx=AllSquadList[i].VerAidx;
+                NewCube.botVerBidx=AllSquadList[i].VerBidx;
+                NewCube.botVerCidx=AllSquadList[i].VerCidx;
+                NewCube.botVerDidx=AllSquadList[i].VerDidx;
+                NewCube.MarchVertList_Bottom.push(AllMarchVertexList[j][NewCube.botVerAidx],
+                    AllMarchVertexList[j][NewCube.botVerBidx],
+                    AllMarchVertexList[j][NewCube.botVerCidx],
+                    AllMarchVertexList[j][NewCube.botVerDidx]);
+                NewCube.MarchVertList_Top.push(AllMarchVertexList[j+1][NewCube.botVerAidx],
+                    AllMarchVertexList[j+1][NewCube.botVerBidx],
+                    AllMarchVertexList[j+1][NewCube.botVerCidx],
+                    AllMarchVertexList[j+1][NewCube.botVerDidx]);
             AllMarchCubeLayer_j.push(NewCube);
         }
         AllMarchCubeList.push(AllMarchCubeLayer_j);

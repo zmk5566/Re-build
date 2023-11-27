@@ -113,6 +113,7 @@ var quad_list=[];
 var isolated_triangle_list=[];
 var AllSquadList=[];
 var AllVertexList=[];
+var VertexSelection=-1;
 
 //create a object to hold the find neighbor result
 const FindNeighborResult = new THREE.Object3D();
@@ -339,23 +340,57 @@ AddLayer_btn.addEventListener('click', function(){
     CreateMarchVertex(AllVertexList,AllMarchVertexList,layer);
     CreateMarchCube(AllSquadList,AllMarchVertexList,AllMarchCubeList,layer-1);
 
-    console.log(AllVertexList.length,AllMarchVertexList.length,AllMarchVertexList[0].length);
-    console.log(AllSquadList.length,AllMarchCubeList.length,AllMarchCubeList[0].length);
     
     for(let i=0;i<AllMarchVertexList.length;i++){
         for(let j=0;j<AllMarchVertexList[i].length;j++){ 
-            VisualizeMarchVertex(AllMarchVertexList[i][j],1);
+            //VisualizeMarchVertex(AllMarchVertexList[i][j],1);
         }
     }
+    window.addEventListener('mousedown', function(e) {
+        //TODO:点击鼠标选择一整个marchingcube，并激活对应的顶点
+        console.log("select vertex id :" ,VertexSelection);
+        console.log("corresspond squad id: ",AllMarchVertexList[0][VertexSelection].subquadid_list);
+        //console.log(AllMarchVertexList[ConstructLayer][VertexSelection].IsActive);
 
+        //判断现在的点有几层楼高
 
+        var ConstructLayer=0;
+        //AllMarchVertexList[0][VertexSelection].IsActive=true;
+        if(AllMarchVertexList[0][VertexSelection].IsActive==false){
+            //说明这地方还没建东西
+            ConstructLayer=0;
+        }
+        else{
+            for(let i=1;i<layer-1;i++){
+                if(AllMarchVertexList[i][VertexSelection].IsActive==true&&
+                AllMarchVertexList[i+1][VertexSelection].IsActive==false){
+                    AllMarchVertexList[i][VertexSelection].IsActive=true;
+                    ConstructLayer=i;
+                    break;
+                }
 
+            }
+        }
 
-    // 创建物体//GUI
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-
-
+        var CenterVert=AllMarchVertexList[ConstructLayer][VertexSelection];
+        console.log(ConstructLayer);
+        for(let i=0;i<CenterVert.subquadid_list.length;i++){
+            var vertid=CenterVert.subquadid_list[i];
+            console.log(ConstructLayer);
+            console.log(AllMarchCubeList[ConstructLayer].length);
+            var CurrentCube=AllMarchCubeList[ConstructLayer][vertid];
+            for(let j=0;j<4;j++){
+                if(CurrentCube.MarchVertList_Bottom[j].IsActive==false){
+                    CurrentCube.MarchVertList_Bottom[j].IsActive=true;
+                    VisualizeMarchVertex(CurrentCube.MarchVertList_Bottom[j],1);
+                }
+                if(CurrentCube.MarchVertList_Top[j].IsActive==false){
+                    CurrentCube.MarchVertList_Top[j].IsActive=true;
+                    VisualizeMarchVertex(CurrentCube.MarchVertList_Top[j],1);
+                }
+            }
+        }
+    });
 });
 
 const AddLoadModel = document.getElementById('LoadModel');
@@ -453,13 +488,11 @@ function mouseTriggerBase(){
             highlight_object.children.forEach(function(object) {
                 highlight_object.remove(object);
             });
-            var result=GetNearestVertex(projected.x,0,projected.z,AllVertexList);
+            VertexSelection=GetNearestVertex(projected.x,0,projected.z,AllVertexList);
            
-            SelectCenter.position.set(AllVertexList[result].x,AllVertexList[result].y,AllVertexList[result].z);
+            SelectCenter.position.set(AllVertexList[VertexSelection].x,AllVertexList[VertexSelection].y,AllVertexList[VertexSelection].z);
             // get a orange color
-            drawVertexbyIndex(result,highlight_object,0xffff00);
-
-            //console.log(SelectCenter.position,projected);
+            drawVertexbyIndex(VertexSelection,highlight_object,0xffff00);
         }
 
     }
