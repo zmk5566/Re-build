@@ -40856,6 +40856,8 @@ gui.domElement.style.zIndex = 10000;
 //create a state machine to maintain the state of the program
 var states = ["idle", "finding_neibour", "smoothing", "selection", "marching_cube"];
 var state = "idle";
+var layer = 3; //layer of vertex
+
 var renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
@@ -40996,36 +40998,79 @@ button_FindNeighbor.addEventListener('click', function () {
 // create a mouse click event listener
 window.addEventListener('mousedown', function (e) {
   console.log("mouse down");
+  mousePosition.x = e.clientX / window.innerWidth * 2 - 1;
+  mousePosition.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  if (state == "marching_cube") {
+    var idx = mouseTriggerBase();
+    console.log("select vertex id :", idx);
+    if (idx != -1) {
+      drawVertexbyIndex(idx, the_scene_object, 0xadd8e6);
+      SelectedVertex_object.add(the_scene_object);
+      800080;
+      var ConstructLayer = 0;
+      //AllMarchVertexList[0][VertexSelection].IsActive=true;
+      if (AllMarchVertexList[0][VertexSelection].IsActive == false) {
+        //说明这地方还没建东西
+        ConstructLayer = 0;
+      } else {
+        for (var _i2 = 1; _i2 < layer - 1; _i2++) {
+          if (AllMarchVertexList[_i2][VertexSelection].IsActive == true && AllMarchVertexList[_i2 + 1][VertexSelection].IsActive == false) {
+            AllMarchVertexList[_i2][VertexSelection].IsActive = true;
+            ConstructLayer = _i2;
+            break;
+          }
+        }
+      }
+      var CenterVert = AllMarchVertexList[ConstructLayer][VertexSelection];
+      console.log(ConstructLayer);
+      for (var _i3 = 0; _i3 < CenterVert.subquadid_list.length; _i3++) {
+        var vertid = CenterVert.subquadid_list[_i3];
+        console.log(ConstructLayer);
+        console.log(AllMarchCubeList[ConstructLayer].length);
+        var CurrentCube = AllMarchCubeList[ConstructLayer][vertid];
+        for (var j = 0; j < 4; j++) {
+          if (CurrentCube.MarchVertList_Bottom[j].IsActive == false) {
+            CurrentCube.MarchVertList_Bottom[j].IsActive = true;
+            VisualizeMarchVertex(CurrentCube.MarchVertList_Bottom[j], 1);
+          }
+          if (CurrentCube.MarchVertList_Top[j].IsActive == false) {
+            CurrentCube.MarchVertList_Top[j].IsActive = true;
+            VisualizeMarchVertex(CurrentCube.MarchVertList_Top[j], 1);
+          }
+        }
+      }
+    }
+  }
 });
 function drawVertexByType(CenterList, MidList, vertex_List, result) {
   result.forEach(function (element) {
     scene.remove(element);
   });
   result.length = 0;
-  for (var _i2 = 0; _i2 < CenterList.length; _i2++) {
+  for (var _i4 = 0; _i4 < CenterList.length; _i4++) {
     var CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.2, 4, 2), new THREE.MeshBasicMaterial({
       wireframe: false,
       color: 0xAABBFF
     }));
-    CenterOfHex.position.set(CenterList[_i2].x, CenterList[_i2].y, CenterList[_i2].z);
+    CenterOfHex.position.set(CenterList[_i4].x, CenterList[_i4].y, CenterList[_i4].z);
     result.push(CenterOfHex);
     scene.add(CenterOfHex);
   }
-  for (var _i3 = 0; _i3 < MidList.length; _i3++) {
+  for (var _i5 = 0; _i5 < MidList.length; _i5++) {
     var CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.2, 4, 2), new THREE.MeshBasicMaterial({
       wireframe: false,
       color: 0xAABB00
     }));
-    CenterOfHex.position.set(MidList[_i3].x, MidList[_i3].y, MidList[_i3].z);
+    CenterOfHex.position.set(MidList[_i5].x, MidList[_i5].y, MidList[_i5].z);
     result.push(CenterOfHex);
     scene.add(CenterOfHex);
   }
-  for (var _i4 = 0; _i4 < vertex_List.length; _i4++) {
+  for (var _i6 = 0; _i6 < vertex_List.length; _i6++) {
     var CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.2, 4, 2), new THREE.MeshBasicMaterial({
       wireframe: false,
       color: 0x0000FF
     }));
-    CenterOfHex.position.set(vertex_List[_i4].x, vertex_List[_i4].y, vertex_List[_i4].z);
+    CenterOfHex.position.set(vertex_List[_i6].x, vertex_List[_i6].y, vertex_List[_i6].z);
     result.push(CenterOfHex);
     scene.add(CenterOfHex);
   }
@@ -41040,8 +41085,8 @@ function Smooth_it_Out() {
   clearTheScene();
   (0, _SubQuad.Smooth)(AllVertexList, AllSquadList);
   console.log(AllVertexList.length);
-  for (var _i5 = 0; _i5 < AllSquadList.length; _i5++) {
-    (0, _SubQuad.DrawSubQuad)(AllSquadList[_i5], 0xffc0cb, scene, qua_list, true);
+  for (var _i7 = 0; _i7 < AllSquadList.length; _i7++) {
+    (0, _SubQuad.DrawSubQuad)(AllSquadList[_i7], 0xffc0cb, scene, qua_list, true);
   }
 }
 var Smooth_btn = document.getElementById('Smooth');
@@ -41057,8 +41102,8 @@ function drawVertexbyIndex(idx, the_scene_object) {
   //console.log(AllVertexList.length);
   var testVert = AllVertexList[StartIdx];
   //console.log(testVert.subquadid_list);
-  for (var _i6 = 0; _i6 < testVert.subquadid_list.length; _i6++) {
-    (0, _SubQuad.DrawSubQuad)(AllSquadList[testVert.subquadid_list[_i6]], color, the_scene_object, qua_list, false);
+  for (var _i8 = 0; _i8 < testVert.subquadid_list.length; _i8++) {
+    (0, _SubQuad.DrawSubQuad)(AllSquadList[testVert.subquadid_list[_i8]], color, the_scene_object, qua_list, false);
   }
   return the_scene_object;
 }
@@ -41073,7 +41118,7 @@ RandomSelect_btn.addEventListener('click', function () {
   SelectedVertex_object.add(the_scene_object);
 });
 function VisualizeMarchVertex(march_vertex, height) {
-  var CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.2, 4, 2), new THREE.MeshBasicMaterial({
+  var CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.1, 4, 2), new THREE.MeshBasicMaterial({
     wireframe: false,
     color: march_vertex.IsActive == true ? 0x00ff00 : 0xff0000
   }));
@@ -41090,56 +41135,15 @@ var MarchVertex_object = new THREE.Object3D();
 scene.add(MarchVertex_object);
 AddLayer_btn.addEventListener('click', function () {
   console.log("convert 2D to 3D");
-  var layer = 3; //layer of vertex
+  state = "marching_cube";
   console.log(AllVertexList.length);
   (0, _Vertex.CreateMarchVertex)(AllVertexList, AllMarchVertexList, layer);
   (0, _SubQuad.CreateMarchCube)(AllSquadList, AllMarchVertexList, AllMarchCubeList, layer - 1);
-  for (var _i7 = 0; _i7 < AllMarchVertexList.length; _i7++) {
-    for (var j = 0; j < AllMarchVertexList[_i7].length; j++) {
+  for (var _i9 = 0; _i9 < AllMarchVertexList.length; _i9++) {
+    for (var j = 0; j < AllMarchVertexList[_i9].length; j++) {
       //VisualizeMarchVertex(AllMarchVertexList[i][j],1);
     }
   }
-  window.addEventListener('mousedown', function (e) {
-    //TODO:点击鼠标选择一整个marchingcube，并激活对应的顶点
-    console.log("select vertex id :", VertexSelection);
-    console.log("corresspond squad id: ", AllMarchVertexList[0][VertexSelection].subquadid_list);
-    //console.log(AllMarchVertexList[ConstructLayer][VertexSelection].IsActive);
-
-    //判断现在的点有几层楼高
-
-    var ConstructLayer = 0;
-    //AllMarchVertexList[0][VertexSelection].IsActive=true;
-    if (AllMarchVertexList[0][VertexSelection].IsActive == false) {
-      //说明这地方还没建东西
-      ConstructLayer = 0;
-    } else {
-      for (var _i8 = 1; _i8 < layer - 1; _i8++) {
-        if (AllMarchVertexList[_i8][VertexSelection].IsActive == true && AllMarchVertexList[_i8 + 1][VertexSelection].IsActive == false) {
-          AllMarchVertexList[_i8][VertexSelection].IsActive = true;
-          ConstructLayer = _i8;
-          break;
-        }
-      }
-    }
-    var CenterVert = AllMarchVertexList[ConstructLayer][VertexSelection];
-    console.log(ConstructLayer);
-    for (var _i9 = 0; _i9 < CenterVert.subquadid_list.length; _i9++) {
-      var vertid = CenterVert.subquadid_list[_i9];
-      console.log(ConstructLayer);
-      console.log(AllMarchCubeList[ConstructLayer].length);
-      var CurrentCube = AllMarchCubeList[ConstructLayer][vertid];
-      for (var _j2 = 0; _j2 < 4; _j2++) {
-        if (CurrentCube.MarchVertList_Bottom[_j2].IsActive == false) {
-          CurrentCube.MarchVertList_Bottom[_j2].IsActive = true;
-          VisualizeMarchVertex(CurrentCube.MarchVertList_Bottom[_j2], 1);
-        }
-        if (CurrentCube.MarchVertList_Top[_j2].IsActive == false) {
-          CurrentCube.MarchVertList_Top[_j2].IsActive = true;
-          VisualizeMarchVertex(CurrentCube.MarchVertList_Top[_j2], 1);
-        }
-      }
-    }
-  });
 });
 var AddLoadModel = document.getElementById('LoadModel');
 AddLoadModel.addEventListener('click', function () {
@@ -41194,11 +41198,7 @@ var SelectCenter = new THREE.Mesh(new THREE.SphereGeometry(0.2, 4, 2), new THREE
   color: 0x0000ff
 }));
 scene.add(SelectCenter);
-function mouseTriggerBase() {}
-window.addEventListener('mousemove', function (e) {
-  // ///改一下
-  mousePosition.x = e.clientX / window.innerWidth * 2 - 1;
-  mousePosition.y = -(e.clientY / window.innerHeight) * 2 + 1;
+function mouseTriggerBase() {
   raycaster.setFromCamera(mousePosition, camera); //从相机到鼠标位置创建一条射线
   intersects = raycaster.intersectObject(planeMesh); //射线跟平面形成焦点
   if (intersects.length > 0) {
@@ -41219,17 +41219,29 @@ window.addEventListener('mousemove', function (e) {
     projected.z = intersect.point.z;
     sphere.position.copy(projected);
     cursor_point.add(sphere);
+    var result;
     if (AllVertexList.length > 0) {
       // clear the highlight object
       highlight_object.children.forEach(function (object) {
         highlight_object.remove(object);
       });
       VertexSelection = GetNearestVertex(projected.x, 0, projected.z, AllVertexList);
-      SelectCenter.position.set(AllVertexList[VertexSelection].x, AllVertexList[VertexSelection].y, AllVertexList[VertexSelection].z);
-      // get a orange color
-      drawVertexbyIndex(VertexSelection, highlight_object, 0xffff00);
+      if (VertexSelection != -1) {
+        SelectCenter.position.set(AllVertexList[VertexSelection].x, AllVertexList[VertexSelection].y, AllVertexList[VertexSelection].z);
+
+        // get a orange color
+        drawVertexbyIndex(VertexSelection, highlight_object, 0xffff00);
+      }
     }
   }
+  return VertexSelection;
+}
+window.addEventListener('mousemove', function (e) {
+  // ///改一下
+
+  mousePosition.x = e.clientX / window.innerWidth * 2 - 1;
+  mousePosition.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  mouseTriggerBase();
 });
 var sphereMesh = new THREE.Mesh(new THREE.SphereGeometry(0.4, 4, 2), new THREE.MeshBasicMaterial({
   wireframe: true,
@@ -41268,6 +41280,10 @@ function GetNearestVertex(x, y, z, currentVertList) {
       idx = _i10;
     }
   }
+  //console.log("distance",distance);
+  if (distance > 0.5) {
+    idx = -1;
+  }
   return result, idx; //这个顶点和他的id
 }
 
@@ -41305,7 +41321,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "32347" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "35156" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
