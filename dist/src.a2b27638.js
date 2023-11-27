@@ -40912,10 +40912,11 @@ for (var i = 0; i < triangle_list.length; i++) {
 function clearTheScene() {
   triangle_object.clear();
   FindNeighborResult.clear();
+  smooth_object.clear();
 }
 
 //Step3
-var button_FindNeighbor = document.getElementById('FindNeighbor');
+//const button_FindNeighbor = document.getElementById('FindNeighbor');
 var tri_list = [];
 var qua_list = [];
 var CenterList = [];
@@ -40930,7 +40931,7 @@ var VertexSelection = -1;
 //create a object to hold the find neighbor result
 var FindNeighborResult = new THREE.Object3D();
 scene.add(FindNeighborResult);
-function findNeighbor() {
+function _findNeighbor() {
   state = "finding_neibour";
   // 在这里编写按钮点击时要执行的 JavaScript 代码
   clearTheScene();
@@ -40992,10 +40993,11 @@ function findNeighbor() {
   (0, _SubQuad.Map)(AllVertexList, AllSquadList);
 }
 button_FindNeighbor.addEventListener('click', function () {
-  findNeighbor();
+  _findNeighbor();
 });
 var model_list = [];
 var loader = new _OBJLoader.OBJLoader();
+
 // create a mouse click event listener
 window.addEventListener('mousedown', function (e) {
   console.log("mouse down");
@@ -41191,7 +41193,9 @@ function drawVertexByType(CenterList, MidList, vertex_List, result) {
 }
 
 // smooth the mesh
-
+// create a object to hold the smoothsquad visualization
+var smooth_object = new THREE.Object3D();
+scene.add(smooth_object);
 function Smooth_it_Out() {
   state = "smoothing";
 
@@ -41200,13 +41204,9 @@ function Smooth_it_Out() {
   (0, _SubQuad.Smooth)(AllVertexList, AllSquadList);
   console.log(AllVertexList.length);
   for (var _i9 = 0; _i9 < AllSquadList.length; _i9++) {
-    (0, _SubQuad.DrawSubQuad)(AllSquadList[_i9], 0xffc0cb, scene, qua_list, true);
+    (0, _SubQuad.DrawSubQuad)(AllSquadList[_i9], 0xffc0cb, smooth_object, qua_list, true);
   }
 }
-var Smooth_btn = document.getElementById('Smooth');
-Smooth_btn.addEventListener('click', function () {
-  Smooth_it_Out();
-});
 
 // create an empty 3d object to hold the vertex and subquad in the future
 var the_scene_object = new THREE.Object3D();
@@ -41225,40 +41225,28 @@ function drawVertexbyIndex(idx, the_scene_object) {
 // create a layer to hold the selected vertex
 var SelectedVertex_object = new THREE.Object3D();
 scene.add(SelectedVertex_object);
-var RandomSelect_btn = document.getElementById('RandomSelect');
-RandomSelect_btn.addEventListener('click', function () {
-  var StartIdx = Math.floor(Math.random() * AllVertexList.length);
-  drawVertexbyIndex(StartIdx, the_scene_object);
-  SelectedVertex_object.add(the_scene_object);
-});
 function VisualizeMarchVertex(march_vertex, height) {
   var CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.1, 4, 2), new THREE.MeshBasicMaterial({
     wireframe: false,
-    color: march_vertex.IsActive == true ? 0x00ff00 : 0xff0000
+    color: march_vertex.IsActive == true ? 0xff10f0 : 0xff0000
   }));
   CenterOfHex.position.set(march_vertex.x, march_vertex.layer * height, march_vertex.z);
   MarchVertex_object.add(CenterOfHex);
 }
 var AllMarchVertexList = [];
 var AllMarchCubeList = [];
-var AddLayer_btn = document.getElementById('Construct3D');
-function MarchingCubeUpdate() {}
+//const AddLayer_btn = document.getElementById('Construct3D');
 
 // create a object to hold marching vertexes
 var MarchVertex_object = new THREE.Object3D();
 scene.add(MarchVertex_object);
-AddLayer_btn.addEventListener('click', function () {
+function covert2Dto3D() {
   console.log("convert 2D to 3D");
   state = "marching_cube";
   console.log(AllVertexList.length);
   (0, _Vertex.CreateMarchVertex)(AllVertexList, AllMarchVertexList, layer);
   (0, _SubQuad.CreateMarchCube)(AllSquadList, AllMarchVertexList, AllMarchCubeList, layer - 1);
-  for (var _i11 = 0; _i11 < AllMarchVertexList.length; _i11++) {
-    for (var j = 0; j < AllMarchVertexList[_i11].length; j++) {
-      //VisualizeMarchVertex(AllMarchVertexList[i][j],1);
-    }
-  }
-});
+}
 var AddLoadModel = document.getElementById('LoadModel');
 AddLoadModel.addEventListener('click', function () {
   //load obj here 
@@ -41304,9 +41292,7 @@ var intersects;
 
 // create a 3d object for highlight
 var highlight_object = new THREE.Object3D();
-var cursor_point = new THREE.Object3D();
 scene.add(highlight_object);
-scene.add(cursor_point);
 var SelectCenter = new THREE.Mesh(new THREE.SphereGeometry(0.2, 4, 2), new THREE.MeshBasicMaterial({
   wireframe: false,
   color: 0x0000ff
@@ -41318,11 +41304,6 @@ function mouseTriggerBase() {
   if (intersects.length > 0) {
     //如果有焦点
     var intersect = intersects[0];
-    //找到最近的vertex
-    // clear the cursor point
-    cursor_point.children.forEach(function (object) {
-      cursor_point.remove(object);
-    });
     var sphere = new THREE.Mesh(new THREE.SphereGeometry(0.1, 4, 2), new THREE.MeshBasicMaterial({
       wireframe: true,
       color: 0x00FF00
@@ -41331,8 +41312,6 @@ function mouseTriggerBase() {
     projected.x = intersect.point.x;
     projected.y = 0;
     projected.z = intersect.point.z;
-    sphere.position.copy(projected);
-    cursor_point.add(sphere);
     var result;
     if (AllVertexList.length > 0) {
       // clear the highlight object
@@ -41386,12 +41365,12 @@ function GetNearestVertex(x, y, z, currentVertList) {
   var distance = 10000;
   var result;
   var idx;
-  for (var _i12 = 0; _i12 < currentVertList.length; _i12++) {
-    var temp = Math.pow(x - currentVertList[_i12].x, 2) + Math.pow(y - currentVertList[_i12].y, 2) + Math.pow(z - currentVertList[_i12].z, 2);
+  for (var _i11 = 0; _i11 < currentVertList.length; _i11++) {
+    var temp = Math.pow(x - currentVertList[_i11].x, 2) + Math.pow(y - currentVertList[_i11].y, 2) + Math.pow(z - currentVertList[_i11].z, 2);
     if (temp < distance) {
       distance = temp;
-      result = currentVertList[_i12];
-      idx = _i12;
+      result = currentVertList[_i11];
+      idx = _i11;
     }
   }
   //console.log("distance",distance);
@@ -41401,15 +41380,41 @@ function GetNearestVertex(x, y, z, currentVertList) {
   return result, idx; //这个顶点和他的id
 }
 
+// add gui buttons new folder
+var button_folder = gui.addFolder('Buttons');
+
+// add one button
+var button = {
+  findNeighbor: function findNeighbor() {
+    _findNeighbor();
+  }
+};
+
+// add the button to the folder
+button_folder.add(button, 'findNeighbor').name('Find Neighbor');
+
+// add another button smooth
+
+var button_smooth = {
+  smooth: function smooth() {
+    Smooth_it_Out();
+  }
+};
+button_folder.add(button_smooth, 'smooth').name('Smooth');
+
+// add 2d to 3d button
+var button_2d_to_3d = {
+  convert: function convert() {
+    covert2Dto3D();
+  }
+};
+button_folder.add(button_2d_to_3d, 'convert').name('2D to 3D');
+button_folder.open();
+
 // add gui check boxes for the display
-display_folder.add(scene, 'visible').name('scene');
-display_folder.add(triangle_object, 'visible').name('triangle_object');
-display_folder.add(FindNeighborResult, 'visible').name('FindNeighborResult');
+display_folder.add(SelectedVertex_object, 'visible').name('SelectedVertex_object');
 display_folder.add(highlight_object, 'visible').name('highlight_object');
-display_folder.add(cursor_point, 'visible').name('cursor_point');
-display_folder.add(planeMesh, 'visible').name('planeMesh');
-display_folder.add(SelectCenter, 'visible').name('SelectCenter');
-display_folder.add(orbit, 'enabled').name('orbit');
+display_folder.add(MarchVertex_object, 'visible').name('MarchVertex_object');
 },{"./styles.css":"src/styles.css","three":"node_modules/three/build/three.module.js","three/examples/jsm/controls/OrbitControls.js":"node_modules/three/examples/jsm/controls/OrbitControls.js","./HexGrid.js":"src/HexGrid.js","./HexCubeCoord.js":"src/HexCubeCoord.js","./Triangle.js":"src/Triangle.js","./Quad.js":"src/Quad.js","./SubQuad.js":"src/SubQuad.js","three/src/math/MathUtils.js":"node_modules/three/src/math/MathUtils.js","./Vertex.js":"src/Vertex.js","three/examples/jsm/loaders/OBJLoader.js":"node_modules/three/examples/jsm/loaders/OBJLoader.js","dat.gui":"node_modules/dat.gui/build/dat.gui.module.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
@@ -41435,7 +41440,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "35156" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "43580" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
