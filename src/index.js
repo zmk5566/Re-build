@@ -447,7 +447,8 @@ function LoadMultipleModels(path,position,model_list,ConstructLayer){
             }
             });
 
-            scene.add( object );
+            mesh_hold_object.add(object);
+            //scene.add( object );
             // const geometry=object.children[0].geometry;
             // vertices=geometry.vertices;
             console.log("vertices",verticesList.length);
@@ -486,6 +487,11 @@ function LoadMultipleModels(path,position,model_list,ConstructLayer){
 
 
 
+//create a 3d  object to hold
+const mesh_hold_object = new THREE.Object3D();
+scene.add(mesh_hold_object);
+
+
 function drawVertexByType(CenterList,MidList,vertex_List,result){
 
     result.forEach(element => {scene.remove(element);});
@@ -499,7 +505,7 @@ function drawVertexByType(CenterList,MidList,vertex_List,result){
         }));
         CenterOfHex.position.set(CenterList[i].x,CenterList[i].y,CenterList[i].z);
         result.push(CenterOfHex);
-        scene.add(CenterOfHex);
+        mesh_hold_object.add(CenterOfHex);
     }
     for(let i=0;i<MidList.length;i++){
         var CenterOfHex = new THREE.Mesh(
@@ -510,7 +516,7 @@ function drawVertexByType(CenterList,MidList,vertex_List,result){
         }));
         CenterOfHex.position.set(MidList[i].x,MidList[i].y,MidList[i].z);
         result.push(CenterOfHex);
-        scene.add(CenterOfHex);
+        mesh_hold_object.add(CenterOfHex);
     }
     for(let i=0;i<vertex_List.length;i++){
         var CenterOfHex = new THREE.Mesh(
@@ -521,7 +527,7 @@ function drawVertexByType(CenterList,MidList,vertex_List,result){
         }));
         CenterOfHex.position.set(vertex_List[i].x,vertex_List[i].y,vertex_List[i].z);
         result.push(CenterOfHex);
-        scene.add(CenterOfHex);
+        mesh_hold_object.add(CenterOfHex);
     }
 }
 
@@ -599,42 +605,19 @@ function covert2Dto3D(){
 }
 
 
-const AddLoadModel = document.getElementById('LoadModel');
+const AddLoadModel = document.getElementById('talk_to_gpt');
 AddLoadModel.addEventListener('click',function(){
 
     //load obj here 
     const loader = new OBJLoader();
     var input_pt1 = document.getElementById("MeshId_pt1");
-    var input_pt2 = document.getElementById("MeshId_pt2");
-    var path='/models/'+input_pt1.value+' '+input_pt2.value+'.obj';
-    console.log(path);
-    loader.load(
-        // resource URL
-        path,
-        // called when resource is loaded
-        function ( object ) {
-            const material = new THREE.MeshPhongMaterial({ color: 0xffffff });
-            object.traverse(function (child) {
-            if (child instanceof THREE.Mesh) {
-                child.material = material;
-            }
-            });
-            scene.add( object );
 
-        },
-        // called when loading is in progresses
-        function ( xhr ) {
+    get_new_city(input_pt1.value);
 
-            console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+    document.getElementById("status").innerHTML="Loading";
 
-        },
-        // called when loading has errors
-        function ( error ) {
+    document.getElementById("answer").innerHTML=input_pt1.value;
 
-            console.log( 'An error happened' );
-
-        }
-    );
 
 });
 
@@ -803,6 +786,8 @@ button_folder.open();
 // add gui check boxes for the display
 display_folder.add(SelectedVertex_object, 'visible').name('SelectedVertex_object');
 display_folder.add(MarchVertex_object, 'visible').name('MarchVertex_object');
+display_folder.add(mesh_hold_object, 'visible').name('mesh_hold_object');
+
 
 
     const url = 'https://api.drugcity.a8a8.top/';
@@ -893,7 +878,9 @@ function hit_the_object_in_center(){
 
     for (let i = 0; i < map_2d.length; i++) {
         for (let j = 0; j < map_2d[i].length; j++) {
-            hit_the_object((i-map_data.city_width*0.5+0.5)*grid_unit_size,(j-map_data.city_height*0.5+0.5)*grid_unit_size);
+            if (the_map.map[i][j]!=0){
+                hit_the_object((i-map_data.city_width*0.5+0.5)*grid_unit_size,(j-map_data.city_height*0.5+0.5)*grid_unit_size);
+            }
         }
     }
 
@@ -912,3 +899,74 @@ button_folder.add(button_hit_the_object, 'hit_the_object').name('hit_the_object'
 //loop through the 2d map and perform a get 
 
 
+
+
+
+const talk_to_server = {
+    talk_to_server: function() {
+        restart_gpt();
+    }
+};
+
+button_folder.add(talk_to_server, 'talk_to_server').name('talk_to_server');
+
+// create ajax call to get the data from the server through a get method,with a get parameter "prompt" value "ok"
+function get_new_city(input_prompt){
+
+    const params = {
+        prompt: input_prompt+",please reply restrictedly using json"
+      };
+      // Here, 'param1' is the name of the parameter expected by the API. Replace it and its value as needed.
+      
+      axios.get(url+"city", {params})
+      .then(function (response) {
+        // The request was successful, you can process the response here.
+        console.log(response.data);
+        var the_result = response.data;
+
+
+        // check is the response.data is a string or a json object
+        if (typeof the_result == "string"){
+            console.log("parse the string");
+            the_result = JSON.parse(the_result);
+            the_map.map = the_result.rebuild[0].layout;
+            console.log(the_map.map);
+            document.getElementById("status").innerHTML="Standby"
+
+        }else{
+            the_map.map = the_result.rebuild[0].layout;
+            console.log(the_map.map);
+            document.getElementById("status").innerHTML="standby"
+            document.getElementById("answer").innerHTML=the_result.rebuild[0].description;
+            
+            hit_the_object_in_center();
+
+        }
+
+
+      })
+      .catch(function (error) {
+        // The request failed, handle the error here
+        console.log(error);
+      });
+
+}
+
+function restart_gpt(){
+    axios.get(url+"prompt_history/reset")
+    .then(function (response) {
+      // The request was successful, you can process the response here.
+      console.log(response.data);
+    })
+    .catch(function (error) {
+      // The request failed, handle the error here
+      console.log(error);
+    });
+}
+
+
+// get the entire map
+get_map();
+
+// restart the chatgpt prompt
+restart_gpt();

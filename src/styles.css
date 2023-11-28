@@ -16,6 +16,19 @@ body {
   margin-right: 25px;
 }
 
+#gpt_conversation{
+  position: fixed;
+  width: 25%;
+  height:35%;
+  top: 10px;
+  border: 3px solid #8AC007;
+}
+
+#conversation{
+  margin-top: 20px;
+
+}
+
 /* Button Styling -> https://getcssscan.com/css-buttons-examples */
 .button {
   align-items: center;
