@@ -46162,6 +46162,9 @@ var layer = 8; //layer of vertex
 var renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
+
+//TODO:创建六边形点阵地图
+var number_of_extension = 3;
 var scene = new THREE.Scene();
 var _default = exports.default = scene;
 var ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -46180,8 +46183,6 @@ var planeMesh = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshBa
 planeMesh.rotateX(-Math.PI / 2);
 scene.add(planeMesh);
 
-//TODO:创建六边形点阵地图
-var number_of_extension = 3;
 //Stage1：找到每个六边形的中心点，在这个位置创建一个球，并显示出来
 var center = new _HexCubeCoord.HexCubeCoord(0, 0, 0);
 var coordList = (0, _HexCubeCoord.HexCoordList)(3);
@@ -46233,6 +46234,15 @@ var VertexSelection = -1;
 //create a object to hold the find neighbor result
 var FindNeighborResult = new THREE.Object3D();
 scene.add(FindNeighborResult);
+
+//create a 3d  object to hold
+var mesh_hold_object = new THREE.Object3D();
+scene.add(mesh_hold_object);
+
+// smooth the mesh
+// create a object to hold the smoothsquad visualization
+var smooth_object = new THREE.Object3D();
+scene.add(smooth_object);
 function _findNeighbor() {
   state = "finding_neibour";
   // 在这里编写按钮点击时要执行的 JavaScript 代码
@@ -46279,7 +46289,7 @@ function _findNeighbor() {
   //按照顶点分类网格
   (0, _SubQuad.MapSubQuad4UI)(isolated_triangle_list, quad_list, vertex_List, MidList, CenterList);
   for (var _i = 0; _i < vertex_List[4].subquadlist.length; _i++) {
-    var CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.2, 4, 2), new THREE.MeshBasicMaterial({
+    var CenterOfHex = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), new THREE.MeshBasicMaterial({
       wireframe: false,
       color: 0xAABBFF
     }));
@@ -46407,7 +46417,7 @@ function process_the_hitted_logic(idx) {
             color1 = 0x800080;
             break;
         }
-        var CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.1, 4, 2), new THREE.MeshBasicMaterial({
+        var CenterOfHex = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), new THREE.MeshBasicMaterial({
           wireframe: false,
           color: color1
         }));
@@ -46438,14 +46448,6 @@ function process_the_hitted_logic(idx) {
         var VertexC = new THREE.Vector3(ThisCube.MarchVertList_Bottom[2].x, ThisCube.MarchVertList_Bottom[2].y, ThisCube.MarchVertList_Bottom[2].z);
         var VertexD = new THREE.Vector3(ThisCube.MarchVertList_Bottom[3].x, ThisCube.MarchVertList_Bottom[3].y, ThisCube.MarchVertList_Bottom[3].z);
         var VetexList = [VertexA, VertexB, VertexC, VertexD, CenterPosition];
-        // var CenterOfHex = new THREE.Mesh(
-        //     new THREE.SphereGeometry(0.1, 4, 2),
-        //     new THREE.MeshBasicMaterial({
-        //         wireframe: false,
-        //         color: 0xff0000
-        //     }));
-        //     CenterOfHex.position.set(CenterPosition[0],CenterPosition[1],CenterPosition[2]);
-        //     MarchVertex_object.add(CenterOfHex);
         allModelSet.push([_j2, ModelName, VetexList]);
       }
     }
@@ -46491,14 +46493,14 @@ function LoadMultipleModels(path, position, model_list, ConstructLayer) {
 
           interpolatedAB.lerpVectors(position[0], position[3], x + 0.5);
           //console.log(interpolatedAB);
-          var CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.1, 4, 2), new THREE.MeshBasicMaterial({
+          var CenterOfHex = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), new THREE.MeshBasicMaterial({
             wireframe: false,
             color: 0xff0000
           }));
           CenterOfHex.position.set(interpolatedAB.x, interpolatedAB.y, interpolatedAB.z);
           MarchVertex_object.add(CenterOfHex);
           interpolatedCD.lerpVectors(position[1], position[2], x + 0.5);
-          var CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.1, 4, 2), new THREE.MeshBasicMaterial({
+          var CenterOfHex = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), new THREE.MeshBasicMaterial({
             wireframe: false,
             color: 0x00ff00
           }));
@@ -46506,7 +46508,7 @@ function LoadMultipleModels(path, position, model_list, ConstructLayer) {
           MarchVertex_object.add(CenterOfHex);
           var finalLerp = new THREE.Vector3();
           finalLerp.lerpVectors(interpolatedAB, interpolatedCD, z + 0.5);
-          var CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.1, 4, 2), new THREE.MeshBasicMaterial({
+          var CenterOfHex = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), new THREE.MeshBasicMaterial({
             wireframe: false,
             color: 0x0000ff
           }));
@@ -46538,33 +46540,13 @@ function LoadMultipleModels(path, position, model_list, ConstructLayer) {
   // console.log(interpolatedAB);
 }
 
-// const button_RotateX = document.getElementById('rotateX');
-// button_RotateX.addEventListener('click', function(){
-//     model_list.forEach(element => {
-//         element.rotateX(Math.PI / 2);
-//     });
-// });
-// const button_RotateY = document.getElementById('rotateY');
-// button_RotateY.addEventListener('click', function(){
-//     model_list.forEach(element => {
-//     element.rotateY(Math.PI / 2);
-// });});
-// const button_RotateZ = document.getElementById('rotateZ');
-// button_RotateZ.addEventListener('click', function(){
-//     model_list.forEach(element => {
-//     element.rotateZ(Math.PI / 2);
-// });});
-
-//create a 3d  object to hold
-var mesh_hold_object = new THREE.Object3D();
-scene.add(mesh_hold_object);
 function drawVertexByType(CenterList, MidList, vertex_List, result) {
   result.forEach(function (element) {
     scene.remove(element);
   });
   result.length = 0;
   for (var _i9 = 0; _i9 < CenterList.length; _i9++) {
-    var CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.2, 4, 2), new THREE.MeshBasicMaterial({
+    var CenterOfHex = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), new THREE.MeshBasicMaterial({
       wireframe: false,
       color: 0xAABBFF
     }));
@@ -46573,7 +46555,7 @@ function drawVertexByType(CenterList, MidList, vertex_List, result) {
     mesh_hold_object.add(CenterOfHex);
   }
   for (var _i10 = 0; _i10 < MidList.length; _i10++) {
-    var CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.2, 4, 2), new THREE.MeshBasicMaterial({
+    var CenterOfHex = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), new THREE.MeshBasicMaterial({
       wireframe: false,
       color: 0xAABB00
     }));
@@ -46582,7 +46564,7 @@ function drawVertexByType(CenterList, MidList, vertex_List, result) {
     mesh_hold_object.add(CenterOfHex);
   }
   for (var _i11 = 0; _i11 < vertex_List.length; _i11++) {
-    var CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.2, 4, 2), new THREE.MeshBasicMaterial({
+    var CenterOfHex = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), new THREE.MeshBasicMaterial({
       wireframe: false,
       color: 0x0000FF
     }));
@@ -46591,11 +46573,6 @@ function drawVertexByType(CenterList, MidList, vertex_List, result) {
     mesh_hold_object.add(CenterOfHex);
   }
 }
-
-// smooth the mesh
-// create a object to hold the smoothsquad visualization
-var smooth_object = new THREE.Object3D();
-scene.add(smooth_object);
 function Smooth_it_Out() {
   state = "smoothing";
 
@@ -46628,7 +46605,7 @@ function drawVertexbyIndex(idx, the_scene_object) {
 var SelectedVertex_object = new THREE.Object3D();
 scene.add(SelectedVertex_object);
 function VisualizeMarchVertex(march_vertex, height) {
-  var CenterOfHex = new THREE.Mesh(new THREE.SphereGeometry(0.1, 4, 2), new THREE.MeshBasicMaterial({
+  var CenterOfHex = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), new THREE.MeshBasicMaterial({
     wireframe: false,
     color: march_vertex.IsActive == true ? 0xff10f0 : 0xff0000
   }));
@@ -46672,7 +46649,7 @@ var intersects;
 // create a 3d object for highlight
 var highlight_object = new THREE.Object3D();
 scene.add(highlight_object);
-var SelectCenter = new THREE.Mesh(new THREE.SphereGeometry(0.2, 4, 2), new THREE.MeshBasicMaterial({
+var SelectCenter = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), new THREE.MeshBasicMaterial({
   wireframe: false,
   color: 0x0000ff
 }));
@@ -46683,7 +46660,7 @@ function mouseTriggerBase() {
   if (intersects.length > 0) {
     //如果有焦点
     var intersect = intersects[0];
-    var sphere = new THREE.Mesh(new THREE.SphereGeometry(0.1, 4, 2), new THREE.MeshBasicMaterial({
+    var sphere = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), new THREE.MeshBasicMaterial({
       wireframe: true,
       color: 0x00FF00
     }));
@@ -46715,11 +46692,6 @@ window.addEventListener('mousemove', function (e) {
   mousePosition.y = -(e.clientY / window.innerHeight) * 2 + 1;
   mouseTriggerBase();
 });
-var sphereMesh = new THREE.Mesh(new THREE.SphereGeometry(0.4, 4, 2), new THREE.MeshBasicMaterial({
-  wireframe: true,
-  color: 0xFFEA00
-})); //点击选择后漂浮在选中plane上方的旋转小方块
-
 var objects = [];
 var clicks = 1;
 
@@ -46761,6 +46733,16 @@ function GetNearestVertex(x, y, z, currentVertList) {
 
 // add gui buttons new folder
 var button_folder = gui.addFolder('Buttons');
+var button_ready = {
+  ready: function ready() {
+    // ready to construct the map
+    state = "selection";
+    _findNeighbor();
+    Smooth_it_Out();
+    covert2Dto3D();
+  }
+};
+button_folder.add(button_ready, 'ready').name('Ready');
 
 // add one button
 var button = {
@@ -46794,45 +46776,13 @@ button_folder.open();
 display_folder.add(SelectedVertex_object, 'visible').name('SelectedVertex_object');
 display_folder.add(MarchVertex_object, 'visible').name('MarchVertex_object');
 display_folder.add(mesh_hold_object, 'visible').name('mesh_hold_object');
-var url = 'https://api.drugcity.a8a8.top/';
-var map_data = [];
-// create a new object to hold the map grid
-var map_object = new THREE.Object3D();
-scene.add(map_object);
-var the_map;
-display_folder.add(map_object, 'visible').name('map_object');
-var grid_unit_size = 1;
-map_object.visible = false;
-function get_map() {
-  // create ajax call to get the data from the server
-  _axios.default.get(url + "map").then(function (response) {
-    // get the data from the response
-    var data = response.data;
-    map_data = data;
-    the_map = map_data;
-    var map_2d = map_data.map;
-
-    // loop through the 2d array and create a 2d grid map
-    for (var _i15 = 0; _i15 < map_2d.length; _i15++) {
-      for (var j = 0; j < map_2d[_i15].length; j++) {
-        var cube = new THREE.Mesh(new THREE.BoxGeometry(grid_unit_size, grid_unit_size, grid_unit_size), new THREE.MeshBasicMaterial({
-          wireframe: true,
-          color: map_2d[_i15][j] == 1 ? 0x0000ff : 0xff0000
-        }));
-        cube.position.set((_i15 - map_data.city_width * 0.5 + 0.5) * grid_unit_size, 0, (j - map_data.city_height * 0.5 + 0.5) * grid_unit_size);
-        map_object.add(cube);
-      }
-    }
-    console.log(data);
-  });
-}
 var button_call_api = {
   call_api: function call_api() {
     get_map();
   }
 };
 button_folder.add(button_call_api, 'call_api').name('call_api');
-button_folder.open();
+button_folder.hide();
 function hit_the_object(x, z) {
   if (AllVertexList.length > 0) {
     // clear the highlight object
@@ -46851,10 +46801,10 @@ function hit_the_object_in_center() {
   var grid_unit_size = 1;
   // loop through the 2d array and create a 2d grid map
 
-  for (var _i16 = 0; _i16 < map_2d.length; _i16++) {
-    for (var j = 0; j < map_2d[_i16].length; j++) {
-      if (the_map.map[_i16][j] != 0) {
-        hit_the_object((_i16 - map_data.city_width * 0.5 + 0.5) * grid_unit_size, (j - map_data.city_height * 0.5 + 0.5) * grid_unit_size);
+  for (var _i15 = 0; _i15 < map_2d.length; _i15++) {
+    for (var j = 0; j < map_2d[_i15].length; j++) {
+      if (the_map.map[_i15][j] != 0) {
+        hit_the_object((_i15 - map_data.city_width * 0.5 + 0.5) * grid_unit_size, (j - map_data.city_height * 0.5 + 0.5) * grid_unit_size);
       }
     }
   }
@@ -46868,61 +46818,12 @@ button_folder.add(button_hit_the_object, 'hit_the_object').name('hit_the_object'
 
 //loop through the 2d map and perform a get 
 
-var talk_to_server = {
-  talk_to_server: function talk_to_server() {
-    restart_gpt();
-  }
-};
-button_folder.add(talk_to_server, 'talk_to_server').name('talk_to_server');
-
-// create ajax call to get the data from the server through a get method,with a get parameter "prompt" value "ok"
-function get_new_city(input_prompt) {
-  var params = {
-    prompt: input_prompt + ",please reply restrictedly using json"
-  };
-  // Here, 'param1' is the name of the parameter expected by the API. Replace it and its value as needed.
-
-  _axios.default.get(url + "city", {
-    params: params
-  }).then(function (response) {
-    // The request was successful, you can process the response here.
-    console.log(response.data);
-    var the_result = response.data;
-
-    // check is the response.data is a string or a json object
-    if (typeof the_result == "string") {
-      console.log("parse the string");
-      the_result = JSON.parse(the_result);
-      the_map.map = the_result.rebuild[0].layout;
-      console.log(the_map.map);
-      document.getElementById("status").innerHTML = "Standby";
-    } else {
-      the_map.map = the_result.rebuild[0].layout;
-      console.log(the_map.map);
-      document.getElementById("status").innerHTML = "standby";
-      document.getElementById("answer").innerHTML = the_result.rebuild[0].description;
-      hit_the_object_in_center();
-    }
-  }).catch(function (error) {
-    // The request failed, handle the error here
-    console.log(error);
-  });
+function scene_intialization() {
+  _findNeighbor();
+  Smooth_it_Out();
+  covert2Dto3D();
 }
-function restart_gpt() {
-  _axios.default.get(url + "prompt_history/reset").then(function (response) {
-    // The request was successful, you can process the response here.
-    console.log(response.data);
-  }).catch(function (error) {
-    // The request failed, handle the error here
-    console.log(error);
-  });
-}
-
-// get the entire map
-get_map();
-
-// restart the chatgpt prompt
-restart_gpt();
+scene_intialization();
 },{"./styles.css":"src/styles.css","three":"node_modules/three/build/three.module.js","three/examples/jsm/controls/OrbitControls.js":"node_modules/three/examples/jsm/controls/OrbitControls.js","./HexGrid.js":"src/HexGrid.js","./HexCubeCoord.js":"src/HexCubeCoord.js","./Triangle.js":"src/Triangle.js","./Quad.js":"src/Quad.js","./SubQuad.js":"src/SubQuad.js","three/src/math/MathUtils.js":"node_modules/three/src/math/MathUtils.js","./Vertex.js":"src/Vertex.js","three/examples/jsm/loaders/OBJLoader.js":"node_modules/three/examples/jsm/loaders/OBJLoader.js","dat.gui":"node_modules/dat.gui/build/dat.gui.module.js","axios":"node_modules/axios/index.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
