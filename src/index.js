@@ -404,7 +404,7 @@ function LoadMultipleModels(path,position,model_list,ConstructLayer){
         path,
         // called when resource is loaded
         function ( object ) {
-            var material = new THREE.MeshPhongMaterial({ color: 0xffffff });
+            var material = new THREE.MeshPhongMaterial({ color: 0xffffff ,wireframe:false,transparent:true,opacity:0.3,side:THREE.DoubleSide});
             if(path=='/models/1001 1001.obj'){
                 material = new THREE.MeshPhongMaterial({ color: 0xff00ff });}
             object.traverse(function (child) {
@@ -652,9 +652,7 @@ function mouseTriggerBase(){
         var result;
         if (AllVertexList.length>0){
             // clear the highlight object
-            highlight_object.children.forEach(function(object) {
-                highlight_object.remove(object);
-            });
+            highlight_object.clear();
             VertexSelection=GetNearestVertex(projected.x,0,projected.z,AllVertexList);
 
             if (VertexSelection != -1){
@@ -677,8 +675,6 @@ window.addEventListener('mousemove', function(e) {
     mousePosition.x = (e.clientX / window.innerWidth) * 2 - 1;
     mousePosition.y = -(e.clientY / window.innerHeight) * 2 + 1;
     mouseTriggerBase();
-
-    
   
 });
 
@@ -787,8 +783,9 @@ const button_call_api = {
 };
 
 button_folder.add(button_call_api, 'call_api').name('call_api');
-button_folder.hide();
 
+// fold the button folder
+button_folder.close();
 
 function hit_the_object(x,z){
     if (AllVertexList.length>0){
@@ -834,9 +831,6 @@ const button_hit_the_object = {
 };
 
 button_folder.add(button_hit_the_object, 'hit_the_object').name('hit_the_object');
-
-//loop through the 2d map and perform a get 
-
 
 
 function scene_intialization(){

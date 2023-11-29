@@ -46470,7 +46470,11 @@ function LoadMultipleModels(path, position, model_list, ConstructLayer) {
   // called when resource is loaded
   function (object) {
     var material = new THREE.MeshPhongMaterial({
-      color: 0xffffff
+      color: 0xffffff,
+      wireframe: false,
+      transparent: true,
+      opacity: 0.3,
+      side: THREE.DoubleSide
     });
     if (path == '/models/1001 1001.obj') {
       material = new THREE.MeshPhongMaterial({
@@ -46671,9 +46675,7 @@ function mouseTriggerBase() {
     var result;
     if (AllVertexList.length > 0) {
       // clear the highlight object
-      highlight_object.children.forEach(function (object) {
-        highlight_object.remove(object);
-      });
+      highlight_object.clear();
       VertexSelection = GetNearestVertex(projected.x, 0, projected.z, AllVertexList);
       if (VertexSelection != -1) {
         SelectCenter.position.set(AllVertexList[VertexSelection].x, AllVertexList[VertexSelection].y, AllVertexList[VertexSelection].z);
@@ -46782,7 +46784,9 @@ var button_call_api = {
   }
 };
 button_folder.add(button_call_api, 'call_api').name('call_api');
-button_folder.hide();
+
+// fold the button folder
+button_folder.close();
 function hit_the_object(x, z) {
   if (AllVertexList.length > 0) {
     // clear the highlight object
@@ -46815,9 +46819,6 @@ var button_hit_the_object = {
   }
 };
 button_folder.add(button_hit_the_object, 'hit_the_object').name('hit_the_object');
-
-//loop through the 2d map and perform a get 
-
 function scene_intialization() {
   _findNeighbor();
   Smooth_it_Out();
