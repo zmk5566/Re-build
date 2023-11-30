@@ -11,6 +11,9 @@ import { smootherstep } from "three/src/math/MathUtils.js";
 import { Vertex,MarchVertex,CreateMarchVertex } from "./Vertex.js";
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 
+// import stats 
+import Stats from 'three/examples/jsm/libs/stats.module.js';
+
 //import the gui
 import * as dat from 'dat.gui';
 
@@ -32,8 +35,11 @@ const states = ["idle", "finding_neibour","smoothing","selection","marching_cube
 
 var state = "idle";
 
-var layer=5;//layer of vertex
+var layer=7;//layer of vertex
 
+const stats = new Stats()
+stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
+document.body.appendChild(stats.dom)
 
 const renderer = new THREE.WebGLRenderer();
 
@@ -453,7 +459,7 @@ function LoadMultipleModels(path,position,model_list,ConstructLayer){
             //scene.add( object );
             // const geometry=object.children[0].geometry;
             // vertices=geometry.vertices;
-            console.log("vertices",verticesList.length);
+            //console.log("vertices",verticesList.length);
             //object.position.set(position[4].x,position[4].y-0.5,position[4].z);
         },
         // called when loading is in progresses
@@ -680,6 +686,7 @@ function animate(time) {
         object.rotation.z = time / 1000;
         object.position.y = 0.5 + 0.5 * Math.abs(Math.sin(time / 1000));
     });
+    stats.update(); 
     renderer.render(scene, camera);
 }
 

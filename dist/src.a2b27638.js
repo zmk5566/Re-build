@@ -38346,7 +38346,126 @@ var OBJLoader = exports.OBJLoader = /*#__PURE__*/function (_Loader) {
   }]);
   return OBJLoader;
 }(_three.Loader);
-},{"three":"node_modules/three/build/three.module.js"}],"node_modules/dat.gui/build/dat.gui.module.js":[function(require,module,exports) {
+},{"three":"node_modules/three/build/three.module.js"}],"node_modules/three/examples/jsm/libs/stats.module.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var Stats = function Stats() {
+  var mode = 0;
+  var container = document.createElement('div');
+  container.style.cssText = 'position:fixed;top:0;left:0;cursor:pointer;opacity:0.9;z-index:10000';
+  container.addEventListener('click', function (event) {
+    event.preventDefault();
+    showPanel(++mode % container.children.length);
+  }, false);
+
+  //
+
+  function addPanel(panel) {
+    container.appendChild(panel.dom);
+    return panel;
+  }
+  function showPanel(id) {
+    for (var i = 0; i < container.children.length; i++) {
+      container.children[i].style.display = i === id ? 'block' : 'none';
+    }
+    mode = id;
+  }
+
+  //
+
+  var beginTime = (performance || Date).now(),
+    prevTime = beginTime,
+    frames = 0;
+  var fpsPanel = addPanel(new Stats.Panel('FPS', '#0ff', '#002'));
+  var msPanel = addPanel(new Stats.Panel('MS', '#0f0', '#020'));
+  if (self.performance && self.performance.memory) {
+    var memPanel = addPanel(new Stats.Panel('MB', '#f08', '#201'));
+  }
+  showPanel(0);
+  return {
+    REVISION: 16,
+    dom: container,
+    addPanel: addPanel,
+    showPanel: showPanel,
+    begin: function begin() {
+      beginTime = (performance || Date).now();
+    },
+    end: function end() {
+      frames++;
+      var time = (performance || Date).now();
+      msPanel.update(time - beginTime, 200);
+      if (time >= prevTime + 1000) {
+        fpsPanel.update(frames * 1000 / (time - prevTime), 100);
+        prevTime = time;
+        frames = 0;
+        if (memPanel) {
+          var memory = performance.memory;
+          memPanel.update(memory.usedJSHeapSize / 1048576, memory.jsHeapSizeLimit / 1048576);
+        }
+      }
+      return time;
+    },
+    update: function update() {
+      beginTime = this.end();
+    },
+    // Backwards Compatibility
+
+    domElement: container,
+    setMode: showPanel
+  };
+};
+Stats.Panel = function (name, fg, bg) {
+  var min = Infinity,
+    max = 0,
+    round = Math.round;
+  var PR = round(window.devicePixelRatio || 1);
+  var WIDTH = 80 * PR,
+    HEIGHT = 48 * PR,
+    TEXT_X = 3 * PR,
+    TEXT_Y = 2 * PR,
+    GRAPH_X = 3 * PR,
+    GRAPH_Y = 15 * PR,
+    GRAPH_WIDTH = 74 * PR,
+    GRAPH_HEIGHT = 30 * PR;
+  var canvas = document.createElement('canvas');
+  canvas.width = WIDTH;
+  canvas.height = HEIGHT;
+  canvas.style.cssText = 'width:80px;height:48px';
+  var context = canvas.getContext('2d');
+  context.font = 'bold ' + 9 * PR + 'px Helvetica,Arial,sans-serif';
+  context.textBaseline = 'top';
+  context.fillStyle = bg;
+  context.fillRect(0, 0, WIDTH, HEIGHT);
+  context.fillStyle = fg;
+  context.fillText(name, TEXT_X, TEXT_Y);
+  context.fillRect(GRAPH_X, GRAPH_Y, GRAPH_WIDTH, GRAPH_HEIGHT);
+  context.fillStyle = bg;
+  context.globalAlpha = 0.9;
+  context.fillRect(GRAPH_X, GRAPH_Y, GRAPH_WIDTH, GRAPH_HEIGHT);
+  return {
+    dom: canvas,
+    update: function update(value, maxValue) {
+      min = Math.min(min, value);
+      max = Math.max(max, value);
+      context.fillStyle = bg;
+      context.globalAlpha = 1;
+      context.fillRect(0, 0, WIDTH, GRAPH_Y);
+      context.fillStyle = fg;
+      context.fillText(round(value) + ' ' + name + ' (' + round(min) + '-' + round(max) + ')', TEXT_X, TEXT_Y);
+      context.drawImage(canvas, GRAPH_X + PR, GRAPH_Y, GRAPH_WIDTH - PR, GRAPH_HEIGHT, GRAPH_X, GRAPH_Y, GRAPH_WIDTH - PR, GRAPH_HEIGHT);
+      context.fillRect(GRAPH_X + GRAPH_WIDTH - PR, GRAPH_Y, PR, GRAPH_HEIGHT);
+      context.fillStyle = bg;
+      context.globalAlpha = 0.9;
+      context.fillRect(GRAPH_X + GRAPH_WIDTH - PR, GRAPH_Y, PR, round((1 - value / maxValue) * GRAPH_HEIGHT));
+    }
+  };
+};
+var _default = exports.default = Stats;
+},{}],"node_modules/dat.gui/build/dat.gui.module.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -46136,11 +46255,14 @@ var _SubQuad = require("./SubQuad.js");
 var _MathUtils = require("three/src/math/MathUtils.js");
 var _Vertex = require("./Vertex.js");
 var _OBJLoader = require("three/examples/jsm/loaders/OBJLoader.js");
+var _statsModule = _interopRequireDefault(require("three/examples/jsm/libs/stats.module.js"));
 var dat = _interopRequireWildcard(require("dat.gui"));
 var _axios = _interopRequireDefault(require("axios"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
 function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && Object.prototype.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
+// import stats 
+
 //import the gui
 
 // import library ready for ajax call, axio
@@ -46157,14 +46279,17 @@ gui.domElement.style.zIndex = 10000;
 //create a state machine to maintain the state of the program
 var states = ["idle", "finding_neibour", "smoothing", "selection", "marching_cube"];
 var state = "idle";
-var layer = 8; //layer of vertex
+var layer = 7; //layer of vertex
 
+var stats = new _statsModule.default();
+stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+document.body.appendChild(stats.dom);
 var renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 //TODO:创建六边形点阵地图
-var number_of_extension = 3;
+var number_of_extension = 2;
 var scene = new THREE.Scene();
 var _default = exports.default = scene;
 var ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -46401,7 +46526,7 @@ function process_the_hitted_logic(idx) {
       }
       if (CurrentCube.MarchVertList_Top[j].IsActive == false) {
         CurrentCube.MarchVertList_Top[j].IsActive = true;
-        //VisualizeMarchVertex(CurrentCube.MarchVertList_Top[j],1);
+        VisualizeMarchVertex(CurrentCube.MarchVertList_Top[j], 1);
         var color1;
         switch (j) {
           case 0:
@@ -46452,25 +46577,43 @@ function process_the_hitted_logic(idx) {
       }
     }
   }
-  console.log(allModelSet);
+
+  //console.log(allModelSet);
   for (var _i7 = 0; _i7 < allModelSet.length; _i7++) {
     //var path='/models/'+allModelSet[i][1]+'.obj';
     var path = '/models/' + 'cube' + '.obj';
     var pos = allModelSet[_i7][2];
-    LoadMultipleModels(path, pos, model_list, ConstructLayer);
+    mesh_hold_object.clear();
+    LoadMultipleModels(path, pos, model_list, 0);
   }
+}
+
+// input an array of 4 vertexes,
+function doubleLerp(vertex_list, position, idx, ConstructLayer) {
+  var x = vertex_list[idx];
+  var y = vertex_list[idx + 1];
+  var z = vertex_list[idx + 2];
+  var interpolatedAB = new THREE.Vector3();
+  var interpolatedCD = new THREE.Vector3();
+  // console.log(`Vertex ${i / 3}: x=${x}, y=${y}, z=${z}`);
+
+  interpolatedAB.lerpVectors(position[0], position[3], x + 0.5);
+  interpolatedCD.lerpVectors(position[1], position[2], x + 0.5);
+  var finalLerp = new THREE.Vector3();
+  finalLerp.lerpVectors(interpolatedAB, interpolatedCD, z + 0.5);
+  vertex_list[idx] = finalLerp.x;
+  vertex_list[idx + 1] = y + finalLerp.y + 0.5 + ConstructLayer;
+  vertex_list[idx + 2] = finalLerp.z;
 }
 function LoadMultipleModels(path, position, model_list, ConstructLayer) {
   //console.log(path);
   //if(path=='/models/0011 0011.obj'){path='/models/1001 1001.obj';}
   var verticesList = [];
-  var interpolatedAB = new THREE.Vector3();
-  var interpolatedCD = new THREE.Vector3();
   loader.load(path,
   // called when resource is loaded
   function (object) {
     var material = new THREE.MeshPhongMaterial({
-      color: 0xffffff,
+      color: 0xa9d4ff,
       wireframe: false,
       transparent: true,
       opacity: 0.3,
@@ -46490,37 +46633,8 @@ function LoadMultipleModels(path, position, model_list, ConstructLayer) {
         // console.log("vertices count",vertices.length);
         // 输出每个顶点的坐标
         for (var _i8 = 0; _i8 < vertices.length; _i8 += 3) {
-          var x = vertices[_i8];
-          var y = vertices[_i8 + 1];
-          var z = vertices[_i8 + 2];
-          // console.log(`Vertex ${i / 3}: x=${x}, y=${y}, z=${z}`);
+          doubleLerp(vertices, position, _i8, ConstructLayer);
 
-          interpolatedAB.lerpVectors(position[0], position[3], x + 0.5);
-          //console.log(interpolatedAB);
-          var CenterOfHex = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), new THREE.MeshBasicMaterial({
-            wireframe: false,
-            color: 0xff0000
-          }));
-          CenterOfHex.position.set(interpolatedAB.x, interpolatedAB.y, interpolatedAB.z);
-          MarchVertex_object.add(CenterOfHex);
-          interpolatedCD.lerpVectors(position[1], position[2], x + 0.5);
-          var CenterOfHex = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), new THREE.MeshBasicMaterial({
-            wireframe: false,
-            color: 0x00ff00
-          }));
-          CenterOfHex.position.set(interpolatedCD.x, interpolatedCD.y, interpolatedCD.z);
-          MarchVertex_object.add(CenterOfHex);
-          var finalLerp = new THREE.Vector3();
-          finalLerp.lerpVectors(interpolatedAB, interpolatedCD, z + 0.5);
-          var CenterOfHex = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), new THREE.MeshBasicMaterial({
-            wireframe: false,
-            color: 0x0000ff
-          }));
-          CenterOfHex.position.set(finalLerp.x, finalLerp.y, finalLerp.z);
-          MarchVertex_object.add(CenterOfHex);
-          vertices[_i8] = finalLerp.x;
-          vertices[_i8 + 1] = (y + finalLerp.y + 0.5 + ConstructLayer) / 2;
-          vertices[_i8 + 2] = finalLerp.z;
           // console.log(`Vertex ${i / 3}: x=${finalLerp.x}, y=${vertices[i+1]}, z=${vertices[i+2]}`);
         }
       }
@@ -46530,7 +46644,7 @@ function LoadMultipleModels(path, position, model_list, ConstructLayer) {
     //scene.add( object );
     // const geometry=object.children[0].geometry;
     // vertices=geometry.vertices;
-    console.log("vertices", verticesList.length);
+    //console.log("vertices",verticesList.length);
     //object.position.set(position[4].x,position[4].y-0.5,position[4].z);
   },
   // called when loading is in progresses
@@ -46540,6 +46654,7 @@ function LoadMultipleModels(path, position, model_list, ConstructLayer) {
   // called when loading has errors
   function (error) {
     console.log('An error happened');
+    console.log(error);
   });
   // console.log(interpolatedAB);
 }
@@ -46704,6 +46819,7 @@ function animate(time) {
     object.rotation.z = time / 1000;
     object.position.y = 0.5 + 0.5 * Math.abs(Math.sin(time / 1000));
   });
+  stats.update();
   renderer.render(scene, camera);
 }
 renderer.setAnimationLoop(animate);
@@ -46825,7 +46941,7 @@ function scene_intialization() {
   covert2Dto3D();
 }
 scene_intialization();
-},{"./styles.css":"src/styles.css","three":"node_modules/three/build/three.module.js","three/examples/jsm/controls/OrbitControls.js":"node_modules/three/examples/jsm/controls/OrbitControls.js","./HexGrid.js":"src/HexGrid.js","./HexCubeCoord.js":"src/HexCubeCoord.js","./Triangle.js":"src/Triangle.js","./Quad.js":"src/Quad.js","./SubQuad.js":"src/SubQuad.js","three/src/math/MathUtils.js":"node_modules/three/src/math/MathUtils.js","./Vertex.js":"src/Vertex.js","three/examples/jsm/loaders/OBJLoader.js":"node_modules/three/examples/jsm/loaders/OBJLoader.js","dat.gui":"node_modules/dat.gui/build/dat.gui.module.js","axios":"node_modules/axios/index.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./styles.css":"src/styles.css","three":"node_modules/three/build/three.module.js","three/examples/jsm/controls/OrbitControls.js":"node_modules/three/examples/jsm/controls/OrbitControls.js","./HexGrid.js":"src/HexGrid.js","./HexCubeCoord.js":"src/HexCubeCoord.js","./Triangle.js":"src/Triangle.js","./Quad.js":"src/Quad.js","./SubQuad.js":"src/SubQuad.js","three/src/math/MathUtils.js":"node_modules/three/src/math/MathUtils.js","./Vertex.js":"src/Vertex.js","three/examples/jsm/loaders/OBJLoader.js":"node_modules/three/examples/jsm/loaders/OBJLoader.js","three/examples/jsm/libs/stats.module.js":"node_modules/three/examples/jsm/libs/stats.module.js","dat.gui":"node_modules/dat.gui/build/dat.gui.module.js","axios":"node_modules/axios/index.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -46850,7 +46966,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "0.0.0.0" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "23421" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "34313" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
