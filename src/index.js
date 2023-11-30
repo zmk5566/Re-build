@@ -10,6 +10,7 @@ import { SubQuad,DrawSubQuad,MapSubQuad4UI,Smooth,Map,CreateMarchCube } from "./
 import { smootherstep } from "three/src/math/MathUtils.js";
 import { Vertex,MarchVertex,CreateMarchVertex } from "./Vertex.js";
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import {ConstructUnit} from './MarchCubeTest.js'
 
 //import the gui
 import * as dat from 'dat.gui';
@@ -946,9 +947,45 @@ function GetNearestVertex(x,y,z,currentVertList){
 
 
 
-
+const march_folder = gui.addFolder('Marching Cube');
+var digit0 = {toggle: false};
+var digit1 = {toggle: false};
+var digit2 = {toggle: false};
+var digit3 = {toggle: false};
+var digit4 = {toggle: false};
+var digit5 = {toggle: false};
+var digit6 = {toggle: false};
+var digit7 = {toggle: false};
+march_folder.add(digit0, 'toggle').name('digit0');
+march_folder.add(digit1, 'toggle').name('digit1');
+march_folder.add(digit2, 'toggle').name('digit2');
+march_folder.add(digit3, 'toggle').name('digit3');
+march_folder.add(digit4, 'toggle').name('digit4');
+march_folder.add(digit5, 'toggle').name('digit5');
+march_folder.add(digit6, 'toggle').name('digit6');
+march_folder.add(digit7, 'toggle').name('digit7');
+const RedrawButton={
+    Redraw: function() {
+        marchCube();
+    }
+}
+march_folder.add(RedrawButton, 'Redraw').name('Redraw');
+var CubeMeSH=[];
+function marchCube(){
+    //scene.clear();
+    CubeMeSH.forEach(element => {scene.remove(element);});
+    var bitlist=[digit0.toggle,digit1.toggle,digit2.toggle,digit3.toggle,digit4.toggle,digit5.toggle,digit6.toggle,digit7.toggle];
+    ConstructUnit(bitlist,scene,CubeMeSH);
+}
 // add gui buttons new folder
 const button_folder = gui.addFolder('Buttons');
+
+// const MarchSampleButton={
+//     marchCube: function() {
+//         marchCube();
+//     }
+// }
+// button_folder.add(MarchSampleButton, 'marchCube').name('Marching Cube Sample');
 
 // add one button
 const button = {
