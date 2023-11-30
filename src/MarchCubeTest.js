@@ -236,7 +236,7 @@ export function DrawFace(FaceID,vertex,scene,CubeMeSH){
     geometry.setIndex(indices);
     
     // 创建材质对象
-    var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });  // 使用绿色作为材质颜色
+    var material = new THREE.MeshBasicMaterial({ color: 0x00ff00,side:THREE.DoubleSide });
     
     // 创建网格对象
     var mesh = new THREE.Mesh(geometry, material);
