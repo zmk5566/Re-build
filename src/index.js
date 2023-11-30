@@ -32,7 +32,7 @@ const states = ["idle", "finding_neibour","smoothing","selection","marching_cube
 
 var state = "idle";
 
-var layer=8;//layer of vertex
+var layer=5;//layer of vertex
 
 
 const renderer = new THREE.WebGLRenderer();
@@ -42,7 +42,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 //TODO:创建六边形点阵地图
-var number_of_extension = 3;
+var number_of_extension = 2;
 
 const scene = new THREE.Scene();
 export default scene;
@@ -317,7 +317,7 @@ function process_the_hitted_logic(idx) {
             }
             if(CurrentCube.MarchVertList_Top[j].IsActive==false){
                 CurrentCube.MarchVertList_Top[j].IsActive=true;
-                //VisualizeMarchVertex(CurrentCube.MarchVertList_Top[j],1);
+                VisualizeMarchVertex(CurrentCube.MarchVertList_Top[j],1);
                 var color1;
                 switch(j){
                     case 0:
@@ -384,27 +384,52 @@ function process_the_hitted_logic(idx) {
     }
 
 
-    console.log(allModelSet);
+    //console.log(allModelSet);
     for(let i=0;i<allModelSet.length;i++){
         //var path='/models/'+allModelSet[i][1]+'.obj';
         var path='/models/'+'cube'+'.obj';
         var pos=allModelSet[i][2];
 
-        LoadMultipleModels(path,pos,model_list,ConstructLayer);
+        mesh_hold_object.clear();
+        LoadMultipleModels(path,pos,model_list,0);
     }
 }
+
+
+
+// input an array of 4 vertexes,
+function doubleLerp(vertex_list,position,idx,ConstructLayer){
+    const x = vertex_list[idx];
+    const y = vertex_list[idx + 1];
+    const z = vertex_list[idx + 2];
+
+    var interpolatedAB = new THREE.Vector3();
+    var interpolatedCD = new THREE.Vector3();
+    // console.log(`Vertex ${i / 3}: x=${x}, y=${y}, z=${z}`);
+
+    interpolatedAB.lerpVectors(position[0], position[3], (x+0.5));
+
+    interpolatedCD.lerpVectors(position[1], position[2], (x+0.5));
+
+    const finalLerp=new THREE.Vector3();
+    finalLerp.lerpVectors(interpolatedAB,interpolatedCD,(z+0.5));
+
+            
+    vertex_list[idx]=finalLerp.x;
+    vertex_list[idx+1]=(y+finalLerp.y+0.5+ConstructLayer);
+    vertex_list[idx+2]=finalLerp.z;
+}
+
 
 function LoadMultipleModels(path,position,model_list,ConstructLayer){
     //console.log(path);
     //if(path=='/models/0011 0011.obj'){path='/models/1001 1001.obj';}
     var  verticesList=[];
-    var interpolatedAB = new THREE.Vector3();
-    var interpolatedCD = new THREE.Vector3();
     loader.load(
         path,
         // called when resource is loaded
         function ( object ) {
-            var material = new THREE.MeshPhongMaterial({ color: 0xffffff ,wireframe:false,transparent:true,opacity:0.3,side:THREE.DoubleSide});
+            var material = new THREE.MeshPhongMaterial({ color: 0xa9d4ff ,wireframe:false,transparent:true,opacity:0.3,side:THREE.DoubleSide});
             if(path=='/models/1001 1001.obj'){
                 material = new THREE.MeshPhongMaterial({ color: 0xff00ff });}
             object.traverse(function (child) {
@@ -416,43 +441,9 @@ function LoadMultipleModels(path,position,model_list,ConstructLayer){
                 // console.log("vertices count",vertices.length);
                 // 输出每个顶点的坐标
                 for (let i = 0; i < vertices.length; i += 3) {
-                    const x = vertices[i];
-                    const y = vertices[i + 1];
-                    const z = vertices[i + 2];
-                    // console.log(`Vertex ${i / 3}: x=${x}, y=${y}, z=${z}`);
+                    
+                    doubleLerp(vertices,position,i,ConstructLayer);
 
-                    interpolatedAB.lerpVectors(position[0], position[3], (x+0.5));
-                    //console.log(interpolatedAB);
-                    var CenterOfHex = new THREE.Mesh(
-                        new THREE.BoxGeometry(0.1,0.1,0.1),
-                        new THREE.MeshBasicMaterial({
-                            wireframe: false,
-                            color: 0xff0000
-                        }));
-                        CenterOfHex.position.set(interpolatedAB.x,interpolatedAB.y,interpolatedAB.z);
-                        MarchVertex_object.add(CenterOfHex);
-                        interpolatedCD.lerpVectors(position[1], position[2], (x+0.5));
-                        var CenterOfHex = new THREE.Mesh(
-                            new THREE.BoxGeometry(0.1,0.1,0.1),
-                            new THREE.MeshBasicMaterial({
-                                wireframe: false,
-                                color: 0x00ff00
-                            }));
-                            CenterOfHex.position.set(interpolatedCD.x,interpolatedCD.y,interpolatedCD.z);
-                            MarchVertex_object.add(CenterOfHex);
-                        const finalLerp=new THREE.Vector3();
-                        finalLerp.lerpVectors(interpolatedAB,interpolatedCD,(z+0.5));
-                        var CenterOfHex = new THREE.Mesh(
-                            new THREE.BoxGeometry(0.1,0.1,0.1),
-                            new THREE.MeshBasicMaterial({
-                                wireframe: false,
-                                color: 0x0000ff
-                            }));
-                            CenterOfHex.position.set(finalLerp.x,finalLerp.y,finalLerp.z);
-                            MarchVertex_object.add(CenterOfHex);
-                    vertices[i]=finalLerp.x;
-                    vertices[i+1]=(y+finalLerp.y+0.5+ConstructLayer)/2;
-                    vertices[i+2]=finalLerp.z;
                     // console.log(`Vertex ${i / 3}: x=${finalLerp.x}, y=${vertices[i+1]}, z=${vertices[i+2]}`);
                 }
             }
@@ -472,6 +463,7 @@ function LoadMultipleModels(path,position,model_list,ConstructLayer){
         // called when loading has errors
         function ( error ) {
             console.log( 'An error happened' );
+            console.log(error);
         }
     );
     // console.log(interpolatedAB);
@@ -582,7 +574,6 @@ const MarchVertex_object = new THREE.Object3D();
 scene.add(MarchVertex_object);
 
 function covert2Dto3D(){
-
     console.log("convert 2D to 3D");
     state = "marching_cube";
     console.log(AllVertexList.length);
