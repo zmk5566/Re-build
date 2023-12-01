@@ -1,3 +1,6 @@
+import axios from 'axios';
+
+
 const url = 'https://api.drugcity.a8a8.top/';
 
 

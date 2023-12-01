@@ -2,7 +2,6 @@ import {HexCubeCoord,HexCoordList,CubeRing} from './HexCubeCoord.js';
 import {Edge,IsEdgeExist} from './Edge.js';
 import { SubQuad } from './SubQuad.js';
 //import scene from './index.js';
-import * as THREE from 'three';
 import { Quad } from './Quad.js';
 export class Triangle{
     squadlist=[];

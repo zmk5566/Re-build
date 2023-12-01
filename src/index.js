@@ -3,32 +3,12 @@ import "./styles.css";
 import * as THREE from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
 import {HexGrid} from './HexGrid.js';
-import {HexCubeCoord,HexCoordList,CubeRing} from './HexCubeCoord.js';
 import {Merge,TriangleList,DrawTriangle, Triangle} from './Triangle.js';
-import { DrawQuad } from "./Quad.js";
 import { SubQuad,DrawSubQuad,MapSubQuad4UI,Smooth,Map,CreateMarchCube } from "./SubQuad.js";
-import { smootherstep } from "three/src/math/MathUtils.js";
 import { Vertex,MarchVertex,CreateMarchVertex } from "./Vertex.js";
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 
-// import stats 
-import Stats from 'three/examples/jsm/libs/stats.module.js';
-
-//import the gui
-import * as dat from 'dat.gui';
-
 // import library ready for ajax call, axio
-import axios from 'axios';
-
-
-const gui = new dat.GUI();
-
-//create a folder for the Display
-const display_folder = gui.addFolder('Display');
-
-//set the gui to the front
-
-gui.domElement.style.zIndex = 10000;
 
 //create a state machine to maintain the state of the program
 const states = ["idle", "finding_neibour","smoothing","selection","marching_cube"]
@@ -37,9 +17,6 @@ var state = "idle";
 
 var layer=7;//layer of vertex
 
-const stats = new Stats()
-stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
-document.body.appendChild(stats.dom)
 
 const renderer = new THREE.WebGLRenderer();
 
@@ -51,7 +28,7 @@ document.body.appendChild(renderer.domElement);
 var number_of_extension = 2;
 
 const scene = new THREE.Scene();
-export default scene;
+//export default scene;
 
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
 scene.add(ambientLight);
@@ -69,21 +46,11 @@ camera.position.set(0, 30, 0);//camera位置
 
 orbit.update();
 
-//整个map上的grid//其实就是一整块
-var planeMesh = new THREE.Mesh(
-    new THREE.PlaneGeometry(20, 20),
-    new THREE.MeshBasicMaterial({
-        side: THREE.DoubleSide,
-        visible: false
-    })
-);
-planeMesh.rotateX(-Math.PI / 2);
-scene.add(planeMesh);
 
 //Stage1：找到每个六边形的中心点，在这个位置创建一个球，并显示出来
 var center=new HexCubeCoord(0,0,0);
-var coordList=HexCoordList(3);
-var ringSample=CubeRing(center,3);
+var coordList=HexCoordList(number_of_extension);
+var ringSample=CubeRing(center,number_of_extension);
 //饼：在每一个重点创建一个cube
 
 
@@ -94,7 +61,6 @@ var triangle_list=TriangleList(coordList);//所有的三角形
 const triangle_object = new THREE.Object3D();
 scene.add(triangle_object);
 //创建三角形地图grid
-var LineList=[];
 for(let i=0;i<triangle_list.length;i++){
     const points=[];
     const material = new THREE.LineBasicMaterial( { color: 0x0000ff } );
@@ -105,7 +71,6 @@ for(let i=0;i<triangle_list.length;i++){
     points.push(new THREE.Vector3(triangle_list[i].va[0],triangle_list[i].va[1],triangle_list[i].va[2]));
     const geometry = new THREE.BufferGeometry().setFromPoints( points );
     const line = new THREE.Line( geometry, material );
-    LineList.push(line);
     triangle_object.add( line );
 }
 
@@ -117,13 +82,8 @@ function clearTheScene(){
 
 //Step3
 //const button_FindNeighbor = document.getElementById('FindNeighbor');
-var tri_list=[];
+
 var qua_list=[];
-var CenterList=[];
-var vertex_List=[];
-var MidList=[];
-var quad_list=[];
-var isolated_triangle_list=[];
 var AllSquadList=[];
 var AllVertexList=[];
 var VertexSelection=-1;
@@ -140,125 +100,6 @@ scene.add(mesh_hold_object);
 // create a object to hold the smoothsquad visualization
 const smooth_object = new THREE.Object3D();
 scene.add(smooth_object);
-
-
-
-
-function findNeighbor(){
-
-    state = "finding_neibour";
-    // 在这里编写按钮点击时要执行的 JavaScript 代码
-    clearTheScene();
-    //tri_list.forEach(element => {scene.remove(element);});
-    //qua_list.forEach(element => {scene.remove(element);});
-    var triangle_list=TriangleList(coordList);
-    console.log("Number of Triangles before merge",triangle_list.length);
-    Merge(triangle_list,quad_list,isolated_triangle_list);
-    console.log("Number of Quads created",quad_list.length);
-    console.log("Number of Triangles Left",isolated_triangle_list.length);
-    //DrawTriangle(test[0],0x0000ff,scene,tri_list);//随机选取的三角形
-    //console.log(triangle_list.length);
-    if(isolated_triangle_list.length>0){
-        //DrawSubQuad(isolated_triangle_list[0].squadlist[0],0xff0000,scene,tri_list);
-        for(let j=0;j<isolated_triangle_list.length;j++){
-            //DrawTriangle(isolated_triangle_list[j],0xff0000,scene,tri_list);
-            DrawSubQuad(isolated_triangle_list[j].squadlist[0],0x000022,FindNeighborResult,qua_list,false);
-            DrawSubQuad(isolated_triangle_list[j].squadlist[1],0xff22ff,FindNeighborResult,qua_list,false);
-            DrawSubQuad(isolated_triangle_list[j].squadlist[2],0x0022ff,FindNeighborResult,qua_list,false);
-            
-            AllSquadList.push(isolated_triangle_list[j].squadlist[0]);
-            AllSquadList.push(isolated_triangle_list[j].squadlist[1]);
-            AllSquadList.push(isolated_triangle_list[j].squadlist[2]);
-        }
-    }
-    
-    //DrawQuad(quad_list[0],0x00ff00,scene,qua_list);
-    if(quad_list.length>0){
-        for(let j=0;j<quad_list.length;j++){
-            var color=0x00ff00+j*(0x0000ff)/quad_list.length;
-            //DrawQuad(quad_list[j],color,scene,qua_list);}
-            DrawSubQuad(quad_list[j].squadlist[0],0xffc0cb,FindNeighborResult,qua_list,false);
-            DrawSubQuad(quad_list[j].squadlist[1],0x71a5d0,FindNeighborResult,qua_list,false);
-            DrawSubQuad(quad_list[j].squadlist[2],0xe4b7ff,FindNeighborResult,qua_list,false);
-            DrawSubQuad(quad_list[j].squadlist[3],0xff9c70,FindNeighborResult,qua_list,false);
-
-            //add to squadlist
-            AllSquadList.push(quad_list[j].squadlist[0]);
-            AllSquadList.push(quad_list[j].squadlist[1]);
-            AllSquadList.push(quad_list[j].squadlist[2]);
-            AllSquadList.push(quad_list[j].squadlist[3]);
-        }
-    }
-    //按照顶点分类网格
-    MapSubQuad4UI(isolated_triangle_list,quad_list,vertex_List,MidList,CenterList);
-    for(let i=0;i<vertex_List[4].subquadlist.length;i++){
-        var CenterOfHex = new THREE.Mesh(
-                    new THREE.BoxGeometry(0.1, 0.1, 0.1),
-                    new THREE.MeshBasicMaterial({
-                        wireframe: false,
-                        color: 0xAABBFF
-                    }));
-                    CenterOfHex.position.set(vertex_List[4].x,vertex_List[4].y,vertex_List[4].z);
-                    FindNeighborResult.add(CenterOfHex)
-        console.log(vertex_List[4].subquadlist.length);
-        DrawSubQuad(vertex_List[4].subquadlist[i],0xff0000,FindNeighborResult,qua_list);
-    }
-    //测试定点分类
-    var AllVertexMesh=[];
-    //drawVertexByType(CenterList,MidList,vertex_List,AllVertexMesh);
-    AllVertexList=CenterList.concat(MidList).concat(vertex_List);
-    Map(AllVertexList,AllSquadList);
-
-}
-
-
-// button_FindNeighbor.addEventListener('click', function() {
-//     findNeighbor();
-// });
-
-function the_hitted_logic(idx){
-    drawVertexbyIndex(idx,the_scene_object,0xadd8e6);
-    SelectedVertex_object.add(the_scene_object);
-800080
-    
-    var ConstructLayer=0;
-    //AllMarchVertexList[0][VertexSelection].IsActive=true;
-    if(AllMarchVertexList[0][VertexSelection].IsActive==false){
-        //说明这地方还没建东西
-        ConstructLayer=0;
-    }
-    else{
-        for(let i=1;i<layer-1;i++){
-            if(AllMarchVertexList[i][VertexSelection].IsActive==true&&
-            AllMarchVertexList[i+1][VertexSelection].IsActive==false){
-                AllMarchVertexList[i][VertexSelection].IsActive=true;
-                ConstructLayer=i;
-                break;
-            }
-
-        }
-    }
-
-    var CenterVert=AllMarchVertexList[ConstructLayer][VertexSelection];
-    console.log(ConstructLayer);
-    for(let i=0;i<CenterVert.subquadid_list.length;i++){
-        var vertid=CenterVert.subquadid_list[i];
-        console.log(ConstructLayer);
-        console.log(AllMarchCubeList[ConstructLayer].length);
-        var CurrentCube=AllMarchCubeList[ConstructLayer][vertid];
-        for(let j=0;j<4;j++){
-            if(CurrentCube.MarchVertList_Bottom[j].IsActive==false){
-                CurrentCube.MarchVertList_Bottom[j].IsActive=true;
-                VisualizeMarchVertex(CurrentCube.MarchVertList_Bottom[j],1);
-            }
-            if(CurrentCube.MarchVertList_Top[j].IsActive==false){
-                CurrentCube.MarchVertList_Top[j].IsActive=true;
-                VisualizeMarchVertex(CurrentCube.MarchVertList_Top[j],1);
-            }
-        }
-    }
-
-}
 
 var model_list=[];
 const loader=new OBJLoader();
@@ -403,6 +244,7 @@ function process_the_hitted_logic(idx) {
 
 
 
+
 // input an array of 4 vertexes,
 function doubleLerp(vertex_list,position,idx,ConstructLayer){
     const x = vertex_list[idx];
@@ -447,20 +289,12 @@ function LoadMultipleModels(path,position,model_list,ConstructLayer){
                 // console.log("vertices count",vertices.length);
                 // 输出每个顶点的坐标
                 for (let i = 0; i < vertices.length; i += 3) {
-                    
                     doubleLerp(vertices,position,i,ConstructLayer);
-
-                    // console.log(`Vertex ${i / 3}: x=${finalLerp.x}, y=${vertices[i+1]}, z=${vertices[i+2]}`);
                 }
             }
             });
 
             mesh_hold_object.add(object);
-            //scene.add( object );
-            // const geometry=object.children[0].geometry;
-            // vertices=geometry.vertices;
-            //console.log("vertices",verticesList.length);
-            //object.position.set(position[4].x,position[4].y-0.5,position[4].z);
         },
         // called when loading is in progresses
         function ( xhr ) {
@@ -477,50 +311,7 @@ function LoadMultipleModels(path,position,model_list,ConstructLayer){
 }
 
 
-
-
-function drawVertexByType(CenterList,MidList,vertex_List,result){
-
-    result.forEach(element => {scene.remove(element);});
-    result.length=0;
-    for(let i=0;i<CenterList.length;i++){
-        var CenterOfHex = new THREE.Mesh(
-        new THREE.BoxGeometry(0.1, 0.1, 0.1),
-        new THREE.MeshBasicMaterial({
-            wireframe: false,
-            color: 0xAABBFF
-        }));
-        CenterOfHex.position.set(CenterList[i].x,CenterList[i].y,CenterList[i].z);
-        result.push(CenterOfHex);
-        mesh_hold_object.add(CenterOfHex);
-    }
-    for(let i=0;i<MidList.length;i++){
-        var CenterOfHex = new THREE.Mesh(
-        new THREE.BoxGeometry(0.1, 0.1, 0.1),
-        new THREE.MeshBasicMaterial({
-            wireframe: false,
-            color: 0xAABB00
-        }));
-        CenterOfHex.position.set(MidList[i].x,MidList[i].y,MidList[i].z);
-        result.push(CenterOfHex);
-        mesh_hold_object.add(CenterOfHex);
-    }
-    for(let i=0;i<vertex_List.length;i++){
-        var CenterOfHex = new THREE.Mesh(
-        new THREE.BoxGeometry(0.1, 0.1, 0.1),
-        new THREE.MeshBasicMaterial({
-            wireframe: false,
-            color: 0x0000FF
-        }));
-        CenterOfHex.position.set(vertex_List[i].x,vertex_List[i].y,vertex_List[i].z);
-        result.push(CenterOfHex);
-        mesh_hold_object.add(CenterOfHex);
-    }
-}
-
-
-
-function Smooth_it_Out(){
+function smooth_hex_vertexes_positions(){
 
         state = "smoothing";
 
@@ -536,22 +327,6 @@ function Smooth_it_Out(){
 }
 
 
-// create an empty 3d object to hold the vertex and subquad in the future
-const the_scene_object = new THREE.Object3D();
-
-// mainly used for drawing the selected or hightlighted graphic
-function drawVertexbyIndex(idx,the_scene_object,color=0xffc0cb){
-
-    var StartIdx=idx;
-    //console.log(AllVertexList.length);
-    var testVert=AllVertexList[StartIdx];
-    //console.log(testVert.subquadid_list);
-    for(let i=0;i<testVert.subquadid_list.length;i++){
-        DrawSubQuad(AllSquadList[testVert.subquadid_list[i]],color,the_scene_object,qua_list,false);
-    }
-
-    return the_scene_object;
-}
 
 // create a layer to hold the selected vertex
 const SelectedVertex_object = new THREE.Object3D();
@@ -571,21 +346,9 @@ function VisualizeMarchVertex(march_vertex,height){
         CenterOfHex.position.set(march_vertex.x,march_vertex.layer*height,march_vertex.z);
         MarchVertex_object.add(CenterOfHex);
 }
-var AllMarchVertexList=[];
-var AllMarchCubeList=[];
-//const AddLayer_btn = document.getElementById('Construct3D');
 
-// create a object to hold marching vertexes
-const MarchVertex_object = new THREE.Object3D();
-scene.add(MarchVertex_object);
 
-function covert2Dto3D(){
-    console.log("convert 2D to 3D");
-    state = "marching_cube";
-    console.log(AllVertexList.length);
-    CreateMarchVertex(AllVertexList,AllMarchVertexList,layer);
-    CreateMarchCube(AllSquadList,AllMarchVertexList,AllMarchCubeList,layer-1);
-}
+
 
 
 const AddLoadModel = document.getElementById('talk_to_gpt');
@@ -628,50 +391,43 @@ var SelectCenter = new THREE.Mesh(
 scene.add(SelectCenter);
 
 
-function mouseTriggerBase(){
+function mouseTriggerBase(mousePosition,camera){
+
+    var selected_area=-1;
+
     raycaster.setFromCamera(mousePosition, camera);//从相机到鼠标位置创建一条射线
     intersects = raycaster.intersectObject(planeMesh);//射线跟平面形成焦点
     if(intersects.length > 0) {//如果有焦点
         const intersect = intersects[0];
 
-        const sphere = new THREE.Mesh(
-            new THREE.BoxGeometry(0.1,0.1,0.1),
-            new THREE.MeshBasicMaterial({
-                wireframe: true,
-                color: 0x00FF00
-            })
-        );
         var projected=new THREE.Vector3(0,0,0)
         projected.x=intersect.point.x;
         projected.y=0;
         projected.z=intersect.point.z;
 
-        var result;
         if (AllVertexList.length>0){
             // clear the highlight object
             highlight_object.clear();
-            VertexSelection=GetNearestVertex(projected.x,0,projected.z,AllVertexList);
+            selected_area=GetNearestVertex(projected.x,0,projected.z,AllVertexList);
 
-            if (VertexSelection != -1){
+            if (selected_area != -1){
            
-            SelectCenter.position.set(AllVertexList[VertexSelection].x,AllVertexList[VertexSelection].y,AllVertexList[VertexSelection].z);
+            SelectCenter.position.set(AllVertexList[selected_area].x,AllVertexList[selected_area].y,AllVertexList[selected_area].z);
             
             // get a orange color
-            drawVertexbyIndex(VertexSelection,highlight_object,0xffff00);
+            drawVertexbyIndex(selected_area,highlight_object,0xffff00);
             }
         }
 
     }
 
-    return VertexSelection;
+    return selected_area;
 }
 
 window.addEventListener('mousemove', function(e) {
     // ///改一下
-
-    mousePosition.x = (e.clientX / window.innerWidth) * 2 - 1;
-    mousePosition.y = -(e.clientY / window.innerHeight) * 2 + 1;
-    mouseTriggerBase();
+    var mousePosition = new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
+    mouseTriggerBase(mousePosition);
   
 });
 
@@ -686,7 +442,7 @@ function animate(time) {
         object.rotation.z = time / 1000;
         object.position.y = 0.5 + 0.5 * Math.abs(Math.sin(time / 1000));
     });
-    stats.update(); 
+    //stats.update(); 
     renderer.render(scene, camera);
 }
 
@@ -719,121 +475,10 @@ function GetNearestVertex(x,y,z,currentVertList){
 }
 
 
-// add gui buttons new folder
-const button_folder = gui.addFolder('Buttons');
-
-const button_ready = {
-    ready: function() {
-        // ready to construct the map
-        state = "selection";
-        findNeighbor();
-        Smooth_it_Out();
-        covert2Dto3D();
-    }
-}
-
-button_folder.add(button_ready, 'ready').name('Ready');
-
-// add one button
-const button = {
-    findNeighbor: function() {
-        findNeighbor();
-    }
-};
-
-// add the button to the folder
-button_folder.add(button, 'findNeighbor').name('Find Neighbor');
-
-// add another button smooth
-
-const button_smooth = {
-    smooth: function() {
-        Smooth_it_Out();
-    }
-};
-
-button_folder.add(button_smooth, 'smooth').name('Smooth');
-
-// add 2d to 3d button
-const button_2d_to_3d = {
-    convert: function() {
-        covert2Dto3D();
-    }
-};
-
-
-
-button_folder.add(button_2d_to_3d, 'convert').name('2D to 3D');
-
-button_folder.open();
-
-// add gui check boxes for the display
-display_folder.add(SelectedVertex_object, 'visible').name('SelectedVertex_object');
-display_folder.add(MarchVertex_object, 'visible').name('MarchVertex_object');
-display_folder.add(mesh_hold_object, 'visible').name('mesh_hold_object');
-
-
-
-const button_call_api = {
-    call_api: function() {
-        get_map();
-    }
-};
-
-button_folder.add(button_call_api, 'call_api').name('call_api');
-
-// fold the button folder
-button_folder.close();
-
-function hit_the_object(x,z){
-    if (AllVertexList.length>0){
-        // clear the highlight object
-        highlight_object.children.forEach(function(object) {
-            highlight_object.remove(object);
-        });
-        VertexSelection=GetNearestVertex(x,0,z,AllVertexList);
-
-        if (VertexSelection != -1){
-            the_hitted_logic(VertexSelection);
-        }
-    }
-}
- 
-
-function hit_the_object_in_center(){
-
-    //loop through the 2d map and perform a hit_the_object
-    var map_2d =the_map.map;
-
-    var grid_unit_size = 1;
-    // loop through the 2d array and create a 2d grid map
-
-
-
-    for (let i = 0; i < map_2d.length; i++) {
-        for (let j = 0; j < map_2d[i].length; j++) {
-            if (the_map.map[i][j]!=0){
-                hit_the_object((i-map_data.city_width*0.5+0.5)*grid_unit_size,(j-map_data.city_height*0.5+0.5)*grid_unit_size);
-            }
-        }
-    }
-
-
-    
-}
-
-const button_hit_the_object = {
-    hit_the_object: function() {
-        hit_the_object_in_center();
-    }
-};
-
-button_folder.add(button_hit_the_object, 'hit_the_object').name('hit_the_object');
-
 
 function scene_intialization(){
     findNeighbor();
-    Smooth_it_Out();
+    smooth_hex_vertexes_positions();
     covert2Dto3D();
 }
 
