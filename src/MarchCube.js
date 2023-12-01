@@ -1,30 +1,11 @@
-import * as THREE from 'three';
-import { Vertex } from './Vertex';
-import { Triangle } from './Triangle';
-import { Quad } from './Quad';
-import {get_model,boolArrayToInt} from "./ModelHolder.js";
-import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
-const loader = new OBJLoader();
+import {SubQuad} from "./SubQuad.js";
 
-export class SubQuad{
-    constructor(va,vb,vc,vd){
-        this.va=va;
-        this.vb=vb;
-        this.vc=vc;
-        this.vd=vd;
 
-        this.VerAidx=-1;
-        this.VerBidx=-1;
-        this.VerCidx=-1;
-        this.VerDidx=-1;
-    }
-}
 export class MarchCube extends SubQuad{
-    
     //有八个顶点的
     MarchVertList_Top=[];
     MarchVertList_Bottom=[];
-    constructor(va,vb,vc,vd,layer,the_scene,debug_scene){
+    constructor(va,vb,vc,vd,layer){
         super(va,vb,vc,vd);
         this.layer=layer;
         this.botVerAidx;
@@ -33,86 +14,26 @@ export class MarchCube extends SubQuad{
         this.botVerDidx;
         this.MarchVertList_Top;
         this.MarchVertList_Bottom;
-        this.ModelName="0000 0000";
+        this.ModelName="";
         this.center_post;
-        this.model_int=0;
-        this.scene_object = new THREE.Object3D();
-        the_scene.add(this.scene_object);
-        this.debug_object = new THREE.Object3D();
-        debug_scene.add(this.debug_object);
 
     }
-
-    VisualizeMarchVertex(march_vertex,height){
-        var CenterOfHex = new THREE.Mesh(
-            new THREE.BoxGeometry(0.1,0.1,0.1),
-            new THREE.MeshBasicMaterial({
-                wireframe: false,
-                color: march_vertex.IsActive == true ? 0xff10f0 : 0xff0000
-            }));
-            CenterOfHex.position.set(march_vertex.x,march_vertex.layer*height,march_vertex.z);
-            this.debug_object.add(CenterOfHex);
-    }
-
 
     on_triggered(){
-
-        // change itself to be active
         for(let j=0;j<4;j++){//遍历所有受影响的vertex
             if(this.MarchVertList_Bottom[j].IsActive==false){
                 this.MarchVertList_Bottom[j].IsActive=true;
                 //this.MarchVertList_Bottom[j].on_triggered(steps-1);
-                this.VisualizeMarchVertex(this.MarchVertList_Bottom[j],1);
+                //VisualizeMarchVertex(CurrentCube.MarchVertList_Bottom[j],1);
             }
             if(this.MarchVertList_Top[j].IsActive==false){
                 this.MarchVertList_Top[j].IsActive=true;
                 //this.MarchVertList_Top[j].on_triggered(steps-1);
-                this.VisualizeMarchVertex(this.MarchVertList_Top[j],1);
+                //VisualizeMarchVertex(CurrentCube.MarchVertList_Top[j],1);
             }
         }
         this.update_name();
 
-    }
-
-
-    
-        load_model(){
-            this.update_name();
-            this.update_pos();
-            var  verticesList=[];
-            
-            this.scene_object.clear();
-
-            if (this.model_int != 0) {
-            loader.load(
-                "/models/cube.obj",
-                // called when resource is loaded
-                 ( object ) => {
-                    var material = new THREE.MeshPhongMaterial({ color: 0xa9d4ff ,wireframe:false,transparent:true,opacity:0.3,side:THREE.DoubleSide});
-
-                    object.traverse((child) => {
-                    if (child instanceof THREE.Mesh) {
-                        child.material = material;
-                        child.geometry.applyMatrix4(new THREE.Matrix4().makeRotationY(-Math.PI / 2));
-                        // vertices=child.vertices;
-                        const vertices = child.geometry.attributes.position.array;
-                        // console.log("vertices count",vertices.length);
-                        // 输出每个顶点的坐标
-                        for (let i = 0; i < vertices.length; i += 3) {
-                            double_lerp(vertices,this.position,i,0);
-                        }
-                    }
-                    });
-                    this.mesh_model = object;
-                    this.scene_object.add(this.mesh_model);
-                    //mesh_hold_object.add(object);
-                }
-            );
-            }
-
-        }
-
-        update_pos(){
 
         var CenterPosition=new THREE.Vector3(
             (this.MarchVertList_Bottom[0].x+
@@ -130,56 +51,55 @@ export class MarchCube extends SubQuad{
             var VertexC=new THREE.Vector3(this.MarchVertList_Bottom[2].x,this.MarchVertList_Bottom[2].y,this.MarchVertList_Bottom[2].z);
             var VertexD=new THREE.Vector3(this.MarchVertList_Bottom[3].x,this.MarchVertList_Bottom[3].y,this.MarchVertList_Bottom[3].z);
             this.position=[VertexA,VertexB,VertexC,VertexD,CenterPosition];
-        }
 
 
-    // load_model(){
-    //     this.mesh_model  =deepCopyThreeObject(get_model(this.model_int));
-    //     console.log(this.mesh_model);
-    //     //this.mesh_model = this.cube_hub.get_preloaded_model(this.bits_list);
+            this.load_model();
+    }
+    
 
-    //     // need to be changed very soon
-    //     var material = new THREE.MeshPhongMaterial({ color: 0xa9d4ff ,wireframe:false,transparent:true,opacity:0.3,side:THREE.DoubleSide});
+    load_model(){
+        this.mesh_model = this.cube_hub.get_preloaded_model(this.bits_list);
 
-    //     this.mesh_model.traverse((child) =>  {
-    //         if (child instanceof THREE.Mesh) {
-    //             child.material = material;
-    //             child.geometry.applyMatrix4(new THREE.Matrix4().makeRotationY(-Math.PI / 2));
-    //             // vertices=child.vertices;
-    //             const vertices = child.geometry.attributes.position.array;
-    //             // console.log("vertices count",vertices.length);
-    //             // 输出每个顶点的坐标
-    //             for (let i = 0; i < vertices.length; i += 3) {
-    //                 double_lerp(vertices,this.position,i,0);
-    //             }
-    //         }
-    //         });
+        // need to be changed very soon
+        var material = new THREE.MeshPhongMaterial({ color: 0xa9d4ff ,wireframe:false,transparent:true,opacity:0.3,side:THREE.DoubleSide});
 
-    //     this.scene_object.add(this.mesh_model);
-    // }
+        this.mesh_model.traverse(function (child) {
+            if (child instanceof THREE.Mesh) {
+                child.material = material;
+                child.geometry.applyMatrix4(new THREE.Matrix4().makeRotationY(-Math.PI / 2));
+                // vertices=child.vertices;
+                const vertices = child.geometry.attributes.position.array;
+                // console.log("vertices count",vertices.length);
+                // 输出每个顶点的坐标
+                for (let i = 0; i < vertices.length; i += 3) {
+                    this.doubleLerp(vertices,this.position,i,ConstructLayer);
+                }
+            }
+            });
+
+        this.scene_object.add(this.mesh_model);
+    }
 
     
 
     update_name(){
-        var bit1=this.MarchVertList_Top[0].IsActive;
-        var bit2=this.MarchVertList_Top[1].IsActive;
-        var bit3=this.MarchVertList_Top[2].IsActive;
-        var bit4=this.MarchVertList_Top[3].IsActive;
+        var bit1=this.MarchVertList_Top[0].IsActive==false?'0':'1';
+        var bit2=this.MarchVertList_Top[1].IsActive==false?'0':'1';
+        var bit3=this.MarchVertList_Top[2].IsActive==false?'0':'1';
+        var bit4=this.MarchVertList_Top[3].IsActive==false?'0':'1';
 
-        var bit5=this.MarchVertList_Bottom[0].IsActive;
-        var bit6=this.MarchVertList_Bottom[1].IsActive;
-        var bit7=this.MarchVertList_Bottom[2].IsActive;
-        var bit8=this.MarchVertList_Bottom[3].IsActive;
-        //this.ModelName=bit1+bit2+bit3+bit4+' '+bit5+bit6+bit7+bit8;
-
-        var temp_bits_list=[bit1,bit2,bit3,bit4,bit5,bit6,bit7,bit8];
-        this.model_int=boolArrayToInt(temp_bits_list);
-        //console.log(temp_bits_list)
-        //console.log(this.model_int);
+        var bit5=this.MarchVertList_Bottom[0].IsActive==false?'0':'1';
+        var bit6=this.MarchVertList_Bottom[1].IsActive==false?'0':'1';
+        var bit7=this.MarchVertList_Bottom[2].IsActive==false?'0':'1';
+        var bit8=this.MarchVertList_Bottom[3].IsActive==false?'0':'1';
+        this.ModelName=bit1+bit2+bit3+bit4+' '+bit5+bit6+bit7+bit8;
         
     }
 }
-export function CreateMarchCube(AllSquadList,AllMarchVertexList,AllMarchCubeList,layer,the_scene,debug_scene){
+
+
+
+export function CreateMarchCube(AllSquadList,AllMarchVertexList,AllMarchCubeList,layer){
     for(let j=0;j<layer;j++){
         var AllMarchCubeLayer_j=[];
         for(let i=0;i<AllSquadList.length;i++){
@@ -188,7 +108,7 @@ export function CreateMarchCube(AllSquadList,AllMarchVertexList,AllMarchCubeList
                 AllSquadList[i].vb,//layer*height,因为设置的height=1
                 AllSquadList[i].vc,
                 AllSquadList[i].vd,
-                j,the_scene,debug_scene);
+                j);
                 NewCube.botVerAidx=AllSquadList[i].VerAidx;
                 NewCube.botVerBidx=AllSquadList[i].VerBidx;
                 NewCube.botVerCidx=AllSquadList[i].VerCidx;
@@ -484,41 +404,4 @@ function SmoothSquad(index,VertexList,SQuadList){
         SQuadList[squadIdx].vc=[VertexList[influencedSquad.VerCidx].x,VertexList[influencedSquad.VerCidx].y,VertexList[influencedSquad.VerCidx].z];
         SQuadList[squadIdx].vd=[VertexList[influencedSquad.VerDidx].x,VertexList[influencedSquad.VerDidx].y,VertexList[influencedSquad.VerDidx].z];
     }
-}
-
-function double_lerp(vertex_list,position,idx,ConstructLayer){
-    const x = vertex_list[idx];
-    const y = vertex_list[idx + 1];
-    const z = vertex_list[idx + 2];
-
-    var interpolatedAB = new THREE.Vector3();
-    var interpolatedCD = new THREE.Vector3();
-    // console.log(`Vertex ${i / 3}: x=${x}, y=${y}, z=${z}`);
-
-    interpolatedAB.lerpVectors(position[0], position[3], (x+0.5));
-
-    interpolatedCD.lerpVectors(position[1], position[2], (x+0.5));
-
-    const finalLerp=new THREE.Vector3();
-    finalLerp.lerpVectors(interpolatedAB,interpolatedCD,(z+0.5));
-
-            
-    vertex_list[idx]=finalLerp.x;
-    vertex_list[idx+1]=(y+finalLerp.y+0.5+ConstructLayer);
-    vertex_list[idx+2]=finalLerp.z;
-}
-
-function deepCopyThreeObject(originalObject) {
-    // Clone the object to create a new instance with copied properties
-    let copiedObject = originalObject.clone();
-
-    // Check if geometry and material properties exist before cloning them
-    if (originalObject.geometry) {
-        copiedObject.geometry = originalObject.geometry.clone();
-    }
-    if (originalObject.material) {
-        copiedObject.material = originalObject.material.clone();
-    }
-
-    return copiedObject;
 }

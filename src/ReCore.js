@@ -3,6 +3,10 @@ import {HexCoordList} from './HexCubeCoord.js';
 import {Merge,TriangleList} from './Triangle.js';
 import {DrawSubQuad,MapSubQuad4UI,Smooth,Map,CreateMarchCube } from "./SubQuad.js";
 import {CreateMarchVertex } from "./Vertex.js";
+import {CubeHub} from "./CubeHub.js";
+import {init_gui} from './MarchingCubeTest.js';
+
+
 
 // TODO migrate the logic into the ReCore class
 
@@ -13,11 +17,11 @@ export class ReCore {
         this.layers_num = layers_num;
         this.scene = scene;
         this.state = "idle";
+
     }
 
     init() {
         // initalized the lists
-
         this.qua_list=[];
         this.AllSquadList=[];
         this.AllVertexList=[];
@@ -25,7 +29,7 @@ export class ReCore {
         this.AllMarchCubeList=[];
         this.VertexSelection=-1;
         this.coordList=HexCoordList(this.number_of_extension);
-        
+
 
         this.layers_init();
         this.plane_init();
@@ -33,6 +37,9 @@ export class ReCore {
         this.findNeibour();
         this.smooth_hex_vertexes_positions();
         this.ready_marching_cube();
+
+        this.cube_hub = new CubeHub(this.layers_num,this.AllMarchVertexList,this.AllMarchCubeList,this.the_scene_object,this.debug_object);
+
     }
 
     layers_init(){
@@ -41,6 +48,9 @@ export class ReCore {
         this.mesh_hold_object = new THREE.Object3D();
         this.smooth_object = new THREE.Object3D();
         this.highlight_object = new THREE.Object3D();
+        this.selectedVertex_object = new THREE.Object3D();
+        this.the_scene_object = new THREE.Object3D();
+        this.debug_object = new THREE.Object3D();
 
 
         this.scene.add(this.triangle_object);
@@ -48,6 +58,9 @@ export class ReCore {
         this.scene.add(this.mesh_hold_object);
         this.scene.add(this.smooth_object);
         this.scene.add(this.highlight_object);
+        this.scene.add(this.selectedVertex_object);
+        this.scene.add(this.the_scene_object);
+        this.scene.add(this.debug_object);
 
     }
 
@@ -196,8 +209,9 @@ export class ReCore {
         console.log("Marching cube ready state");
         this.state = "marching_cube";
         console.log(this.AllVertexList.length);
+        
         CreateMarchVertex(this.AllVertexList,this.AllMarchVertexList,this.layers_num);
-        CreateMarchCube(this.AllSquadList,this.AllMarchVertexList,this.AllMarchCubeList,this.layers_num-1);
+        CreateMarchCube(this.AllSquadList,this.AllMarchVertexList,this.AllMarchCubeList,this.layers_num-1,this.mesh_hold_object,this.debug_object);
     }
 
     GetNearestVertex(x,y,z,currentVertList){
@@ -267,9 +281,30 @@ export class ReCore {
     }
 
 
-    
-    
+    process_hit_placement(idx){
+            // draw the hitted place ready to construct map first 
+            this.drawVertexbyIndex(idx,this.the_scene_object,0xadd8e6);
+            this.selectedVertex_object.add(this.the_scene_object);
+            this.cube_hub.on_trigger_new_entry(idx);
 
 
+    }
 
+    updated_debug_display(flag){
+        if (flag){
+            this.debug_object.visible = true;
+        }else{
+            this.debug_object.visible = false;
+        }
+        
+    }
+
+    process_gui(input_gui){
+        var temp_folder = input_gui.addFolder('DISPLAY');
+        temp_folder.open();
+        this.debug_object.visible = false;
+        var debug_mode = {toggle: false};
+        temp_folder.add(debug_mode, 'toggle').name('debug_mode').onFinishChange(this.updated_debug_display.bind(this));
+        }
+   
 }
