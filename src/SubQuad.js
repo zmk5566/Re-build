@@ -86,12 +86,14 @@ export class MarchCube extends SubQuad{
             this.mesh_model = deepCopyThreeObject(get_model(this.model_int));
             console.log("processed",this.mesh_model);
 
-            var material = new THREE.MeshPhongMaterial({ color: 0xa9d4ff ,wireframe:false,transparent:true,opacity:0.3,side:THREE.DoubleSide});
+            var material = new THREE.MeshPhongMaterial({ color: 0xa9d4ff ,wireframe:false,transparent:true,opacity:0.7,side:THREE.DoubleSide});
 
             this.mesh_model.traverse((child) => {
                 if (child instanceof THREE.Mesh) {
                     child.material = material;
+                    child.geometry = child.geometry.scale(-1, 1, 1);
                     child.geometry.applyMatrix4(new THREE.Matrix4().makeRotationY(-Math.PI / 2));
+                    
                     // vertices=child.vertices;
                     const vertices = child.geometry.attributes.position.array;
                     // console.log("vertices count",vertices.length);
