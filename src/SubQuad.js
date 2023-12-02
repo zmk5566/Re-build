@@ -33,7 +33,6 @@ export class MarchCube extends SubQuad{
         this.botVerDidx;
         this.MarchVertList_Top;
         this.MarchVertList_Bottom;
-        this.ModelName="0000 0000";
         this.center_post;
         this.model_int=0;
         this.scene_object = new THREE.Object3D();
@@ -79,35 +78,35 @@ export class MarchCube extends SubQuad{
         load_model(){
             this.update_name();
             this.update_pos();
-            var  verticesList=[];
             
             this.scene_object.clear();
 
             if (this.model_int != 0) {
-            loader.load(
-                "/models/cube.obj",
-                // called when resource is loaded
-                 ( object ) => {
-                    var material = new THREE.MeshPhongMaterial({ color: 0xa9d4ff ,wireframe:false,transparent:true,opacity:0.3,side:THREE.DoubleSide});
 
-                    object.traverse((child) => {
-                    if (child instanceof THREE.Mesh) {
-                        child.material = material;
-                        child.geometry.applyMatrix4(new THREE.Matrix4().makeRotationY(-Math.PI / 2));
-                        // vertices=child.vertices;
-                        const vertices = child.geometry.attributes.position.array;
-                        // console.log("vertices count",vertices.length);
-                        // 输出每个顶点的坐标
-                        for (let i = 0; i < vertices.length; i += 3) {
-                            double_lerp(vertices,this.position,i,0);
-                        }
+            this.mesh_model = deepCopyThreeObject(get_model(this.model_int));
+            console.log("processed",this.mesh_model);
+
+            var material = new THREE.MeshPhongMaterial({ color: 0xa9d4ff ,wireframe:false,transparent:true,opacity:0.3,side:THREE.DoubleSide});
+
+            this.mesh_model.traverse((child) => {
+                if (child instanceof THREE.Mesh) {
+                    child.material = material;
+                    child.geometry.applyMatrix4(new THREE.Matrix4().makeRotationY(-Math.PI / 2));
+                    // vertices=child.vertices;
+                    const vertices = child.geometry.attributes.position.array;
+                    // console.log("vertices count",vertices.length);
+                    // 输出每个顶点的坐标
+                    for (let i = 0; i < vertices.length; i += 3) {
+                        double_lerp(vertices,this.position,i,0);
                     }
-                    });
-                    this.mesh_model = object;
-                    this.scene_object.add(this.mesh_model);
-                    //mesh_hold_object.add(object);
                 }
-            );
+                });
+
+            console.log("model_int",this.model_int,this.mesh_model);
+
+            this.scene_object.add(this.mesh_model);
+
+
             }
 
         }
@@ -134,7 +133,16 @@ export class MarchCube extends SubQuad{
 
 
     // load_model(){
+
+
+    //     this.update_name();
+    //     this.update_pos();
+        
+    //     this.scene_object.clear();
+
+
     //     this.mesh_model  =deepCopyThreeObject(get_model(this.model_int));
+        
     //     console.log(this.mesh_model);
     //     //this.mesh_model = this.cube_hub.get_preloaded_model(this.bits_list);
 
@@ -144,7 +152,7 @@ export class MarchCube extends SubQuad{
     //     this.mesh_model.traverse((child) =>  {
     //         if (child instanceof THREE.Mesh) {
     //             child.material = material;
-    //             child.geometry.applyMatrix4(new THREE.Matrix4().makeRotationY(-Math.PI / 2));
+    //             //child.geometry.applyMatrix4(new THREE.Matrix4().makeRotationY(-Math.PI / 2));
     //             // vertices=child.vertices;
     //             const vertices = child.geometry.attributes.position.array;
     //             // console.log("vertices count",vertices.length);
@@ -170,12 +178,9 @@ export class MarchCube extends SubQuad{
         var bit6=this.MarchVertList_Bottom[1].IsActive;
         var bit7=this.MarchVertList_Bottom[2].IsActive;
         var bit8=this.MarchVertList_Bottom[3].IsActive;
-        //this.ModelName=bit1+bit2+bit3+bit4+' '+bit5+bit6+bit7+bit8;
 
         var temp_bits_list=[bit1,bit2,bit3,bit4,bit5,bit6,bit7,bit8];
         this.model_int=boolArrayToInt(temp_bits_list);
-        //console.log(temp_bits_list)
-        //console.log(this.model_int);
         
     }
 }
@@ -509,16 +514,44 @@ function double_lerp(vertex_list,position,idx,ConstructLayer){
 }
 
 function deepCopyThreeObject(originalObject) {
+    console.log("og object",originalObject);
     // Clone the object to create a new instance with copied properties
     let copiedObject = originalObject.clone();
 
-    // Check if geometry and material properties exist before cloning them
-    if (originalObject.geometry) {
-        copiedObject.geometry = originalObject.geometry.clone();
-    }
-    if (originalObject.material) {
-        copiedObject.material = originalObject.material.clone();
+
+    if (originalObject.type == "Mesh") {
+    // copy the geometry
+    var temp_clone =originalObject.geometry.clone();
+    copiedObject.geometry = temp_clone;
+    console.log("comparison",temp_clone,originalObject.geometry);
+    } else{
+        console.log("not mesh");
+
+        // loop through all children using index
+        for (let i = 0; i < originalObject.children.length; i++) {
+            // Clone the child to create a new instance with copied properties
+            let copiedChild = deepCopyThreeObject(originalObject.children[i]);
+    
+            // Add the copied child to the copiedObject
+            copiedObject.children[i] = copiedChild;
+        }
+        return copiedObject;
     }
 
+
+    if (originalObject.children.length == 0) {
+        return copiedObject;
+    }else{
+        for (let child of originalObject.children) {
+            // Clone the child to create a new instance with copied properties
+            let copiedChild = deepCopyThreeObject(child);
+    
+            // Add the copied child to the copiedObject
+            copiedObject.add(copiedChild);
+        }
+        return copiedObject;
+
+    }
     return copiedObject;
+
 }

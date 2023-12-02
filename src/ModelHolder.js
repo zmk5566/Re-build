@@ -6,7 +6,7 @@ import * as THREE from 'three';
 var all_model_list = [];
 const loader = new OBJLoader();
 var model_path = "/models/";
-var is_cube = true;
+var is_cube = false;
 
 
 
@@ -46,7 +46,11 @@ function load_model(index){
         //console.log(the_string);
         if (is_cube){
             loader.load(model_path+"cube.obj", function(obj) {
+   
+
                 all_model_list[index]= obj;
+
+
             });
         }else{
             if (index == 0 || index == 255){
