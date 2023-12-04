@@ -90,18 +90,45 @@ export class MarchCube extends SubQuad{
 
             this.mesh_model.traverse((child) => {
                 if (child instanceof THREE.Mesh) {
-                    child.material = material;
-                    child.geometry = child.geometry.scale(-1, 1, 1);
-                    child.geometry.applyMatrix4(new THREE.Matrix4().makeRotationY(-Math.PI / 2));
-                    
-                    // vertices=child.vertices;
-                    const vertices = child.geometry.attributes.position.array;
-                    // console.log("vertices count",vertices.length);
-                    // 输出每个顶点的坐标
-                    for (let i = 0; i < vertices.length; i += 3) {
-                        double_lerp(vertices,this.position,i,0);
+                    console.log("child",child,child.children.length)
+                    // WHEN IT IS THE GENERATED MODEL
+                    if (child.children.length > 0){
+                        // iterate through all the child.children
+                        child.children.forEach((child_child) => {
+                            console.log("child_child",child_child)
+                            if (child_child instanceof THREE.Mesh) {
+                                console.log("child_child",child_child)
+                                child_child.material = material;
+                                //child_child.geometry = child_child.geometry.scale(-1, 1, 1);
+                                //child_child.geometry.applyMatrix4(new THREE.Matrix4().makeRotationY(-Math.PI / 2));
+                                
+                                // vertices=child.vertices;
+                                const vertices = child_child.geometry.attributes.position.array;
+                                // console.log("vertices count",vertices.length);
+                                // 输出每个顶点的坐标
+                                for (let i = 0; i < vertices.length; i += 3) {
+                                    double_lerp(vertices,this.position,i,0);
+                                }
+                            }
+                        });
+
+                        
+
+                    }else{
+                            console.log("child_content",child)
+                            child.material = material;
+                            child.geometry = child.geometry.scale(-1, 1, 1);
+                            child.geometry.applyMatrix4(new THREE.Matrix4().makeRotationY(-Math.PI / 2));
+                            
+                            // vertices=child.vertices;
+                            const vertices = child.geometry.attributes.position.array;
+                            // console.log("vertices count",vertices.length);
+                            // 输出每个顶点的坐标
+                            for (let i = 0; i < vertices.length; i += 3) {
+                                double_lerp(vertices,this.position,i,0);
+                            }
+                        }
                     }
-                }
                 });
 
             console.log("model_int",this.model_int,this.mesh_model);
@@ -133,42 +160,6 @@ export class MarchCube extends SubQuad{
             this.position=[VertexA,VertexB,VertexC,VertexD,CenterPosition];
         }
 
-
-    // load_model(){
-
-
-    //     this.update_name();
-    //     this.update_pos();
-        
-    //     this.scene_object.clear();
-
-
-    //     this.mesh_model  =deepCopyThreeObject(get_model(this.model_int));
-        
-    //     console.log(this.mesh_model);
-    //     //this.mesh_model = this.cube_hub.get_preloaded_model(this.bits_list);
-
-    //     // need to be changed very soon
-    //     var material = new THREE.MeshPhongMaterial({ color: 0xa9d4ff ,wireframe:false,transparent:true,opacity:0.3,side:THREE.DoubleSide});
-
-    //     this.mesh_model.traverse((child) =>  {
-    //         if (child instanceof THREE.Mesh) {
-    //             child.material = material;
-    //             //child.geometry.applyMatrix4(new THREE.Matrix4().makeRotationY(-Math.PI / 2));
-    //             // vertices=child.vertices;
-    //             const vertices = child.geometry.attributes.position.array;
-    //             // console.log("vertices count",vertices.length);
-    //             // 输出每个顶点的坐标
-    //             for (let i = 0; i < vertices.length; i += 3) {
-    //                 double_lerp(vertices,this.position,i,0);
-    //             }
-    //         }
-    //         });
-
-    //     this.scene_object.add(this.mesh_model);
-    // }
-
-    
 
     update_name(){
         var bit1=this.MarchVertList_Top[0].IsActive;
@@ -516,11 +507,9 @@ function double_lerp(vertex_list,position,idx,ConstructLayer){
 }
 
 function deepCopyThreeObject(originalObject) {
-    console.log("og object",originalObject);
+    //console.log("og object",originalObject);
     // Clone the object to create a new instance with copied properties
     let copiedObject = originalObject.clone();
-
-
     if (originalObject.type == "Mesh") {
     // copy the geometry
     var temp_clone =originalObject.geometry.clone();

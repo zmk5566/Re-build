@@ -76,6 +76,6 @@ window.addEventListener('mousedown', function(e) {
     });
 
 
-init_gui(gui,reCore.debug_object);
+init_gui(gui,reCore.the_scene_object,reCore.debug_object);
 
 reCore.process_gui(gui);

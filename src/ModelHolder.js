@@ -3,6 +3,10 @@
 
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import * as THREE from 'three';
+
+// import the marching cube test
+import {bit_to_mesh} from './MarchingCubeTest.js';
+
 var all_model_list = [];
 const loader = new OBJLoader();
 var model_path = "/models/";
@@ -11,14 +15,20 @@ var is_cube = false;
 
 
 
-function load_all_models(){
+function load_all_models(is_genertive=false){
     // loop through all 0-255 numbers and load the model
     for (let i = 0; i < 256; i++) {
+        if (load_model_generative)
+            load_model_generative(i);
+        else{
         load_model(i);
+    }
         //all_model_list.push(model);
 
     }
 }
+
+
 
 export function intToPaddedBinaryString(num) {
     // Ensure the number is within the 8-bit range.
@@ -36,6 +46,35 @@ export function intToPaddedBinaryString(num) {
     // Insert a space in the middle for readability.
     return binaryStr.slice(0, 4) + ' ' + binaryStr.slice(4);
 }
+
+
+
+function load_model_generative(index){
+
+    if (index == 0 || index == 255){
+            
+            all_model_list[index] = new THREE.Object3D();
+
+    }else{
+        
+        all_model_list[index] = new THREE.Object3D();
+        console.log("boolean array",intToBooleanArray(index));
+        all_model_list[index] = bit_to_mesh(intToBooleanArray(index));
+        console.log("loaded"+index,all_model_list[index]);
+    }
+}
+
+function intToBooleanArray(int) {
+    if(int < 0 || int > 255) {
+        throw 'Input should be in range 0 - 255';
+    }
+    let arr = [];
+    for(let i = 7; i >= 0; i--) {
+        arr.push(Boolean((int >> i) & 1));
+    }
+    return arr;
+}
+
 
 function load_model(index){
 // transfer index into  8 bit binary number, then add the 8 bit binary number in the string format, such as "0000 0001"
@@ -83,4 +122,4 @@ export function boolArrayToInt(boolArray) {
     return parseInt(binaryString, 2);
 }
 
-load_all_models();
+load_all_models(true);
