@@ -92,11 +92,12 @@ export class MarchCube extends SubQuad{
             console.log("processed",this.mesh_model);
 
             // create a basic material
-            var material = new THREE.MeshBasicMaterial({ color: 0xa9d4ff ,wireframe:false,transparent:true,opacity:0.8,side:THREE.DoubleSide});
+            //var material = new THREE.MeshBasicMaterial({ color: 0xa9d4ff ,wireframe:false,transparent:true,opacity:0.8,side:THREE.DoubleSide});
 
             this.mesh_model.traverse((child) => {
                 if (child instanceof THREE.Mesh) {
-                    child.material = material;
+                    //child.material = material;
+                    child.material.side = THREE.DoubleSide;
                     child.geometry = child.geometry.scale(-1, 1, 1);
                     child.geometry.applyMatrix4(new THREE.Matrix4().makeRotationY(-Math.PI / 2));
                     

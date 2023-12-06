@@ -2,6 +2,7 @@
 //when needed
 
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
 import * as THREE from 'three';
 
 // import the marching cube test
@@ -45,7 +46,7 @@ export function intToPaddedBinaryString(num) {
     }
 
     // Insert a space in the middle for readability.
-    return binaryStr.slice(0, 4) + ' ' + binaryStr.slice(4);
+    return binaryStr.slice(0, 4) + '_' + binaryStr.slice(4);
 }
 
 
@@ -86,23 +87,50 @@ function load_model(index){
         var the_string = model_path+intToPaddedBinaryString(index)+".obj";
         //console.log(the_string);
         if (is_cube){
-            loader.load(model_path+"cube.obj", function(obj) {
-   
-
-                all_model_list[index]= obj;
 
 
-            });
+
+
+
+            new MTLLoader().setPath(model_path).load("cube.mtl", function(materials) {
+                materials.preload();
+    
+                new OBJLoader().setMaterials( materials ).load("./models/cube.obj", function(obj) {
+                    all_model_list[index]= obj;
+                    console.log("loaded");
+                });})
+
+
+
+
+
+
+
+
+
+
         }else{
             if (index == 0 || index == 255){
         
                 
                 all_model_list[index] = new THREE.Object3D();
             }else{
-            loader.load(model_path+intToPaddedBinaryString(index)+".obj", function(obj) {
+
+
+            new MTLLoader().setPath(model_path).load(intToPaddedBinaryString(index)+".mtl", function(materials) {
+            materials.preload();
+
+            new OBJLoader().setMaterials( materials ).load(model_path+intToPaddedBinaryString(index)+".obj", function(obj) {
                 all_model_list[index]= obj;
                 console.log("loaded");
             });
+
+        });
+
+
+
+
+
         }
         }
 }
@@ -126,4 +154,4 @@ export function boolArrayToInt(boolArray) {
     console.log(binaryString);
 }
 
-load_all_models(true);
+load_all_models(false);
