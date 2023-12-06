@@ -4,8 +4,9 @@ import { Triangle } from './Triangle';
 import { Quad } from './Quad';
 import {get_model,boolArrayToInt} from "./ModelHolder.js";
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import threeJs from 'three-js';
 const loader = new OBJLoader();
-
+var count=0;
 export class SubQuad{
     constructor(va,vb,vc,vd){
         this.va=va;
@@ -75,70 +76,80 @@ export class MarchCube extends SubQuad{
 
 
     
-        load_model(){
-            this.update_name();
-            this.update_pos();
-            
-            this.scene_object.clear();
+    load_model(){
+        //count=count+1;
+        //console.log(count);
+        this.update_name();
+        this.update_pos();
+        //console.log(this.model_int);
+        this.scene_object.clear();
 
-            if (this.model_int != 0) {
+        if (this.model_int != 0) {
+        // this.mesh_model = deepCopyThreeObject(get_model(204));
+        this.mesh_model = deepCopyThreeObject(get_model(this.model_int));
+        //console.log("center position of this quad",this.mesh_model);
+        var CenterOfHex = new THREE.Mesh(
+            new THREE.BoxGeometry(0.1,0.1,0.1),
+            new THREE.MeshBasicMaterial({
+                wireframe: false,
+                color: 0xff0000
+            }));
+            CenterOfHex.position.set(this.position[4].x,this.position[4].y,this.position[4].z);
+            this.scene_object.add(CenterOfHex);
 
-            this.mesh_model = deepCopyThreeObject(get_model(this.model_int));
-            console.log("processed",this.mesh_model);
-
-            var material = new THREE.MeshPhongMaterial({ color: 0xa9d4ff ,wireframe:false,transparent:true,opacity:0.7,side:THREE.DoubleSide});
-
-            this.mesh_model.traverse((child) => {
-                if (child instanceof THREE.Mesh) {
-                    console.log("child",child,child.children.length)
-                    // WHEN IT IS THE GENERATED MODEL
-                    if (child.children.length > 0){
-                        // iterate through all the child.children
-                        child.children.forEach((child_child) => {
-                            console.log("child_child",child_child)
-                            if (child_child instanceof THREE.Mesh) {
-                                console.log("child_child",child_child)
-                                child_child.material = material;
-                                //child_child.geometry = child_child.geometry.scale(-1, 1, 1);
-                                //child_child.geometry.applyMatrix4(new THREE.Matrix4().makeRotationY(-Math.PI / 2));
-                                
-                                // vertices=child.vertices;
-                                const vertices = child_child.geometry.attributes.position.array;
-                                // console.log("vertices count",vertices.length);
-                                // 输出每个顶点的坐标
-                                for (let i = 0; i < vertices.length; i += 3) {
-                                    double_lerp(vertices,this.position,i,0);
-                                }
+        //var material = new THREE.MeshPhongMaterial({ color: 0xa9d4ff ,wireframe:false,transparent:true,opacity:0.7,side:THREE.DoubleSide});
+        var material=new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        this.mesh_model.traverse((child) => {
+            if (child instanceof THREE.Mesh) {
+                //child.geometry = child.geometry.scale(-1, 1, 1);
+                    // test.geometry.applyMatrix4(new THREE.Matrix4().makeRotationY(-Math.PI));
+                    if(child.children.length>0){
+                        console.log("在位置",this.position[4],'上画',this.model_int,'的',child.children.length,'个面');
+                        for(let i=0;i<child.children.length;i++){
+                            //child.children.length:这个mesh的面数
+                            var vertices = child.children[i].geometry.attributes.position.array;
+                            var newVertices=[];
+                            console.log(vertices);
+                            for (let j = 0; j < vertices.length; j += 3) {
+                                double_lerp(vertices,this.position,j,0,this.scene_object,newVertices);
                             }
-                        });
+                            // for (let j = 0; j < vertices.length; j++){
+                            //     vertices[j]=newVertices[j];
+                            // }
+                            //重新画一遍，蠢，但有用。
+                            var newVertices = new Float32Array([
+                                newVertices[0], newVertices[1], newVertices[2],   // 顶点1
+                                newVertices[3],newVertices[4],newVertices[5], // 顶点2
+                                newVertices[6],newVertices[7],newVertices[8],    // 顶点3
+                                newVertices[9],newVertices[10],newVertices[11]   // 顶点4
+                              ]);
+                            var indices = new Uint32Array([
+                                0, 1, 2,    // 第一个三角形的顶点索引
+                                0, 2, 3     // 第二个三角形的顶点索引
+                                ]);
 
-                        
+                                // 创建BufferGeometry对象
+                                var geometry = new THREE.BufferGeometry();
+                                geometry.setAttribute('position', new THREE.BufferAttribute(newVertices, 3)); // 设置顶点属性
+                                geometry.setIndex(new THREE.BufferAttribute(indices, 1)); // 设置顶点索引属性
 
-                    }else{
-                            console.log("child_content",child)
-                            child.material = material;
-                            child.geometry = child.geometry.scale(-1, 1, 1);
-                            child.geometry.applyMatrix4(new THREE.Matrix4().makeRotationY(-Math.PI / 2));
-                            
-                            // vertices=child.vertices;
-                            const vertices = child.geometry.attributes.position.array;
-                            // console.log("vertices count",vertices.length);
-                            // 输出每个顶点的坐标
-                            for (let i = 0; i < vertices.length; i += 3) {
-                                double_lerp(vertices,this.position,i,0);
-                            }
+                                // 创建材质
+                                var material = new THREE.MeshBasicMaterial({ color: 0xff0000,side:THREE.DoubleSide});
+
+                                // 创建网格对象
+                                var face = new THREE.Mesh(geometry, material);
+
+                                // 将网格对象添加到场景
+                                this.scene_object.add(face);
                         }
+                        
                     }
-                });
-
-            console.log("model_int",this.model_int,this.mesh_model);
-
-            this.scene_object.add(this.mesh_model);
-
-
-            }
-
+                }
+            });
+        // this.scene_object.add(this.mesh_model);
         }
+
+    }
 
         update_pos(){
 
@@ -172,7 +183,9 @@ export class MarchCube extends SubQuad{
         var bit7=this.MarchVertList_Bottom[2].IsActive;
         var bit8=this.MarchVertList_Bottom[3].IsActive;
 
-        var temp_bits_list=[bit1,bit2,bit3,bit4,bit5,bit6,bit7,bit8];
+        var temp_bits_list=[bit2,bit1,bit4,bit3,bit6,bit5,bit8,bit7];
+        // var temp_bits_list=[true,true,false,false,true,true,false,false];
+        // console.log(temp_bits_list);
         this.model_int=boolArrayToInt(temp_bits_list);
         
     }
@@ -484,27 +497,60 @@ function SmoothSquad(index,VertexList,SQuadList){
     }
 }
 
-function double_lerp(vertex_list,position,idx,ConstructLayer){
+function double_lerp(vertex_list,position,idx,ConstructLayer,scene_object,newVertices){
+    //console.log(idx);
     const x = vertex_list[idx];
     const y = vertex_list[idx + 1];
     const z = vertex_list[idx + 2];
 
+    
     var interpolatedAB = new THREE.Vector3();
     var interpolatedCD = new THREE.Vector3();
     // console.log(`Vertex ${i / 3}: x=${x}, y=${y}, z=${z}`);
 
     interpolatedAB.lerpVectors(position[0], position[3], (x+0.5));
-
+    // var CenterOfHex = new THREE.Mesh(
+    //     new THREE.SphereGeometry(0.1, 4, 2),
+    //     new THREE.MeshBasicMaterial({
+    //         wireframe: false,
+    //         color: 0x00ff00
+    //     }));
+    //     CenterOfHex.position.set(interpolatedAB.x,interpolatedAB.y,interpolatedAB.z);
+    //     scene_object.add(CenterOfHex);
     interpolatedCD.lerpVectors(position[1], position[2], (x+0.5));
-
+    // var CenterOfHex = new THREE.Mesh(
+    //     new THREE.SphereGeometry(0.1, 4, 2),
+    //     new THREE.MeshBasicMaterial({
+    //         wireframe: false,
+    //         color: 0x0000ff
+    //     }));
+    //     CenterOfHex.position.set(interpolatedCD.x,interpolatedCD.y,interpolatedCD.z);
+    //     scene_object.add(CenterOfHex);
     const finalLerp=new THREE.Vector3();
     finalLerp.lerpVectors(interpolatedAB,interpolatedCD,(z+0.5));
-
+    // var CenterOfHex = new THREE.Mesh(
+    //     new THREE.SphereGeometry(0.1, 4, 2),
+    //     new THREE.MeshBasicMaterial({
+    //         wireframe: false,
+    //         color: 0xff00ff
+    //     }));
+    //     CenterOfHex.position.set(finalLerp.x,finalLerp.y,finalLerp.z);
+    //     scene_object.add(CenterOfHex);
             
-    vertex_list[idx]=finalLerp.x;
-    vertex_list[idx+1]=(y+finalLerp.y+0.5+ConstructLayer);
-    vertex_list[idx+2]=finalLerp.z;
+    newVertices[idx]=finalLerp.x;
+    newVertices[idx+1]=(y+finalLerp.y+0.5+ConstructLayer);
+    newVertices[idx+2]=finalLerp.z;
+    var CenterOfHex = new THREE.Mesh(
+    new THREE.SphereGeometry(0.1, 4, 2),
+    new THREE.MeshBasicMaterial({
+        wireframe: false,
+        color: 0x00ff00
+    }));
+    CenterOfHex.position.set(newVertices[idx],newVertices[idx+1],newVertices[idx+2]);
+    scene_object.add(CenterOfHex);
 }
+
+
 
 function deepCopyThreeObject(originalObject) {
     //console.log("og object",originalObject);
@@ -514,9 +560,8 @@ function deepCopyThreeObject(originalObject) {
     // copy the geometry
     var temp_clone =originalObject.geometry.clone();
     copiedObject.geometry = temp_clone;
-    console.log("comparison",temp_clone,originalObject.geometry);
     } else{
-        console.log("not mesh");
+        //console.log("not mesh");
 
         // loop through all children using index
         for (let i = 0; i < originalObject.children.length; i++) {

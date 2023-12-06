@@ -58,9 +58,9 @@ function load_model_generative(index){
     }else{
         
         all_model_list[index] = new THREE.Object3D();
-        console.log("boolean array",intToBooleanArray(index));
+        //console.log("boolean array",intToBooleanArray(index));
         all_model_list[index] = bit_to_mesh(intToBooleanArray(index));
-        console.log("loaded"+index,all_model_list[index]);
+        //console.log("loaded"+index,all_model_list[index]);
     }
 }
 
@@ -105,7 +105,7 @@ function load_model(index){
 }
 
 export function get_model(index){
-    console.log(all_model_list);
+    //console.log(all_model_list);
     return all_model_list[index];
 }
 
@@ -120,6 +120,7 @@ export function boolArrayToInt(boolArray) {
 
     // Use parseInt() to convert the binary string to an integer.
     return parseInt(binaryString, 2);
+    console.log(binaryString);
 }
 
 load_all_models(true);

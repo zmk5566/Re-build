@@ -41,7 +41,7 @@ var Center=[[0,0,0]];
 
 export var vertDataset=cubeVertices.concat(EdgeMid).concat(FaceCenter).concat(Center);
 
-console.log("cube vertices",vertDataset)
+//console.log("cube vertices",vertDataset)
 
 
 
@@ -79,7 +79,7 @@ const VertexFacePair=[
 function get_construction_by_bits(bitList){
     let ConstructPairList = JSON.parse(JSON.stringify(VertexFacePair))
 
-    console.log(bitList);
+    //console.log(bitList);
     //12条边
     if(bitList[0]==true){
         if(bitList[1]==true){
@@ -162,7 +162,7 @@ export function ConstructUnit(bitList,scene,CubeMeSH){
     //DrawFaceCube(scene,CubeMeSH);
     var ConstructPairList= get_construction_by_bits(bitList);
 
-    console.log("ConstructPairList",ConstructPairList);
+    //console.log("ConstructPairList",ConstructPairList);
 
     return get_the_overall_mesh(ConstructPairList);
 }
@@ -188,7 +188,15 @@ function get_the_overall_mesh(ConstructPairList){
             }
         }
     }
-
+    // var MergedMesh = new THREE.Mesh();
+    // for(let i=0;i<overall_mesh.children.length;i++){
+    //     var mergedGeometry = THREE.BufferGeometryUtils.mergeBufferGeometries([
+    //         MergedMesh.geometry,
+    //         overall_mesh.children[i].geometry
+    //       ]);
+    // }
+    // console.log('每个unit中存在的面数: ' ,overall_mesh.children.length);
+    // console.log('MergedMesh: ' ,MergedMesh);
     return overall_mesh;
 }
 
@@ -273,7 +281,7 @@ export function DrawFace(FaceID,vertex){
     // 创建网格对象
     var mesh = new THREE.Mesh(geometry, material);
 
-    console.log("real mesh",mesh);
+    //console.log("real mesh",mesh);
     
     
     // 将网格对象添加到场景中
@@ -345,11 +353,12 @@ export function init_gui(input_gui,input_scene){
     function redraw(){
         bitlist=[digit0.toggle,digit1.toggle,digit2.toggle,digit3.toggle,digit4.toggle,digit5.toggle,digit6.toggle,digit7.toggle];
         display_toggle .toggle = true;
-        console.log(bitlist);
+        //console.log(bitlist);
         if (display_toggle.toggle){
             marchCube(input_scene,bitlist);
         }
     }
+    console.log('redraw');
     redraw();
 
 }
@@ -359,5 +368,5 @@ function marchCube(input_scene,input_bitlist){
     //scene.clear();
     CubeMeSH.forEach(element => {input_scene.remove(element);});
     ConstructUnit(input_bitlist,input_scene,CubeMeSH);
-    console.log("Cube mesh info",CubeMeSH);
+    //console.log("Cube mesh info",CubeMeSH);
 }
