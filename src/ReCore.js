@@ -304,7 +304,7 @@ export class ReCore {
         temp_folder.open();
         this.debug_object.visible = false;
         var debug_mode = {toggle: false};
-        temp_folder.add(debug_mode, 'toggle').name('debug_mode').onFinishChange(this.updated_debug_display.bind(this));
+            temp_folder.add(debug_mode, 'toggle').name('debug_mode').onFinishChange(this.updated_debug_display.bind(this));
         }
    
 }

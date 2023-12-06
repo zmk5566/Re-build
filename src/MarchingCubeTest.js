@@ -41,6 +41,11 @@ var Center=[[0,0,0]];
 
 export var vertDataset=cubeVertices.concat(EdgeMid).concat(FaceCenter).concat(Center);
 
+//console.log("cube vertices",vertDataset)
+
+
+
+
 export var FaceDataset=[
         [11,20,26,24],
         [20,9,22,26],
@@ -68,20 +73,22 @@ const VertexFacePair=[
     [3,9,7],
     [2,7,11]
 ];
-export function ConstructUnit(bitList,scene,CubeMeSH){
-    DrawFaceCube(scene,CubeMeSH);
-    var ConstructPairList=[
-        [0,4,10],
-        [4,1,8],
-        [1,5,9],
-        [0,5,11],
-        [6,2,10],
-        [6,8,3],
-        [3,9,7],
-        [2,7,11]
-    ];
-    console.log(bitList);
-    console.log(VertexFacePair);
+
+function bits_translation(bitList){
+
+    var bitList_translation=[bitList[1],bitList[0],bitList[3],bitList[2],bitList[5],bitList[4],bitList[7],bitList[6]];
+
+    return bitList_translation;
+
+
+}
+
+
+
+function get_construction_by_bits(bitList){
+    let ConstructPairList = JSON.parse(JSON.stringify(VertexFacePair))
+
+    //console.log(bitList);
     //12条边
     if(bitList[0]==true){
         if(bitList[1]==true){
@@ -153,16 +160,74 @@ export function ConstructUnit(bitList,scene,CubeMeSH){
     }
     else{ConstructPairList[6]=[];}
     if(bitList[7]==false){ConstructPairList[7]=[];}
-    console.log(ConstructPairList);
+
+    return ConstructPairList;
+
+}
+
+
+
+export function ConstructUnit(bitList,scene,CubeMeSH){
+    //DrawFaceCube(scene,CubeMeSH);
+    var ConstructPairList= get_construction_by_bits(bitList);
+
+    //console.log("ConstructPairList",ConstructPairList);
+
+    return get_the_overall_mesh(ConstructPairList);
+}
+
+export function bit_to_mesh(bitList){
+    // create a mesh object to store the mesh
+    var translated_bitList = bits_translation(bitList);
+    var tempMesh = new THREE.Object3D();
+    var ConstructPairList= get_construction_by_bits(translated_bitList);
+
+    tempMesh.add(get_the_overall_mesh(ConstructPairList));
+
+
+    return tempMesh;
+}
+
+
+function get_the_overall_mesh(ConstructPairList){
+    // create an empty meshobject
+
+    var all_indices = [];
+    var all_vertex = [];
+
     for(let i=0;i<8;i++){
-        if(bitList[i]==true){DrawVertex(i,scene,CubeMeSH);}
+        //if(bitList[i]==true){DrawVertex(i,scene,CubeMeSH);}
         if(ConstructPairList[i].length>0){
             for(let j=0;j<ConstructPairList[i].length;j++){
-                DrawFace(ConstructPairList[i][j],cubeVertices[i],scene,CubeMeSH);
+               DrawFace(ConstructPairList[i][j],cubeVertices[i],all_vertex,all_indices);
             }
         }
     }
+
+    console.log("all_indices",all_indices);
+
+    var geometry = createMergedGeometry(all_vertex, all_indices);
+
+    geometry = geometry.scale(-1, 1, 1);
+    geometry.applyMatrix4(new THREE.Matrix4().makeRotationY(-Math.PI/2));
+
+    
+    // Now you can use this geometry to create a mesh
+    var material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    var overall_mesh = new THREE.Mesh(geometry, material);
+    // var MergedMesh = new THREE.Mesh();
+    // for(let i=0;i<overall_mesh.children.length;i++){
+    //     var mergedGeometry = THREE.BufferGeometryUtils.mergeBufferGeometries([
+    //         MergedMesh.geometry,
+    //         overall_mesh.children[i].geometry
+    //       ]);
+    // }
+    // console.log('每个unit中存在的面数: ' ,overall_mesh.children.length);
+    // console.log('MergedMesh: ' ,MergedMesh);
+    return overall_mesh;
 }
+
+
 
 // export function ConstructCube(bit,scene){
     
@@ -184,7 +249,69 @@ function DrawVertex(i,scene,CubeMeSH){
         scene.add(CenterOfHex);
         CubeMeSH.push(CenterOfHex);
 }
-export function DrawFace(FaceID,vertex,scene,CubeMeSH){
+
+function createMergedGeometry(vertexArrays, indexArrays) {
+    // Create a buffer geometry
+    var geometry = new THREE.BufferGeometry();
+
+    // Merge all vertices and adjust all indices
+    var mergedVertices = [];
+    var mergedIndices = [];
+    var vertexCount = 0;
+
+    console.log("vertices length",vertexArrays.length)
+
+    for (var i = 0; i < vertexArrays.length; i++) {
+        // Merge vertices
+        mergedVertices.push(...vertexArrays[i]);
+
+        // Adjust indices and merge
+        var adjustedIndices = indexArrays[i].map(index => index + vertexCount);
+        mergedIndices.push(...adjustedIndices);
+
+        // Update the total count of vertices
+        vertexCount += vertexArrays[i].length / 3;
+    }
+
+    // Convert to typed arrays for better performance
+    var finalVertices = new Float32Array(mergedVertices);
+    var finalIndices = new Uint32Array(mergedIndices);
+
+    console.log("final_indices",finalIndices);
+
+    // Attach vertices and indices to the geometry
+    geometry.setAttribute('position', new THREE.BufferAttribute(finalVertices, 3));
+    geometry.setIndex(new THREE.BufferAttribute(finalIndices, 1));
+
+    console.log("merged geometry",geometry);
+
+
+    // if (vertexArrays.length > 1) {
+
+    // geometry = new THREE.BufferGeometry();
+    
+    // // 设置顶点坐标属性
+    // var positionAttribute = new THREE.Float32BufferAttribute(vertexArrays[0], 3);
+    // geometry.setAttribute('position', positionAttribute);
+    
+    // // 设置顶点索引属性
+    // geometry.setIndex(indices);
+
+    // }
+
+
+
+    return geometry;
+}
+
+
+
+
+
+
+
+
+export function DrawFace(FaceID,vertex,all_vertex,all_indices){
    // 创建顶点坐标数组
     var vertices = [//一个面的四个顶点坐标
         vertDataset[FaceDataset[FaceID][0]][0],vertDataset[FaceDataset[FaceID][0]][1],vertDataset[FaceDataset[FaceID][0]][2],
@@ -226,29 +353,43 @@ export function DrawFace(FaceID,vertex,scene,CubeMeSH){
         tri2[0], tri2[1], tri2[2]     // 第二个三角形面
     ];
 
-    //e.log(indices);
-    // 创建 BufferGeometry 对象
-    var geometry = new THREE.BufferGeometry();
+    all_indices.push(indices);
+    all_vertex.push(vertices);
     
-    // 设置顶点坐标属性
-    var positionAttribute = new THREE.Float32BufferAttribute(vertices, 3);
-    geometry.setAttribute('position', positionAttribute);
+
+
+
+
+
+
+    // //e.log(indices);
+    // // 创建 BufferGeometry 对象
+    // var geometry = new THREE.BufferGeometry();
     
-    // 设置顶点索引属性
-    geometry.setIndex(indices);
+    // // 设置顶点坐标属性
+    // var positionAttribute = new THREE.Float32BufferAttribute(vertices, 3);
+    // geometry.setAttribute('position', positionAttribute);
     
-    // 创建材质对象
-    var material = new THREE.MeshBasicMaterial({ color: 0x00ff00,side:THREE.DoubleSide });
+    // // 设置顶点索引属性
+    // geometry.setIndex(indices);
     
-    // 创建网格对象
-    var mesh = new THREE.Mesh(geometry, material);
+    // // 创建材质对象
+    // var material = new THREE.MeshBasicMaterial({ color: 0xaed8e6,side:THREE.DoubleSide });
+    
+    // // 创建网格对象
+    // var mesh = new THREE.Mesh(geometry, material);
+
+    //console.log("real mesh",mesh);
+    
     
     // 将网格对象添加到场景中
-    scene.add(mesh);
-    CubeMeSH.push(mesh);
+    //scene.add(mesh);
+    //CubeMeSH.push(mesh);
+
+    return indices,vertices;
 }
 
-export function DrawFaceCube(scene,CubeMeSH){
+export function DrawFaceCube(scene,debug_scene){
     // 创建立方体的大小
     var size = 0.5;
 
@@ -270,10 +411,13 @@ export function DrawFaceCube(scene,CubeMeSH){
             var wireframeClone =  wireframe.clone();
             wireframeClone.position.set(i * size - size / 2, j * size - size / 2, k * size - size / 2);
             scene.add(wireframeClone);
-            CubeMeSH.push(wireframeClone);
+            CubeMeSH.push(debug_scene);
         }
         }
     }
+
+    
+
 }
 
 
@@ -307,11 +451,12 @@ export function init_gui(input_gui,input_scene){
     function redraw(){
         bitlist=[digit0.toggle,digit1.toggle,digit2.toggle,digit3.toggle,digit4.toggle,digit5.toggle,digit6.toggle,digit7.toggle];
         display_toggle .toggle = true;
-        console.log(bitlist);
+        //console.log(bitlist);
         if (display_toggle.toggle){
             marchCube(input_scene,bitlist);
         }
     }
+    console.log('redraw');
     redraw();
 
 }
@@ -321,4 +466,5 @@ function marchCube(input_scene,input_bitlist){
     //scene.clear();
     CubeMeSH.forEach(element => {input_scene.remove(element);});
     ConstructUnit(input_bitlist,input_scene,CubeMeSH);
+    //console.log("Cube mesh info",CubeMeSH);
 }

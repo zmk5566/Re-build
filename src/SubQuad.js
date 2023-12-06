@@ -24,6 +24,10 @@ export class MarchCube extends SubQuad{
     //有八个顶点的
     MarchVertList_Top=[];
     MarchVertList_Bottom=[];
+
+    is_loaded_mesh=false;
+
+
     constructor(va,vb,vc,vd,layer,the_scene,debug_scene){
         super(va,vb,vc,vd);
         this.layer=layer;
@@ -77,6 +81,7 @@ export class MarchCube extends SubQuad{
     
         load_model(){
             this.update_name();
+            // 
             this.update_pos();
             
             this.scene_object.clear();
@@ -86,7 +91,8 @@ export class MarchCube extends SubQuad{
             this.mesh_model = deepCopyThreeObject(get_model(this.model_int));
             console.log("processed",this.mesh_model);
 
-            var material = new THREE.MeshPhongMaterial({ color: 0xa9d4ff ,wireframe:false,transparent:true,opacity:0.7,side:THREE.DoubleSide});
+            // create a basic material
+            var material = new THREE.MeshBasicMaterial({ color: 0xa9d4ff ,wireframe:false,transparent:true,opacity:0.8,side:THREE.DoubleSide});
 
             this.mesh_model.traverse((child) => {
                 if (child instanceof THREE.Mesh) {
@@ -96,7 +102,7 @@ export class MarchCube extends SubQuad{
                     
                     // vertices=child.vertices;
                     const vertices = child.geometry.attributes.position.array;
-                    // console.log("vertices count",vertices.length);
+                     console.log("vertices count",vertices.length);
                     // 输出每个顶点的坐标
                     for (let i = 0; i < vertices.length; i += 3) {
                         double_lerp(vertices,this.position,i,0);
