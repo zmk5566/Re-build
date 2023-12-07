@@ -18,13 +18,26 @@ var is_cube = false;
 
 function load_all_models(is_genertive=false){
     // loop through all 0-255 numbers and load the model
-    for (let i = 0; i < 256; i++) {
-        if (is_genertive){
+
+    if (is_genertive){
+        // fetch the json file
+
+        for (var i = 0; i < 256; i++){
+            //load_model(i);                
             load_model_generative(i);
+
         }
-        else{
-            load_model(i);
-        }
+
+    }else{
+ 
+        fetch('/obj_load_chart.json')
+        .then(response => response.json())
+        .then(data => {
+            //console.log("load the model load list",data);
+            for (var i = 0; i < 256; i++){
+                load_model(i,data[i]); 
+            }
+        });
         //all_model_list.push(model);
 
     }
@@ -79,17 +92,17 @@ function intToBooleanArray(int) {
 }
 
 
-function load_model(index){
+
+
+function load_model(index,the_obj){
 // transfer index into  8 bit binary number, then add the 8 bit binary number in the string format, such as "0000 0001"
 
     //rerturn an empty 3d object  if the index is 0 or 255
 
         var the_string = model_path+intToPaddedBinaryString(index)+".obj";
+        console.log("the object is",the_obj,"object index",index);
         //console.log(the_string);
         if (is_cube){
-
-
-
 
 
             new MTLLoader().setPath(model_path).load("cube.mtl", function(materials) {
@@ -100,28 +113,50 @@ function load_model(index){
                     console.log("loaded");
                 });})
 
-
-
-
-
-
-
-
-
-
         }else{
             if (index == 0 || index == 255){
         
-                
                 all_model_list[index] = new THREE.Object3D();
             }else{
 
 
-            new MTLLoader().setPath(model_path).load(intToPaddedBinaryString(index)+".mtl", function(materials) {
+                var target_index;
+
+                if (the_obj != null){
+                    if (the_obj["is_unit"] == true){
+                        target_index = the_obj["index"];
+                }else{
+                    target_index = the_obj["unit_index"];
+                }
+    
+                }
+                
+                //console.log("current_index",index,"the target index is",target_index);
+
+
+
+
+            new MTLLoader().setPath(model_path).load(intToPaddedBinaryString(target_index)+".mtl", function(materials) {
             materials.preload();
 
-            new OBJLoader().setMaterials( materials ).load(model_path+intToPaddedBinaryString(index)+".obj", function(obj) {
+            new OBJLoader().setMaterials( materials ).load(model_path+intToPaddedBinaryString(target_index)+".obj", function(obj) {
+                //console.log(obj);
+
+                // loop through all the children and update the geomoetry
+                for (var i = 0; i < obj.children.length; i++){
+
+                    //apply rotation z 90 degree
+                    if(the_obj["flip"]){
+                        obj.children[i].geometry = obj.children[i].geometry.scale(-1, 1, 1);
+                    }
+                    obj.children[i].geometry.applyMatrix4(new THREE.Matrix4().makeRotationY( Math.PI / 2*the_obj["rotation"] ));
+                }
+
+                //console.log("the object is",the_obj,"object index",index);
+
+                
                 all_model_list[index]= obj;
+
                 console.log("loaded");
             });
 

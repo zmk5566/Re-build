@@ -4,7 +4,6 @@ import {Merge,TriangleList} from './Triangle.js';
 import {DrawSubQuad,MapSubQuad4UI,Smooth,Map,CreateMarchCube } from "./SubQuad.js";
 import {CreateMarchVertex } from "./Vertex.js";
 import {CubeHub} from "./CubeHub.js";
-import {init_gui} from './MarchingCubeTest.js';
 
 
 

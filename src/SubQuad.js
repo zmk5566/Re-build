@@ -87,6 +87,7 @@ export class MarchCube extends SubQuad{
             this.scene_object.clear();
 
             if (this.model_int != 0) {
+            
 
             this.mesh_model = deepCopyThreeObject(get_model(this.model_int));
             console.log("processed",this.mesh_model);
