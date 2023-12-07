@@ -59,3 +59,4 @@ dist/src.a2b27638.js
 dist/src.a2b27638.js.map
 dist/src.a2b27638.js
 static/Models/teapot.obj
+*.pyc
